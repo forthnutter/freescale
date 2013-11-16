@@ -10,7 +10,7 @@ USING:
     tools.continuations peg fry assocs combinators sequences.deep make
     vectors
     words quotations deques dlists
-    6805.emulator.memory ;
+    freescale.6805.emulator.memory ;
   
 !    io.encodings.binary
 !    io.files
@@ -18,7 +18,7 @@ USING:
 !    peg.ebnf
 !    peg.parsers
 ! ;
-IN: 6805.emulator
+IN: freescale.6805.emulator
 
 
 

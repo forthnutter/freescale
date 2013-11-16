@@ -2,12 +2,30 @@
 ! See http://factorcode.org/license.txt for BSD license.
 !
 USING: accessors kernel math models sequences vectors
-       6805.emulator.ports ;
+       freescale.6805.emulator.ports arrays ;
 
 
-IN: 6805.emulator.memory
+IN: freescale.6805.emulator.memory
 
-TUPLE: memory < model n string ;
+
+
+CONSTANT: MEMSTART 0
+CONSTANT: MEMSIZE 0xFFFF
+
+TUPLE: cell < model ;
+
+! make one cell or one memory location
+: <cell> ( n -- cell )
+    cell new-model ;
+
+GENERIC: read ( object -- n )
+GENERIC: write ( n object -- )
+
+M: cell read value>> ;
+
+M: cell write set-model ;
+
+TUPLE: memory array ;
 
 
 ! PORTA  $0000 Port A
@@ -42,54 +60,36 @@ TUPLE: memory < model n string ;
 ! COPRST $001D COP Reset Register
 ! COPCR  $001E COP Control Register
 
-GENERIC: PORTA ( memory -- )
-GENERIC: PORTB ( memory -- )
-GENERIC: PORTC ( memory -- )
-GENERIC: PORTD ( memory -- )
+
+! need the cell
+: memory-cell ( address memory -- cell/? )
+    array>> ?nth ;
 
 
-M: memory PORTB
-    drop
-;
-
-M: memory PORTC
-    drop
-;
-
-M: memory PORTD
-    drop
-;
-
-
-: <memory> ( n value -- memory )
-    memory new-model swap >>n ;
-
-: memory-add ( object memory -- memory )
-   [ add-connection ] keep 
-;
-
-: memory-setup ( -- vector )
-   16  <vector> dup
-    0 0 <memory> \ PORTA swap memory-add swap push dup ! Port A
-    1 0 <memory> \ PORTB swap memory-add swap push dup ! Port B
-    2 0 <memory> \ PORTC swap memory-add swap push dup ! Port C
-    3 0 <memory> \ PORTD swap memory-add swap push dup ! Port D
-    drop
-    
-    ;
-
+! now get the value from cell
+: memory-cell-value ( cell -- value/? )
+    dup cell? [ value>> ] [ drop f ] if ;
 
 
 ! read memory
-: memory-read ( address vector -- data )
-    dup dup vector? swap length zero? not and
-    [
-        nth
-        dup
-        memory?
-        [
-            value>>
-        ] when
-    ] when
+: memory-read ( address memory -- data )
+    memory-cell read ;
 
-    ;
+
+! write memory
+: memory-write ( d address memory -- )
+    memory-cell write ;
+
+! write an array to memory
+: memory-array-write ( array address memory -- )
+    rot
+    [
+        -rot
+        [ memory-write ] 2keep
+        [ 1 + ] dip
+    ] each 2drop ;
+
+: <memory> ( -- memory )
+    memory new
+    0x10000 0 <array> [ <cell> ] map >>array ;
+

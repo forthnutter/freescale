@@ -5,18 +5,18 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations freescale.68000.emulator.alu ;
+    words quotations
+    freescale.68000.emulator.alu
+    freescale.68000.emulator.address models ;
   
-!    io.encodings.binary
-!    io.files
-!    io.pathnames
-!    peg.ebnf
-!    peg.parsers
-! ;
+
 IN: freescale.68000.emulator
 
 TUPLE: cpu alu ar dr pc ssp usp rx cycles memory ;
 
+M: cpu model-changed
+  drop
+  drop ;
 
 
 ! put value into A7
@@ -26,8 +26,7 @@ TUPLE: cpu alu ar dr pc ssp usp rx cycles memory ;
 
 ! get A7
 : A7> ( cpu -- d )
-  [ alu>> alu-mode? ] keep swap
-  [ ssp>> ] [ usp>> ] if ;
+  ar>> 7 swap nth ;
 
 ! increment A7
 : A7+ ( cpu -- )
@@ -96,12 +95,18 @@ TUPLE: cpu alu ar dr pc ssp usp rx cycles memory ;
   cpu new
   <alu> >>alu
   8 0 <array> >>dr
+!  ar-new >>ar
   8 0 <array> >>ar
-  0 >>ssp
-  0 >>usp
+  0 <model> >>ssp
+  0 <model> >>usp
 
+  [ ar>> 0 <model> swap 7 swap set-nth ] keep
+
+  [ dup ssp>> add-connection ] keep 
 
   [ alu>> 7 swap alu-imask-write ] keep
 
+
+  
  ;
                     

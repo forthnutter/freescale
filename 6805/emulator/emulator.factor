@@ -13,35 +13,10 @@ USING:
     freescale.6805.emulator.memory
     freescale.6805.emulator.alu ;
   
-!    io.encodings.binary
-!    io.files
-!    io.pathnames
-!    peg.ebnf
-!    peg.parsers
-! ;
+
 IN: freescale.6805.emulator
 
 TUPLE: cpu a x ccr pc sp halted? last-interrupt cycles mlist memory ;
-
-GENERIC: reset ( cpu -- )
-GENERIC: addmemory ( obj cpu -- )
-GENERIC: byte-read ( address cpu -- byte )
-
-
-
-
-#! do a cpu Reset
-M: cpu reset ( cpu -- )
-   0               >>a          ! reset reg A
-   0               >>x          ! reset reg X
-   "11100000" bin> >>ccr        ! reset CCR
-   "FFFE" hex>     >>pc         ! reset PC this needs a relook
-   "00FF" hex>     >>sp         ! reset SP
-   f >>halted?
-   0 >>cycles
-   drop
-;
-
 
 
 
@@ -53,48 +28,45 @@ M: cpu reset ( cpu -- )
 
 
 
-
-: write-byte ( value addr cpu -- )
-  #! Write a byte to the specified memory address.
-#!  over dup 0 < swap HEX: FFFF > or
- #! [ 3drop ]
- #! [ ram>> set-nth ] if
-;
-
 : read-word ( addr cpu -- word )
+   drop drop 0
   #! [ read-byte ] 2keep [ 1 + ] dip read-byte swap 8 shift bitor
 ;
 
-: write-word ( value addr cpu -- )
-  [ >word< ] 2dip [ write-byte ] 2keep [ 1 + ] dip write-byte ;
+: PC+ ( cpu -- )
+   [ pc>> ] keep swap 1 + >>pc drop ;
 
-: inc-pc ( cpu -- )
-  [ pc>> ] keep
-  swap
-  1 + >>pc
-  drop
- ;
-
+: PC- ( cpu -- )
+   [ pc>> ] keep swap 1 - >>pc drop ;
 
 : not-implemented ( <cpu> -- )
   drop
 ;
 
- 
+: write-byte ( d a cpu -- )
+   memory>> memory-write ;
+
+
+: read-byte ( a cpu -- d )
+   memory>> memory-read ;
 
 
 ! Get PC and Read memory data
 : pc-memory-read ( cpu -- d )
-  [ pc>> ] keep [ memory>> ] keep
-  memory-read ;
+  [ pc>> ] keep memory>> memory-read ;
+
 
 
 ! Branch if Bit 0 is Set
 : (opcode-00) ( cpu -- )
-  [ pc-memory-read ] keep 
+   [ PC+ ] keep [ pc-memory-read ] keep drop drop
   ;
+
+: cpu-reset ( cpu -- )
+   0xfffe >>pc drop ;
 
 #! Make a CPU here
 : <cpu> ( -- cpu )
   cpu new
+  [ cpu-reset ] keep
   <memory> >>memory ;

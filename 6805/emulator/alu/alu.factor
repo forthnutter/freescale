@@ -6,7 +6,7 @@ USING:
     kernel
     locals
     math sequences byte-arrays io
-    math.parser math.bitwise math.bits unicode.case
+    math.parser math.bitwise unicode.case
     namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     vectors words quotations deques dlists models

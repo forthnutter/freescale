@@ -29,9 +29,16 @@ TUPLE: alu < model ;
 
 ! make a alu
 : <alu> ( -- alu )
-    alu new
-    0 >>value
-    ;
+    0 alu new-model ;
+
+
+M: alu model-activated
+    break drop ;
+
+
+! we add a connection
+: alu-add-connection ( model alu -- )
+    
 
 ! C flag manipulation
 : alu-c-set ( alu -- )

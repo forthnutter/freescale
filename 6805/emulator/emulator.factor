@@ -9,14 +9,15 @@ USING:
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     vectors
-    words quotations deques dlists
+    words quotations
     freescale.6805.emulator.memory
-    freescale.6805.emulator.alu ;
+    freescale.6805.emulator.alu
+    freescale.6805.emulator.config ;
   
 
 IN: freescale.6805.emulator
 
-TUPLE: cpu a x ccr pc sp halted? last-interrupt cycles mlist memory ;
+TUPLE: cpu config a x ccr pc sp halted? last-interrupt cycles mlist memory ;
 
 
 
@@ -62,11 +63,29 @@ TUPLE: cpu a x ccr pc sp halted? last-interrupt cycles mlist memory ;
    [ PC+ ] keep [ pc-memory-read ] keep drop drop
   ;
 
-: cpu-reset ( cpu -- )
-   0xfffe >>pc drop ;
+! add memory tuple
+: cpu-add-memory ( memory cpu -- )
+  memory<< ;
 
-#! Make a CPU here
+
+: cpu-reset ( cpu -- )
+  ! all DDR = 0
+  ! SP = 0x00ff
+  ! I bit in the CCR set to 1 to inhibit maskable interrupts
+  ! External interrupt latch cleared
+  ! STOP latch cleared
+  ! WAIT latch cleared
+  [ config>> config-reset-vector ] keep
+  [ read-word ] keep
+  pc<< ;
+
+: cpu-add-config ( config cpu -- )
+  config<< ;
+
+ 
+! step 1 Make a CPU here
 : <cpu> ( -- cpu )
-  cpu new
-  [ cpu-reset ] keep
-  <memory> >>memory ;
+  cpu new ;
+
+!  [ cpu-reset ] keep
+!  <memory> >>memory ;

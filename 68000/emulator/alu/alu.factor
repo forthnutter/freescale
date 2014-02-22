@@ -38,6 +38,7 @@ M: alu model-activated
 
 ! we add a connection
 : alu-add-connection ( model alu -- )
+    ;
     
 
 ! C flag manipulation

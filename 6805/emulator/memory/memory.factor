@@ -27,6 +27,9 @@ TUPLE: memory vector ;
 : memory-add ( cell memory -- )
     vector>> push ;
 
+: memory-push ( memory cell -- memory )
+    [ dup vector>> ] dip swap push ;
+    
 
 ! need the cell
 : memory-cell ( address memory -- cell/? )
@@ -40,7 +43,7 @@ TUPLE: memory vector ;
 
 ! read memory
 : memory-read ( address memory -- data )
-    drop drop 0 ;
+    vector>> ?nth dup [ value>> ] [ drop 0 ] if ;
 
 
 ! write memory
@@ -60,5 +63,9 @@ TUPLE: memory vector ;
 
 : <memory-default> ( -- memory )
     <memory>
-    <port> swap [ [ data>> ] keep swap ] dip swap
-    [  0 1 <io-cell> ] curry keep [ vector>> push ] keep ;
+    <port> memory-push
+    <port> memory-push
+    <port> memory-push ;
+    
+ ! swap [ [ data>> ] keep swap ] dip swap
+ !   [  0 1 <io-cell> ] curry keep [ vector>> push ] keep ;

@@ -80,52 +80,52 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes ;
   ar>> 0 swap nth ;
 
 : >D7 ( d cpu -- )
-  ar>> 6 swap set-nth ;
+  dr>> 6 swap set-nth ;
 
 : D7> ( cpu -- d )
-  ar>> 6 swap nth ;
+  dr>> 6 swap nth ;
 
 : >D6 ( d cpu -- )
-  ar>> 6 swap set-nth ;
+  dr>> 6 swap set-nth ;
 
 : D6> ( cpu -- d )
-  ar>> 6 swap nth ;
+  dr>> 6 swap nth ;
 
 : >D5 ( d cpu -- )
-  ar>> 5 swap set-nth ;
+  dr>> 5 swap set-nth ;
 
 : D5> ( cpu -- d )
-  ar>> 5 swap nth ;
+  dr>> 5 swap nth ;
 
 : >D4 ( d cpu -- )
-  ar>> 4 swap set-nth ;
+  dr>> 4 swap set-nth ;
 
 : D4> ( cpu -- d )
-  ar>> 4 swap nth ;
+  dr>> 4 swap nth ;
 
 : >D3 ( d cpu -- )
-  ar>> 3 swap set-nth ;
+  dr>> 3 swap set-nth ;
 
 : D3> ( cpu -- d )
-  ar>> 3 swap nth ;
+  dr>> 3 swap nth ;
 
 : >D2 ( d cpu -- )
-  ar>> 2 swap set-nth ;
+  dr>> 2 swap set-nth ;
 
 : D2> ( cpu -- d )
-  ar>> 2 swap nth ;
+  dr>> 2 swap nth ;
 
 : >D1 ( d cpu -- )
-  ar>> 1 swap set-nth ;
+  dr>> 1 swap set-nth ;
 
 : D1> ( cpu -- d )
-  ar>> 1 swap nth ;
+  dr>> 1 swap nth ;
 
 : >D0 ( d cpu -- )
-  ar>> 0 swap set-nth ;
+  dr>> 0 swap set-nth ;
 
 : D0> ( cpu -- d )
-  ar>> 0 swap nth ;
+  dr>> 0 swap nth ;
 
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
@@ -136,6 +136,16 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes ;
 : cpu-write-byte ( d address cpu -- )
   [ memory>> memory-test ] 2keep rot
   [ memory>> memory-write-byte ] [ cpu-exception ] if ;
+
+! read word from memory
+: cpu-read-word ( address cpu -- dd )
+  [ memory>> memory-test ] 2keep rot
+  [ memory>> memory-read-word ] [ cpu-exception 0 ] if ;
+
+! write word to memory
+: cpu-write-word ( dd address cpu -- )
+  [ memory>> memory-test ] 2keep rot
+  [ memory>> memory-write-word ] [ cpu-exception ] if ;
 
 
 ! the opcodes are divide into 16 

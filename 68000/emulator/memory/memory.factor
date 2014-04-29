@@ -72,3 +72,12 @@ TUPLE: memory vector ;
 : memory-write-byte ( d address memory -- )
     [ dup ] dip memory-find dup
     [ mblock-write ] [ ] if ;
+
+
+: memory-read-word ( address memory -- d )
+    [ memory-read-byte ] 2keep
+    memory-read-byte ;
+
+: memory-write-word ( d address memory -- )
+    [ dup ] dip memory-find dup
+    [ mblock-write ] [ ] if ;

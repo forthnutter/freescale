@@ -5,19 +5,19 @@ USING:
     accessors arrays
     kernel
     locals
-    math sequences byte-arrays io
+    math math.bitwise sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     vectors
     words quotations
     freescale.6805.emulator.memory
-    freescale.6805.emulator.alu
+    freescale.6805.emulator.ccr
     freescale.6805.emulator.config ;
   
 
 IN: freescale.6805.emulator
 
-TUPLE: cpu config a x ccr pc sp halted? last-interrupt cycles mlist memory ;
+TUPLE: cpu config alu a x ccr pc sp halted? last-interrupt cycles mlist memory ;
 
 
 
@@ -34,12 +34,32 @@ TUPLE: cpu config a x ccr pc sp halted? last-interrupt cycles mlist memory ;
   #! [ read-byte ] 2keep [ 1 + ] dip read-byte swap 8 shift bitor
 ;
 
+! Increment PC
 : PC+ ( cpu -- )
    [ pc>> ] keep swap 1 + >>pc drop ;
 
+! Decrement PC
 : PC- ( cpu -- )
    [ pc>> ] keep swap 1 - >>pc drop ;
 
+! add the relative displacement to pc
+: pc-relative ( r cpu -- )
+  [ dup 7 bit? ] dip swap
+  [
+    [ 7 clear-bit ] dip
+    [ pc>> swap - 16 bit-range ] keep
+    pc<<
+  ]
+  [
+    [ pc>> + 16 bit-range ] keep
+    pc<<
+  ] if ;
+  
+
+! move bit or flag into carry flag
+: >C ( ? cpu -- )
+  ccr>> >ccr-c ;
+  
 : not-implemented ( <cpu> -- )
   drop
 ;
@@ -58,10 +78,38 @@ TUPLE: cpu config a x ccr pc sp halted? last-interrupt cycles mlist memory ;
 
 
 
-! Branch if Bit 0 is Set
+! BRSET0
 : (opcode-00) ( cpu -- )
-   [ PC+ ] keep [ pc-memory-read ] keep drop drop
+   [ PC+ ] keep
+   [ pc-memory-read ] keep
+   [ 0 bit? ] dip [ >C ] keep
+   [ ccr>> ccr-c? ] keep swap
+   [
+     [ PC+ ] keep
+     [ pc-memory-read ] keep
+     [ PC+ ] keep
+     [ pc-relative ] keep
+   ]
+   [ [ PC+ ] keep PC+ ] if
   ;
+
+
+
+! BRCLR0
+: (opcode-01) ( cpu -- )
+  drop ;
+
+
+
+
+! BRSET1
+: opcode-02 ( cpu -- )
+  drop ;
+
+! BRCLR1
+: opcode-03 ( cpu -- )
+  drop ;
+
 
 ! add memory tuple
 : cpu-add-memory ( memory cpu -- )
@@ -82,10 +130,13 @@ TUPLE: cpu config a x ccr pc sp halted? last-interrupt cycles mlist memory ;
 : cpu-add-config ( config cpu -- )
   config<< ;
 
+
+
+
  
 ! step 1 Make a CPU here
 : <cpu> ( -- cpu )
-  cpu new ;
+  cpu new
+  0 >>pc
+  0xe0 <ccr> >>ccr ;
 
-!  [ cpu-reset ] keep
-!  <memory> >>memory ;

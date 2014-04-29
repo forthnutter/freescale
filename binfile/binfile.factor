@@ -19,5 +19,5 @@ IN: freescale.binfile
         [ binfile-size ] keep swap
         [ binary ] dip [ read ] curry with-file-reader
     ]
-    [ ] if ;
+    [ drop B{ } clone ] if ;
 

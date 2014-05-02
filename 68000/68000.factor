@@ -3,14 +3,11 @@
 !
 
 USING:
-   kernel
-   freescale.68000.emulator
-   ;
+   kernel freescale.68000.emulator freescale.binfile ;
 
 
 IN: freescale.68000
 
 
 : start-68k ( -- cpu )
-    <cpu>
-    ;
+    "work/freescale/68000/iplrom.dat" <binfile> <cpu> ;

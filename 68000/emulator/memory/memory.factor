@@ -81,3 +81,14 @@ TUPLE: memory vector ;
 : memory-write-word ( d address memory -- )
     [ dup ] dip memory-find dup
     [ mblock-write ] [ ] if ;
+
+: memory-read-long ( address memory -- d )
+    [ memory-read-word ] 2keep memory-read-word ;
+
+: memory-read-long ( d address memory -- )
+    [ dup ] dip memory-find dup
+    [ mblock-write ] [ ] if ;
+
+! create a memory block and add binary array
+: memory-create ( address array memory -- )
+    ;

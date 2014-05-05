@@ -37,43 +37,46 @@ CONSTANT: B6-FLAG        6
 CONSTANT: B7-FLAG        7
 
 
-TUPLE: ccr < model ;
+TUPLE: alu < model ;
 
 ! Create CCR
-: <ccr> ( value -- ccr )
-    ccr new-model ;
+: <alu> ( value -- alu )
+    alu new-model ;
 
 ! Write to CCR
-: ccr-write ( b ccr -- )
+: alu-write ( b alu -- )
     [ 8 bits ] dip  set-model ;
 
-! read CCR
-: ccr-read ( ccr -- d )
+! read alu
+: alu-read ( alu -- d )
     value>> 8 bits ;
 
 #! Test the half-carry flag status
-: ccr-h? ( ccr -- ? )
-  ccr-read H-FLAG H-FLAG bit-range 1 = ;
+: alu-h? ( alu -- ? )
+  alu-read H-FLAG H-FLAG bit-range 1 = ;
 
 #! test the interrupt flag
-: ccr-i? ( ccr -- bool )
-  ccr-read I-FLAG I-FLAG bit-range 1 =  ;
+: alu-i? ( alu -- bool )
+  alu-read I-FLAG I-FLAG bit-range 1 =  ;
 
 #! test the negative flag
-: ccr-n? ( ccr -- bool )
-  ccr-read N-FLAG N-FLAG bit-range 1 =  ;
+: alu-n? ( alu -- bool )
+  alu-read N-FLAG N-FLAG bit-range 1 =  ;
 
 #! test the zero flag
-: ccr-z? ( ccr -- bool )
-  ccr-read Z-FLAG Z-FLAG bit-range 1 = ;
+: alu-z? ( alu -- bool )
+  alu-read Z-FLAG Z-FLAG bit-range 1 = ;
 
 #! test the carry flag
-: ccr-c? ( ccr -- bool )
-  ccr-read C-FLAG C-FLAG bit-range 1 = ;
+: alu-c? ( alu -- bool )
+  alu-read C-FLAG C-FLAG bit-range 1 = ;
 
 #! Set Flag_C
-: ccr-set-c ( ccr -- )
-    [ ccr-read C-FLAG set-bit ] keep ccr-write ;
+: alu-set-c ( alu -- )
+    [ alu-read C-FLAG set-bit ] keep alu-write ;
 
+#! clear flag C
+: alu-clr-c ( alu -- )
+    [ alu-read C-FLAG clr-bit ] keep alu-write ;
 
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ! Copyright (C) 2011 Joseph Moschini.
 ! See http://factorcode.org/license.txt for BSD license.
 !
@@ -45,3 +46,12 @@ TUPLE: config iostart iosize
 
 
 
+=======
+! Copyright (C) 2011 Joseph Moschini.
+! See http://factorcode.org/license.txt for BSD license.
+!
+
+
+IN: freescale.6805.emulator.config
+
+>>>>>>> branch 'master' of git@github.com:forthnutter/freescale.git

@@ -11,7 +11,7 @@ USING:
     vectors
     words quotations
     freescale.6805.emulator.memory
-    freescale.6805.emulator.ccr
+    freescale.6805.emulator.alu
     freescale.6805.emulator.config ;
   
 

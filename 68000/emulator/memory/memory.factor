@@ -13,15 +13,12 @@ IN: freescale.68000.emulator.memory
 
 
 
-TUPLE: mblock start nbytes array ;
+TUPLE: mblock start array ;
 
 
 
-: <mblock> ( start nbytes -- mblock )
-    mblock new
-    [ dup ] dip [ nbytes<< ] keep
-    [ <byte-array> ] dip [ array<< ] keep
-    swap >>start ;
+: <mblock> ( start array -- mblock )
+    mblock boa ;
 
 
 : mblock-read ( address mblock -- d )
@@ -48,7 +45,6 @@ TUPLE: memory vector ;
     vector>>
     [
         [ dup ] dip [ start>> ] keep
-        [ dup ] dip [ nbytes>> + ] keep
         [ between? ] dip drop swap [ or ] dip
     ] each drop
  ;
@@ -58,7 +54,6 @@ TUPLE: memory vector ;
     vector>>
     [
         [ dup ] dip [ start>> ] keep
-        [ dup ] dip [ nbytes>> + ] keep
         [ between? ] dip drop
     ] find [ drop drop ] dip ;
 
@@ -85,10 +80,10 @@ TUPLE: memory vector ;
 : memory-read-long ( address memory -- d )
     [ memory-read-word ] 2keep memory-read-word ;
 
-: memory-read-long ( d address memory -- )
+: memory-write-long ( d address memory -- )
     [ dup ] dip memory-find dup
     [ mblock-write ] [ ] if ;
 
 ! create a memory block and add binary array
 : memory-create ( address array memory -- )
-    ;
+    [ <mblock> ] dip memory-add-block ;

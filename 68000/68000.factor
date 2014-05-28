@@ -3,11 +3,13 @@
 !
 
 USING:
-   kernel freescale.68000.emulator freescale.binfile ;
+   accessors freescale.68000.emulator freescale.68000.emulator.memory
+   freescale.binfile kernel ;
 
 
 IN: freescale.68000
 
 
 : start-68k ( -- cpu )
-    "work/freescale/68000/iplrom.dat" <binfile> <cpu> ;
+    "work/freescale/68000/iplrom.dat" <binfile>
+    0 swap <cpu> [ memory>> memory-create ] keep ;

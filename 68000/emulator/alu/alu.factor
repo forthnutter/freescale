@@ -38,12 +38,8 @@ M: alu model-activated
 
 ! we add a connection
 : alu-add-connection ( model alu -- )
-<<<<<<< HEAD
-    add-connection ;
-=======
     swap add-connection ;
->>>>>>> branch 'master' of git@github.com:forthnutter/freescale.git
-    
+
 
 ! C flag manipulation
 : alu-c-set ( alu -- )

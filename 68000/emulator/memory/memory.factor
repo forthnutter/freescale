@@ -27,6 +27,10 @@ TUPLE: mblock start array ;
 : mblock-write ( d address mblock -- )
     [ start>> - ] keep array>> set-nth ;
 
+! Get the start address and end addres from the memory block
+: mblock-start-end ( mblock -- start end )
+    [ start>> dup ] keep array>> length + ;
+
 
 TUPLE: memory vector ;
 
@@ -40,28 +44,26 @@ TUPLE: memory vector ;
 
 
 
-: memory-test ( address memory -- ? )
-    f -rot
-    vector>>
-    [
-        [ dup ] dip [ start>> ] keep
-        [ between? ] dip drop swap [ or ] dip
-    ] each drop
- ;
-
 
 : memory-find ( address memory -- mblock )
     vector>>
     [
-        [ dup ] dip [ start>> ] keep
-        [ between? ] dip drop
+        [ mblock-start-end ] keep
+        [ between? ] dip
     ] find [ drop drop ] dip ;
 
 
 
+
+: memory-test ( address memory -- ? )
+    memory-find mblock? ;
+
+
+
 : memory-read-byte ( address memory -- d )
-    [ dup ] dip memory-find dup
-    [ mblock-read ] [ ] if ;
+    [ dup ] dip memory-find
+    dup mblock?
+    [ mblock-read ] [ drop drop f ] if ;
 
 
 : memory-write-byte ( d address memory -- )

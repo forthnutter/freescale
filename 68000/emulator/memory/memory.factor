@@ -44,7 +44,7 @@ TUPLE: memory vector ;
 
 
 
-
+! go find address memory block 
 : memory-find ( address memory -- mblock )
     vector>>
     [
@@ -54,21 +54,22 @@ TUPLE: memory vector ;
 
 
 
-
+! test to see if address is available
 : memory-test ( address memory -- ? )
     memory-find mblock? ;
 
 
-
-: memory-read-byte ( address memory -- d )
+! read byte from memory
+: memory-read-byte ( address memory -- d/f )
     [ dup ] dip memory-find
     dup mblock?
     [ mblock-read ] [ drop drop f ] if ;
 
 
-: memory-write-byte ( d address memory -- )
-    [ dup ] dip memory-find dup
-    [ mblock-write ] [ ] if ;
+: memory-write-byte ( d address memory -- ? )
+    [ dup ] dip memory-find
+    dup mblock?
+    [ mblock-write t ] [ drop drop drop f ] if ;
 
 
 : memory-read-word ( address memory -- d )

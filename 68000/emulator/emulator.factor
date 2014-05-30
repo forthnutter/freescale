@@ -12,7 +12,7 @@ USING:
 
 IN: freescale.68000.emulator
 
-TUPLE: cpu alu ar dr pc rx cycles memory opcodes ;
+TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 : cpu-exception ( cpu -- )
   drop ;
@@ -129,9 +129,8 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes ;
 
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
-  [ memory>> memory-test ] 2keep rot
-  [ memory>> memory-read-byte ] [ cpu-exception 0 ] if
-  ;
+  [ memory>> memory-read-byte ] keep swap dup
+  f = [ cpu-exception 0 ] [ swap drop ] if ;
 
 : cpu-write-byte ( d address cpu -- )
   [ memory>> memory-test ] 2keep rot

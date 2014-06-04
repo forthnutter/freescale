@@ -76,11 +76,12 @@ TUPLE: memory vector ;
 
 
 : memory-read-word ( address memory -- d )
-    [ memory-read-byte ] 2keep
-    memory-read-byte ;
+    [ memory-read-byte ] 2keep [ 1 + ] dip memory-read-byte
+    2dup and f = [ drop drop f ] [ [ 8 shift ] dip bitor ] if ;
 
 : memory-write-word ( d address memory -- )
-    [ dup ] dip memory-find dup
+    [ [ 8 bits ] dip 8 8 bit-range ] dip
+    [ memory-write-byte ] 3keep [ 1 + ] dip memory-read-byte
     [ mblock-write ] [ ] if ;
 
 : memory-read-long ( address memory -- d )

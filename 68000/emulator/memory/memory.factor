@@ -48,9 +48,12 @@ TUPLE: memory vector ;
 : memory-find ( address memory -- mblock )
     vector>>
     [
-        [ mblock-start-end ] keep
-        [ between? ] dip
-    ] find [ drop drop ] dip ;
+        [ mblock-start-end between? ] keep
+    ] find
+    [ drop ] dip ! remove index
+    swap
+    [ ] [ drop f ] if
+    ;
 
 
 

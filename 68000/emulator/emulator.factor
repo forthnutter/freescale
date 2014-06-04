@@ -130,7 +130,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
   [ memory>> memory-read-byte ] keep swap dup
-  f = [ cpu-exception 0 ] [ swap drop ] if ;
+  f = [ drop cpu-exception 0 ] [ swap drop ] if ;
 
 : cpu-write-byte ( d address cpu -- )
   [ memory>> memory-test ] 2keep rot

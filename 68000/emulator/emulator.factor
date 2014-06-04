@@ -12,10 +12,15 @@ USING:
 
 IN: freescale.68000.emulator
 
+CONSTANT: ACCESS-FAULT 8
+CONSTANT: ADDRESS-ERROR 12
+CONSTANT: ILLEGAL-INSTRUCTION 16
+
+
 TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
-: cpu-exception ( cpu -- )
-  drop ;
+: cpu-exception ( excep cpu -- )
+    state<< ;
 
 
 ! put value into A7
@@ -130,21 +135,21 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
   [ memory>> memory-read-byte ] keep swap dup
-  f = [ drop cpu-exception 0 ] [ swap drop ] if ;
+  f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
 
 : cpu-write-byte ( d address cpu -- )
-  [ memory>> memory-test ] 2keep rot
-  [ memory>> memory-write-byte ] [ cpu-exception ] if ;
+  [ memory>> memory-write-byte ] keep swap 
+  f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
 
 ! read word from memory
 : cpu-read-word ( address cpu -- dd )
-  [ memory>> memory-test ] 2keep rot
-  [ memory>> memory-read-word ] [ cpu-exception 0 ] if ;
+  [ memory>> memory-read-word ] keep swap dup
+  f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
 
 ! write word to memory
 : cpu-write-word ( dd address cpu -- )
-  [ memory>> memory-test ] 2keep rot
-  [ memory>> memory-write-word ] [ cpu-exception ] if ;
+  [ memory>> memory-write-word ] keep swap
+  f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
 
 
 ! the opcodes are divide into 16 

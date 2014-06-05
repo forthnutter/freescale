@@ -5,7 +5,7 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations
+    words quotations math.bits math.bitwise
     freescale.68000.emulator.alu
     freescale.68000.emulator.memory models ;
   
@@ -132,6 +132,15 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : D0> ( cpu -- d )
   dr>> 0 swap nth ;
 
+! split a word value to bytes 
+: word-bytes ( w -- a b )
+    [ 15 8 bit-range ] keep 7 0 bit-range ;
+
+! split a long into 4 bytes
+: long-bytes ( l -- a b c d )
+    [ 31 16 bit-range word-bytes ] keep
+    15 0 bit-range word-bytes ;
+
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
   [ memory>> memory-read-byte ] keep swap dup
@@ -140,6 +149,11 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : cpu-write-byte ( d address cpu -- )
   [ memory>> memory-write-byte ] keep swap 
   f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
+
+: cpu-write-word-1 ( d address cpu -- )
+    [ word-bytes ] 2dip
+    
+    [ memory>> memory-write-byte ] 
 
 ! read word from memory
 : cpu-read-word ( address cpu -- dd )
@@ -150,6 +164,18 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : cpu-write-word ( dd address cpu -- )
   [ memory>> memory-write-word ] keep swap
   f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
+
+
+! read long from memory
+: cpu-read-long ( address cpu -- dddd )
+  [ memory>> memory-read-word ] keep swap dup
+  f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
+
+! write long to memory
+: cpu-write-long ( dddd address cpu -- )
+  [ memory>> memory-write-word ] keep swap
+  f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
+
 
 
 ! the opcodes are divide into 16 

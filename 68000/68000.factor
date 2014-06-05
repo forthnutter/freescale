@@ -3,8 +3,9 @@
 !
 
 USING:
-   accessors freescale.68000.emulator freescale.68000.emulator.memory
-   freescale.binfile kernel ;
+   accessors kernel math.bits math.bitwise
+   freescale.68000.emulator freescale.68000.emulator.memory
+   freescale.binfile ;
 
 
 IN: freescale.68000

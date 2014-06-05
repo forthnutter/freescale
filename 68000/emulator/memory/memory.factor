@@ -5,8 +5,8 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.order
-    freescale.68000.emulator.alu models ;
+    words quotations math.order 
+    freescale.68000.emulator.alu models math.bitwise ;
   
 
 IN: freescale.68000.emulator.memory
@@ -79,13 +79,13 @@ TUPLE: memory vector ;
     [ memory-read-byte ] 2keep [ 1 + ] dip memory-read-byte
     2dup and f = [ drop drop f ] [ [ 8 shift ] dip bitor ] if ;
 
-: memory-write-word ( d address memory -- )
-    [ [ 8 bits ] dip 8 8 bit-range ] dip
-    [ memory-write-byte ] 3keep [ 1 + ] dip memory-read-byte
-    [ mblock-write ] [ ] if ;
+: memory-write-word ( d address memory -- ? )
+    [ [ dup 8 bits swap ] dip [ 7 0 bit-range ] dip ] dip
+    [ memory-write-byte swap ] 2keep [ 1 + ] dip memory-write-byte
+    and ;
 
 : memory-read-long ( address memory -- d )
-    [ memory-read-word ] 2keep memory-read-word ;
+    [ memory-read-word ] 2keep [ 2 + ] dip memory-read-word ;
 
 : memory-write-long ( d address memory -- )
     [ dup ] dip memory-find dup

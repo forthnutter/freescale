@@ -151,9 +151,9 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
   f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
 
 : cpu-write-word-1 ( d address cpu -- )
-    [ word-bytes ] 2dip
+    [ word-bytes ] 2dip [ dup ] dip
     
-    [ memory>> memory-write-byte ] 
+    [ memory>> memory-write-byte ] ;
 
 ! read word from memory
 : cpu-read-word ( address cpu -- dd )

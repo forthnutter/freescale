@@ -140,11 +140,22 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : bytes-word ( a b -- w )
     [ 8 bits 8 shift ] dip 8 bits bitor ;
 
+! join two words into long
+: words-long ( wh wl -- l )
+    [ 16 bits 16 shift ] dip 16 bits bitor ;
+
 
 ! split a long into 4 bytes
 : long-bytes ( l -- a b c d )
     [ 31 16 bit-range word-bytes ] keep
     15 0 bit-range word-bytes ;
+
+! split long into words
+: long-words ( l -- wh wl )
+    [ 31 16 bit-range ] keep
+    15 0 bit-range ;
+
+
 
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
@@ -158,10 +169,6 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 ! read word from memory
 : cpu-read-word ( address cpu -- dd )
-  [ memory>> memory-read-word ] keep swap dup
-  f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
-
-: cpu-read-word-1 ( address cpu -- dd )
     [ cpu-read-byte ] 2keep
     [ 1 + ] dip cpu-read-byte bytes-word ;
 
@@ -174,13 +181,14 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 ! read long from memory
 : cpu-read-long ( address cpu -- dddd )
-  [ memory>> memory-read-word ] keep swap dup
-  f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
+    [ cpu-read-word ] 2keep
+    [ 2 + ] dip cpu-read-word words-long ;
 
 ! write long to memory
 : cpu-write-long ( dddd address cpu -- )
-  [ memory>> memory-write-word ] keep swap
-  f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
+    [ long-words swap ] 2dip
+    [ cpu-write-word ] 2keep
+    [ 2 + ] dip cpu-write-word ;
 
 
 

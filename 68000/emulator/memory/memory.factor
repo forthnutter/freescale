@@ -91,6 +91,12 @@ TUPLE: memory vector ;
     [ dup ] dip memory-find dup
     [ mblock-write ] [ ] if ;
 
+! return a sub array of memory
+: memory-subseq ( from to memory -- array )
+    
+    ;
+
+
 ! create a memory block and add binary array
 : memory-create ( address array memory -- )
     [ <mblock> ] dip memory-add-block ;

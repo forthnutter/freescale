@@ -7,7 +7,7 @@ USING:
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
     freescale.68000.emulator.alu
-    freescale.68000.emulator.memory models ;
+    models ;
   
 
 IN: freescale.68000.emulator
@@ -159,11 +159,11 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
-  [ memory>> memory-read-byte ] keep swap dup
+  [ memory>> empty? ] keep swap dup
   f = [ drop ADDRESS-ERROR swap cpu-exception 0 ] [ swap drop ] if ;
 
 : cpu-write-byte ( d address cpu -- )
-  [ memory>> memory-write-byte ] keep swap 
+  [ memory>> empty? ] keep swap 
   f = [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if ;
 
 
@@ -270,7 +270,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
   <alu> >>alu
   8 0 <array> >>dr
   9 0 <array> >>ar
-  <memory> >>memory
+  BV{ } clone >>memory
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
   

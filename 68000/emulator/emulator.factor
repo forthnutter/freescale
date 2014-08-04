@@ -7,7 +7,7 @@ USING:
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
     freescale.68000.emulator.alu
-    models ;
+    models freescale.68000.emulator.memory ;
   
 
 IN: freescale.68000.emulator
@@ -270,7 +270,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
   <alu> >>alu
   8 0 <array> >>dr
   9 0 <array> >>ar
-  BV{ } clone >>memory
+  <memory> >>memory
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
   

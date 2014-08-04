@@ -6,7 +6,9 @@ USING:
    accessors kernel math math.bitwise math.order math.parser
    sequences unicode.case
    freescale.68000.emulator
-   freescale.binfile ;
+   freescale.binfile
+   freescale.68000.emulator.memory.mblock
+   freescale.68000.emulator.memory ;
 
 
 IN: freescale.68000
@@ -33,4 +35,4 @@ IN: freescale.68000
 
 : start-68k ( -- cpu )
     "work/freescale/68000/iplrom.dat" <binfile>
-    0 swap <cpu> [ memory>> swap append ] keep memory<< ;
+    0 swap <mblock> <cpu> [ memory>> memory-add-block ] keep ;

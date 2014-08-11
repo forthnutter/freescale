@@ -30,3 +30,9 @@ TUPLE: mblock start array ;
 ! Get the start address and end addres from the memory block
 : mblock-start-end ( mblock -- start end )
     [ start>> dup ] keep array>> length + ;
+
+: mblock-address ( a mblock -- index )
+    start>> + ;
+
+: mblock-subseq ( from to mblock -- array )
+    array>> subseq ;

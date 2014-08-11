@@ -18,15 +18,14 @@ IN: freescale.68000
 ! rom dump number of bytes
 : hexdump ( n address cpu -- str )
   [
-      16 bits
       [ dup 16 < ] dip
       [ swap [ + ] [ swap drop 16 + ] if ] keep
       [ 16 bits ] dip
       [ min ] [ max ] 2bi
        2dup
   ] dip 
-  memory>> subseq [ drop ] dip
-  [ >hex 4 CHAR: 0 pad-head >upper " " append ] dip
+  memory>> memory-subseq [ drop ] dip
+  [ >hex 8 CHAR: 0 pad-head >upper " " append ] dip
   [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append ;
 
 

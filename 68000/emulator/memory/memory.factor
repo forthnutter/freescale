@@ -42,6 +42,8 @@ TUPLE: memory vector ;
 : memory-test ( address memory -- ? )
     memory-find mblock? ;
 
+: memory-between ( from to memory -- ? )
+    [ memory-test ] curry bi@ and ;
 
 ! read byte from memory
 : memory-read-byte ( address memory -- d/f )
@@ -73,7 +75,13 @@ TUPLE: memory vector ;
     [ mblock-write ] [ ] if ;
 
 ! return a sub array of memory
-: memory-subseq ( from to memory -- array )
+: memory-subseq ( from to memory -- array/f )
+    [ [ memory-find ] curry bi@ 2dup [ mblock? ] bi@ and ] 3keep drop rot
+    [
+        [ drop ] 2dip rot
+        [ [ mblock-address ] curry bi@ ] keep
+        mblock-subseq
+    ] [ ] if
     
     ;
 

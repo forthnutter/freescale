@@ -15,8 +15,8 @@ IN: freescale.68000
 
 
 
-! rom dump number of bytes
-: hexdump ( n address cpu -- str )
+! memory display or dump bytes
+: mdb ( n address cpu -- str/f )
   [
       [ dup 16 < ] dip
       [ swap [ + ] [ swap drop 16 + ] if ] keep
@@ -24,10 +24,20 @@ IN: freescale.68000
       [ min ] [ max ] 2bi
        2dup
   ] dip 
-  memory>> memory-subseq [ drop ] dip
-  [ >hex 8 CHAR: 0 pad-head >upper " " append ] dip
-  [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append ;
+  memory>> memory-subseq dup f =
+  [
+    [ drop drop ] dip
+  ]
+  [
+    swap drop
+    [ >hex 8 CHAR: 0 pad-head >upper " " append ] dip
+    [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+  ] if ;
+    
 
+! memory display words
+! : mdw ( n address cpu -- str/f )
+  
 
 
 

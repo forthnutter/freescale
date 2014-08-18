@@ -81,9 +81,10 @@ TUPLE: memory vector ;
         [ drop ] 2dip rot
         [ [ mblock-address ] curry bi@ ] keep
         mblock-subseq
-    ] [ ] if
-    
-    ;
+    ]
+    [
+        drop drop [ drop ] dip
+    ] if ;
 
 
 ! create a memory block and add binary array

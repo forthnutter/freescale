@@ -7,17 +7,17 @@ IN: 68000.assembler
 
 : insn ( operand opcode -- ) { 26 0 } bitfield 4 >be % ;
 
-: s>u16 ( s -- u ) HEX: ffff bitand ;
+: s>u16 ( s -- u ) 0xffff bitand ;
 
 : d-insn ( d a simm opcode -- )
         [ s>u16 { 0 16 21 } bitfield ] dip insn ;
 
 : define-d-insn ( word opcode -- )
-        [ d-insn ] curry (( d a simm -- )) define-declared ;
+        [ d-insn ] curry ( d a simm -- ) define-declared ;
 
-SYNTAX: D: CREATE scan-word define-d-insn ;
+SYNTAX: D: create scan-word define-d-insn ;
 
 CONSTANT: D0 ?{ f f f f }
 
 : abcd ( -- d )
-        [ HEX: c 1 { 8 12 } bitfield ] call ;
+        [ 0x0c 1 { 8 12 } bitfield ] call ;

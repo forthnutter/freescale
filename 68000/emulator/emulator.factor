@@ -255,11 +255,13 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : execute-pc-opcodes ( cpu -- )
 !    [ rom-pc-read ] keep
 !    [ opcodes>> nth [ break ] prepose ] keep swap call( cpu -- )
+        drop
 ;
 
 ! execute one instruction
 : execute-pc-opcode ( cpu -- )
 !    [ rom-pc-read ] keep [ opcodes>> nth ] keep swap call( cpu -- )
+        drop
 ;
 
 ! Execute to an address
@@ -268,7 +270,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
  !       [ pc>> = ] 2keep rot ]
 !        [ [ execute-pc-opcode ] keep
 !    ] until 
-!    2drop
+    2drop
 ;
 
   

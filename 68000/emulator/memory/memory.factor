@@ -68,11 +68,12 @@ TUPLE: memory vector ;
     and ;
 
 : memory-read-long ( address memory -- d )
-    [ memory-read-word ] 2keep [ 2 + ] dip memory-read-word ;
+    [ memory-read-word ] 2keep [ 2 + ] dip memory-read-word 
+    2dup and f = [ drop drop f ] [ [ 16 shift ] dip bitor ] if ;
 
-: memory-write-long ( d address memory -- )
-    [ dup ] dip memory-find dup
-    [ mblock-write ] [ ] if ;
+: memory-write-long ( d address memory -- ? )
+    [ [ dup 16 bits swap ] dip [ 15 0 bit-range ] dip ] dip
+    [ memory-write-word swap ] 2keep [ 2 + ] dip memory-write-word and ;
 
 ! return a sub array of memory
 : memory-subseq ( from to memory -- array/f )

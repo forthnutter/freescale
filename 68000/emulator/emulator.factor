@@ -22,16 +22,31 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : cpu-exception ( excep cpu -- )
     state<< ;
 
+! write to user sp
+: >USP ( d cpu -- )
+   ar>> 7 swap set-nth ;
+
+! get user sp
+: USR> ( cpu -- d )
+   ar>> 7 swap nth ;
+
+! write to supervisor sp
+: >SSP ( d cpu -- )
+   ar>> 7 swap set-nth ;
+
+! read supervisor sp
+: SSP> ( cpu -- d )
+  ar>> 8 swap nth ;
 
 ! put value into A7
 : >A7 ( d cpu -- )
     [ alu>> alu-mode? ] keep swap
-    [ ar>> 8 swap set-nth ] [ ar>> 7 swap set-nth ] if ;
+    [ >SSP ] [ >USP ] if ;
 
 ! get A7
 : A7> ( cpu -- d )
   [ alu>> alu-mode? ] keep swap
-  [ ar>> 8 swap nth ] [ ar>> 7 swap nth ] if ;
+  [ SSP> ] [ USP> ] if ;
 
 
 ! increment A7
@@ -41,6 +56,8 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 ! decrement A7
 : A7- ( cpu -- )
   [ A7> 1 - ] keep >A7 ;
+
+
 
 : >A6 ( d cpu -- )
   ar>> 6 swap set-nth ;
@@ -273,7 +290,15 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
     2drop
 ;
 
-  
+
+! Reset Process
+: power ( reset -- )
+    reg_usp = 0;
+    for(int i = 0; i < 8; i++) {
+        reg_d[i] = reg_a[i] = 0;
+    }
+    if(processWithReset) reset();
+}  
 
 : <cpu> ( -- cpu )
   cpu new

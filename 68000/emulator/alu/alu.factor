@@ -222,3 +222,4 @@ M: alu model-activated
 ! read the supervise mode bit
 : alu-mode? ( alu -- ? )
     alu-s-read 0 = not ;
+

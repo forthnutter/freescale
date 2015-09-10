@@ -31,7 +31,7 @@ IN: freescale.68000
   ]
   [
     swap drop
-    [ >hex 8 CHAR: 0 pad-head >upper " " append ] dip
+    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
     [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
     
@@ -61,13 +61,35 @@ IN: freescale.68000
   [
     2 group [ first2 >word< ] map
     swap drop
-    [ >hex 8 CHAR: 0 pad-head >upper " " append ] dip
+    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
     [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
     
-
+! memory display long
+: mdl ( n address cpu -- str/f )
+  [
+      32 bits
+      [ dup 16 < ] dip
+      [ swap [ + ] [ swap drop 16 + ] if ] keep
+      [ 16 bits ] dip
+      [ min ] [ max ] 2bi
+       2dup
+  ] dip 
+  memory>> memory-subseq dup f =
+  [
+    [ drop drop ] dip
+  ]
+  [
+    4 group [ first4 >long< ] map
+    swap drop
+    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
+    [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+  ] if ;
 
 
 : start-68k ( -- cpu )
-    "work/freescale/68000/iplrom.dat" <binfile>
+    "work/freescale/68000/1616OSV_045.bin" <binfile>
     0 swap <mblock> <cpu> [ memory>> memory-add-block ] keep ;
+
+
+

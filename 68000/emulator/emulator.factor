@@ -1,14 +1,14 @@
 ! Copyright (C) 2011 Joseph Moschini.
 ! See http://factorcode.org/license.txt for BSD license.
 !
-USING: 
+USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
     freescale.68000.emulator.alu
     models freescale.68000.emulator.memory ;
-  
+
 
 IN: freescale.68000.emulator
 
@@ -26,13 +26,17 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : >USP ( d cpu -- )
    ar>> 7 swap set-nth ;
 
+! read the user sp
+: USP> ( cpu -- d )
+  ar>> 7 swap nth ;
+
 ! get user sp
-: USR> ( cpu -- d )
-   ar>> 7 swap nth ;
+! : USR> ( cpu -- d )
+!   ar>> 7 swap nth ;
 
 ! write to supervisor sp
 : >SSP ( d cpu -- )
-   ar>> 7 swap set-nth ;
+   ar>> 8 swap set-nth ;
 
 ! read supervisor sp
 : SSP> ( cpu -- d )
@@ -149,7 +153,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 : D0> ( cpu -- d )
   dr>> 0 swap nth ;
 
-! split a word value to bytes 
+! split a word value to bytes
 : word-bytes ( w -- a b )
     [ 15 8 bit-range ] keep 7 0 bit-range ;
 
@@ -199,7 +203,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 ! write word to memory
 : cpu-write-word ( d address cpu -- )
-    [ word-bytes swap ] 2dip 
+    [ word-bytes swap ] 2dip
     [ cpu-write-byte ] 2keep
     [ 1 + ] dip cpu-write-byte ;
 
@@ -217,7 +221,7 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 
 
-! the opcodes are divide into 16 
+! the opcodes are divide into 16
 ! opcode 0
 : (opcode-0) ( cpu -- )
   drop ;
@@ -286,28 +290,30 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 !    [
  !       [ pc>> = ] 2keep rot ]
 !        [ [ execute-pc-opcode ] keep
-!    ] until 
+!    ] until
     2drop
 ;
 
 
+: reset ( cpu -- )
+  drop ;
+
+
 ! Reset Process
-: power ( reset -- )
-    reg_usp = 0;
-    for(int i = 0; i < 8; i++) {
-        reg_d[i] = reg_a[i] = 0;
-    }
-    if(processWithReset) reset();
-}  
+: power ( reset cpu -- )
+    [ 0 swap >USP ] keep
+    [ dr>> [ drop 0 ] map ] keep swap >>dr
+    [ ar>> [ drop 0 ] map ] keep swap >>ar
+    swap [ reset ] [ drop ] if ;
+
+
 
 : <cpu> ( -- cpu )
   cpu new
   <alu> >>alu
-  8 0 <array> >>dr
-  9 0 <array> >>ar
+  8 f <array> >>dr
+  9 f <array> >>ar
   <memory> >>memory
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
-  
-;
-                    
+  [ f swap power ] keep ;

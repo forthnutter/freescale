@@ -1,16 +1,32 @@
 ! Copyright (C) 2014 Joseph Moschini.
 ! See http://factorcode.org/license.txt for BSD license.
 !
-USING: 
+USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.order 
+    words quotations math.order
     freescale.68000.emulator.alu models math.bitwise
     freescale.68000.emulator.memory.mblock ;
-  
+
 
 IN: freescale.68000.emulator.memory
+
+TUPLE: memory-read < model data ;
+TUPLE: memory-write < model data ;
+
+! make memory read model
+: <memory-read> ( -- mr )
+  f memory-read new-model ;
+
+! read memory location
+: memory-read-b ( address mr -- data )
+  [ set-model ] keep data>> ;
+
+! register an observer for the read memory
+: memory-read-connection ( observer mr -- )
+  add-connection ;
+
 
 
 TUPLE: memory vector ;
@@ -24,8 +40,7 @@ TUPLE: memory vector ;
     vector>> push ;
 
 
-
-! go find address memory block 
+! go find address memory block
 : memory-find ( address memory -- mblock )
     vector>>
     [
@@ -47,7 +62,6 @@ TUPLE: memory vector ;
 
 ! read byte from memory
 : memory-read-byte ( address memory -- d/f )
-    [ dup ] dip memory-find
     dup mblock?
     [ mblock-read ] [ drop drop f ] if ;
 
@@ -68,7 +82,7 @@ TUPLE: memory vector ;
     and ;
 
 : memory-read-long ( address memory -- d )
-    [ memory-read-word ] 2keep [ 2 + ] dip memory-read-word 
+    [ memory-read-word ] 2keep [ 2 + ] dip memory-read-word
     2dup and f = [ drop drop f ] [ [ 16 shift ] dip bitor ] if ;
 
 : memory-write-long ( d address memory -- ? )

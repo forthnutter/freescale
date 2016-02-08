@@ -15,6 +15,16 @@ IN: freescale.68000.emulator.memory
 TUPLE: memory-read < model data ;
 TUPLE: memory-write < model data ;
 
+TUPLE: memory-model < model data ;
+
+GENERIC: memory-read ( address model -- data )
+
+: <memory-model> ( -- model )
+  f memory-model new-model ;
+
+M: memory-model memory-read
+  set-model ;
+
 ! make memory read model
 : <memory-read> ( -- mr )
   f memory-read new-model ;

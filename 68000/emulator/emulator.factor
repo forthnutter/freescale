@@ -6,8 +6,8 @@ USING:
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
-    freescale.68000.emulator.alu
-    models freescale.68000.emulator.memory ;
+    freescale.68000.emulator.alu 
+    models models.memory ;
 
 
 IN: freescale.68000.emulator
@@ -17,7 +17,7 @@ CONSTANT: ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 
 
-TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
+TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 
 : cpu-exception ( excep cpu -- )
     state<< ;
@@ -180,20 +180,24 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 ! read byte from memory
 : cpu-read-byte ( address cpu -- d )
-  [ memory>> memory? ] keep swap
-  [
-      [ memory>> memory-read-byte dup f = ] keep swap
-      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
-  ]
-  [ drop ADDRESS-ERROR swap cpu-exception 0 ] if ;
+!  [ memory>> memory? ] keep swap
+!  [
+!      [ memory>> memory-read-byte dup f = ] keep swap
+!      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
+!  ]
+!  [ drop ADDRESS-ERROR swap cpu-exception 0 ] if ;
+  drop drop 0 ;
+
 
 : cpu-write-byte ( d address cpu -- )
-  [ memory>> memory? ] keep swap
-  [
-      [ memory>> memory-write-byte f = ] keep swap
-      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
-  ]
-  [ drop drop ADDRESS-ERROR swap cpu-exception ] if ;
+!  [ memory>> memory? ] keep swap
+!  [
+!      [ memory>> memory-write-byte f = ] keep swap
+!      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
+!  ]
+!  [ drop drop ADDRESS-ERROR swap cpu-exception ] if ;
+   drop drop drop
+;
 
 
 ! read word from memory
@@ -309,11 +313,10 @@ TUPLE: cpu alu ar dr pc rx cycles memory opcodes state ;
 
 
 : <cpu> ( -- cpu )
-  cpu new
+  f cpu new-model
   <alu> >>alu
   8 f <array> >>dr
   9 f <array> >>ar
-  <memory> >>memory
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
   [ f swap power ] keep ;

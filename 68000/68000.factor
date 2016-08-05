@@ -4,11 +4,12 @@
 
 USING:
    accessors kernel math math.bitwise math.order math.parser
-   sequences unicode.case grouping
+   sequences unicode unicode.case grouping
    freescale.68000.emulator
    freescale.binfile
-   freescale.68000.emulator.memory.mblock
-   freescale.68000.emulator.memory ;
+!   freescale.68000.emulator.memory.mblock
+    models.memory
+   ;
 
 
 IN: freescale.68000
@@ -17,21 +18,12 @@ IN: freescale.68000
 
 ! memory display or dump bytes
 : mdb ( n address cpu -- str/f )
+  [ memory-read ] 2keep drop [ dup f = ] dip swap
   [
-      32 bits
-      [ dup 16 < ] dip
-      [ swap [ + ] [ swap drop 16 + ] if ] keep
-      [ 16 bits ] dip
-      [ min ] [ max ] 2bi
-       2dup
-  ] dip 
-  memory>> memory-subseq dup f =
-  [
-    [ drop drop ] dip
+    [ drop ] dip 
   ]
   [
-    swap drop
-    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
+    >hex 8 CHAR: 0 pad-head >upper ": " append swap
     [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
     
@@ -46,17 +38,9 @@ IN: freescale.68000
 
 ! memory display words
 : mdw ( n address cpu -- str/f )
+  [ memory-read ] 2keep drop  [ dup f = ] dip swap
   [
-      32 bits
-      [ dup 16 < ] dip
-      [ swap [ + ] [ swap drop 16 + ] if ] keep
-      [ 16 bits ] dip
-      [ min ] [ max ] 2bi
-       2dup
-  ] dip 
-  memory>> memory-subseq dup f =
-  [
-    [ drop drop ] dip
+    [ drop ] dip
   ]
   [
     2 group [ first2 >word< ] map
@@ -75,7 +59,7 @@ IN: freescale.68000
       [ min ] [ max ] 2bi
        2dup
   ] dip 
-  memory>> memory-subseq dup f =
+  memory-read dup f =
   [
     [ drop drop ] dip
   ]
@@ -86,10 +70,6 @@ IN: freescale.68000
     [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
 
-
-: start-68k ( -- cpu )
-    "work/freescale/68000/1616OSV_045.bin" <binfile>
-    0 swap <mblock> <cpu> [ memory>> memory-add-block ] keep ;
 
 
 

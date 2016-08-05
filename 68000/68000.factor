@@ -7,8 +7,7 @@ USING:
    sequences unicode unicode.case grouping
    freescale.68000.emulator
    freescale.binfile
-!   freescale.68000.emulator.memory.mblock
-    models.memory
+   models.memory
    ;
 
 
@@ -38,36 +37,29 @@ IN: freescale.68000
 
 ! memory display words
 : mdw ( n address cpu -- str/f )
-  [ memory-read ] 2keep drop  [ dup f = ] dip swap
-  [
-    [ drop ] dip
-  ]
-  [
-    2 group [ first2 >word< ] map
-    swap drop
-    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
-    [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
-  ] if ;
+    [ >even ] 2dip    ! make sure we have even number of bytes
+    [ memory-read ] 2keep drop  [ dup f = ] dip swap
+    [
+        [ drop ] dip
+    ]
+    [
+        >hex 8 CHAR: 0 pad-head >upper ": " append swap
+        2 group [ first2 >word< ] map
+
+        [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    ] if ;
     
 ! memory display long
 : mdl ( n address cpu -- str/f )
-  [
-      32 bits
-      [ dup 16 < ] dip
-      [ swap [ + ] [ swap drop 16 + ] if ] keep
-      [ 16 bits ] dip
-      [ min ] [ max ] 2bi
-       2dup
-  ] dip 
-  memory-read dup f =
-  [
-    [ drop drop ] dip
-  ]
-  [
-    4 group [ first4 >long< ] map
-    swap drop
-    [ >hex 8 CHAR: 0 pad-head >upper ": " append ] dip
-    [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    [ >even 0b11 unmask ] 2dip
+    [ memory-read ] 2keep drop [ dup f = ] dip swap
+    [
+        [ drop ] dip
+    ]
+    [
+        >hex 8 CHAR: 0 pad-head >upper ": " append swap
+        4 group [ first4 >long< ] map
+        [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
 
 

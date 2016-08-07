@@ -13,6 +13,7 @@ USING:
 IN: freescale.68000.emulator
 
 
+CONSTANT: CPU-RESET 0
 CONSTANT: ACCESS-FAULT 8
 CONSTANT: ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
@@ -301,7 +302,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 
 
 : reset ( cpu -- )
-  drop ;
+    CPU-RESET >>state drop ;
 
 
 ! Reset Process

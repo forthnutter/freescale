@@ -17,6 +17,7 @@ CONSTANT: CPU-RESET 0
 CONSTANT: ACCESS-FAULT 8
 CONSTANT: ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
+CONSTANT: CPU-UNKNOWN 32
 
 
 TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
@@ -298,6 +299,16 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 !        [ [ execute-pc-opcode ] keep
 !    ] until
     2drop
+;
+
+
+! Execute one cycles
+: execute-cycle ( cpu -- )
+    [ state>> ] keep swap
+    {
+        { CPU-RESET [ ] }   ! do reset cycle
+        [ CPU-UNKNOWN >>state ]
+    } case
 ;
 
 

@@ -278,6 +278,14 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 : (opcode-F) ( cpu -- )
   drop ;
 
+: reset-exception ( cpu -- )
+    break
+    [ drop
+;
+
+: reset ( cpu -- )
+    CPU-RESET >>state drop ;
+
 
 ! execute one instruction
 : execute-pc-opcodes ( cpu -- )
@@ -306,14 +314,13 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 : execute-cycle ( cpu -- )
     [ state>> ] keep swap
     {
-        { CPU-RESET [ ] }   ! do reset cycle
-        [ CPU-UNKNOWN >>state ]
+        { CPU-RESET [ reset-exception ] }   ! do reset cycle
+        { CPU-UNKNOWN [ reset ] }
+        [ drop CPU-UNKNOWN >>state drop ]
     } case
 ;
 
 
-: reset ( cpu -- )
-    CPU-RESET >>state drop ;
 
 
 ! Reset Process

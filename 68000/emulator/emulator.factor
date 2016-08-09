@@ -25,6 +25,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 : cpu-exception ( excep cpu -- )
     state<< ;
 
+: >PC ( d cpu -- )
+    pc<< ;
+
+: PC> ( cpu -- d )
+    pc>> ;
+
 ! write to user sp
 : >USP ( d cpu -- )
    ar>> 7 swap set-nth ;
@@ -179,54 +185,33 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
     [ 31 16 bit-range ] keep
     15 0 bit-range ;
 
-
-
-! read byte from memory
-: cpu-read-byte ( address cpu -- d )
-!  [ memory>> memory? ] keep swap
-!  [
-!      [ memory>> memory-read-byte dup f = ] keep swap
-!      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
-!  ]
-!  [ drop ADDRESS-ERROR swap cpu-exception 0 ] if ;
-  drop drop 0 ;
-
-
-: cpu-write-byte ( d address cpu -- )
-!  [ memory>> memory? ] keep swap
-!  [
-!      [ memory>> memory-write-byte f = ] keep swap
-!      [ ADDRESS-ERROR swap cpu-exception ] [ drop ] if
-!  ]
-!  [ drop drop ADDRESS-ERROR swap cpu-exception ] if ;
-   drop drop drop
-;
-
-
-! read word from memory
-: cpu-read-word ( address cpu -- dd )
-    [ cpu-read-byte ] 2keep
-    [ 1 + ] dip cpu-read-byte bytes-word ;
+: cpu-write-byte ( d address cpu -- ? )
+    [ 1byte-array ] 2dip
+    memory-write ;
 
 ! write word to memory
-: cpu-write-word ( d address cpu -- )
-    [ word-bytes swap ] 2dip
-    [ cpu-write-byte ] 2keep
-    [ 1 + ] dip cpu-write-byte ;
+: cpu-write-word ( d address cpu -- ? )
+    [ word-bytes 2byte-array ] 2dip
+    memory-write ;
 
-
-! read long from memory
-: cpu-read-long ( address cpu -- dddd )
-    [ cpu-read-word ] 2keep
-    [ 2 + ] dip cpu-read-word words-long ;
 
 ! write long to memory
-: cpu-write-long ( dddd address cpu -- )
-    [ long-words swap ] 2dip
-    [ cpu-write-word ] 2keep
-    [ 2 + ] dip cpu-write-word ;
+: cpu-write-long ( dddd address cpu -- ? )
+    [ long-bytes 4byte-array ] 2dip
+    memory-write ;
 
 
+: bytes>number ( seq -- number )
+    0 [ [ 8 shift ] dip bitor ] reduce ;
+
+: cpu-read-byte ( address cpu -- d )
+    [ 1 ] 2dip memory-read bytes>number ;
+
+: cpu-read-word ( address cpu -- d )
+    [ 2 ] 2dip memory-read bytes>number ;
+
+: cpu-read-long ( address cpu -- d )
+    [ 4 ] 2dip memory-read bytes>number ;
 
 ! the opcodes are divide into 16
 ! opcode 0
@@ -280,7 +265,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 
 : reset-exception ( cpu -- )
     break
-    [ drop
+    [ alu>> alu-s-set ] keep
+    [ alu>> alu-t-clr ] keep
+    [ alu>> 7 swap alu-imask-write ] keep    
+    [ 0 ] dip [ cpu-read-long ] keep [ >A7 ] keep
+    [ 4 ] dip [ cpu-read-long ] keep >PC
 ;
 
 : reset ( cpu -- )

@@ -223,3 +223,6 @@ M: alu model-activated
 : alu-mode? ( alu -- ? )
     alu-s-read 0 = not ;
 
+! clear the trace
+: alu-t-clr ( alu -- )
+    [ value>> T-BIT clear-bit ] keep set-model ;

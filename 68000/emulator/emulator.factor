@@ -14,10 +14,12 @@ IN: freescale.68000.emulator
 
 
 CONSTANT: CPU-RESET 0
+CONSTANT: CPU-RUNNING 1
 CONSTANT: ACCESS-FAULT 8
 CONSTANT: ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
+
 
 
 TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
@@ -28,6 +30,14 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 : >PC ( d cpu -- )
     pc<< ;
 
+! test data before putting value into PC
+: >PC? ( d cpu -- )
+    swap
+    dup f = swap dup t = swap [ or ] dip swap
+    [
+        drop ADDRESS-ERROR >>state drop
+    ] [ swap >PC ] if ;    
+    
 : PC> ( cpu -- d )
     pc>> ;
 
@@ -56,6 +66,15 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
     [ alu>> alu-mode? ] keep swap
     [ >SSP ] [ >USP ] if ;
 
+! test data before putting value into A7
+: >A7? ( d cpu -- )
+    swap
+    dup f = swap dup t = swap [ or ] dip swap
+    [
+        drop ADDRESS-ERROR >>state drop
+    ] [ swap >A7 ] if ;
+        
+    
 ! get A7
 : A7> ( cpu -- d )
   [ alu>> alu-mode? ] keep swap
@@ -213,6 +232,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 : cpu-read-long ( address cpu -- d )
     [ 4 ] 2dip memory-read bytes>number ;
 
+: cpu-pc-read ( cpu -- d )
+    [ PC> ] keep cpu-read-word ;
+    
+
 ! the opcodes are divide into 16
 ! opcode 0
 : (opcode-0) ( cpu -- )
@@ -267,10 +290,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
     break
     [ alu>> alu-s-set ] keep
     [ alu>> alu-t-clr ] keep
-    [ alu>> 7 swap alu-imask-write ] keep    
-    [ 0 ] dip [ cpu-read-long ] keep [ >A7 ] keep
-    [ 4 ] dip [ cpu-read-long ] keep >PC
-;
+    [ alu>> 7 swap alu-imask-write ] keep
+    [ 0 ] dip [ cpu-read-long ] keep [ >A7? ] keep
+    [ 4 ] dip [ cpu-read-long ] keep [ >PC? ] keep
+    CPU-RUNNING >>state drop ;
 
 : reset ( cpu -- )
     CPU-RESET >>state drop ;
@@ -285,8 +308,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 
 ! execute one instruction
 : execute-pc-opcode ( cpu -- )
-!    [ rom-pc-read ] keep [ opcodes>> nth ] keep swap call( cpu -- )
-        drop
+    [ cpu-pc-read ] keep [ opcodes>> nth ] keep swap call( cpu -- )
 ;
 
 ! Execute to an address
@@ -305,6 +327,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
     {
         { CPU-RESET [ reset-exception ] }   ! do reset cycle
         { CPU-UNKNOWN [ reset ] }
+        { CPU-RUNNING [ execute-pc-opcode ] }
         [ drop CPU-UNKNOWN >>state drop ]
     } case
 ;

@@ -1,4 +1,4 @@
-! Copyright (C) 2011 Joseph Moschini.
+! Copyright (C) 2016 Joseph Moschini.  a.k.a. forthnutter
 ! See http://factorcode.org/license.txt for BSD license.
 !
 USING:

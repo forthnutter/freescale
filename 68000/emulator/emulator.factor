@@ -22,7 +22,7 @@ CONSTANT: CPU-UNKNOWN 32
 
 
 
-TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
+TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 
 : cpu-exception ( excep cpu -- )
     state<< ;
@@ -237,52 +237,68 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
     
 
 ! the opcodes are divide into 16
-! opcode 0
+! opcode 0 Bit Manipulation MOVEP Immediate
 : (opcode-0) ( cpu -- )
   drop ;
 
+
+! Move Byte
 : (opcode-1) ( cpu -- )
   drop ;
 
+! Move Long
 : (opcode-2) ( cpu -- )
   drop ;
 
+! Move word
 : (opcode-3) ( cpu -- )
   drop ;
 
+! Miscellaneous
 : (opcode-4) ( cpu -- )
   drop ;
 
+! ADDQ SUBQ 
 : (opcode-5) ( cpu -- )
   drop ;
 
+! Bcc BSR BRA
 : (opcode-6) ( cpu -- )
   drop ;
 
+!MOVEQ
 : (opcode-7) ( cpu -- )
   drop ;
 
+! OR DIV SBCD
 : (opcode-8) ( cpu -- )
   drop ;
 
+! SUB SUBX
 : (opcode-9) ( cpu -- )
   drop ;
 
+! Reserved
 : (opcode-A) ( cpu -- )
   drop ;
 
+! CMP EOR
 : (opcode-B) ( cpu -- )
   drop ;
 
+! AND MUL ABCD EXG
 : (opcode-C) ( cpu -- )
   drop ;
 
+! ADD ADDX
 : (opcode-D) ( cpu -- )
   drop ;
 
+! Shift Rotate Bit Field
 : (opcode-E) ( cpu -- )
   drop ;
 
+! Coprocessor Interface
 : (opcode-F) ( cpu -- )
   drop ;
 
@@ -297,6 +313,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles opcodes state ;
 
 : reset ( cpu -- )
     CPU-RESET >>state drop ;
+
+: opcode-save ( opc cpu -- cpu )
+    [ >>copcode ] keep ;
+
+: opcode-read ( cpu -- opc cpu )
+    [ copcode>> ] keep ;
 
 
 ! execute one instruction

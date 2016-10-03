@@ -328,9 +328,15 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
         drop
 ;
 
+! Deep within the instruction is the opcode
+! routine to extract
+: extract-opcode ( instruct -- opcode )
+    15 12 bit-range 4 bits ;
+
 ! execute one instruction
 : execute-pc-opcode ( cpu -- )
-    [ cpu-pc-read ] keep [ opcodes>> nth ] keep swap call( cpu -- )
+    [ cpu-pc-read ] keep
+    [ extract-opcode ] dip [ opcodes>> nth ] keep swap call( cpu -- )
 ;
 
 ! Execute to an address

@@ -238,6 +238,14 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
+! ADDI ANDI
+! BCHG BCLR BSET BTST
+! CALLM CAS CAS2 CHK2 CMPI CMP2
+! EORI
+! MOVEP
+! ORI
+! RTM
+! SUBI
 : (opcode-0) ( cpu -- )
   drop ;
 
@@ -246,19 +254,34 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 : (opcode-1) ( cpu -- )
   drop ;
 
-! Move Long
+! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )
   drop ;
 
-! Move word
+! Move word MOVE MOVEA
 : (opcode-3) ( cpu -- )
   drop ;
 
 ! Miscellaneous
+! CHK CLR
+! EXT EXTB
+! ILLEGAL
+! JMP JSR
+! LEA LINK
+! MOVEM
+! NBCD NEG NEGX NOP NOT
+! PACK PEA
+! RTD RTR RTS
+! SWAP
+! TAS TRAP TRAPV TST
+! UNLK
 : (opcode-4) ( cpu -- )
   drop ;
 
-! ADDQ SUBQ 
+! ADDQ
+! DBcc
+! SUBQ SUBX Scc
+! TRAPcc
 : (opcode-5) ( cpu -- )
   drop ;
 
@@ -266,15 +289,18 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 : (opcode-6) ( cpu -- )
   drop ;
 
-!MOVEQ
+! MOVEQ
 : (opcode-7) ( cpu -- )
   drop ;
 
-! OR DIV SBCD
+! DIV DIVS DIVL DIVU DIVUL
+! OR
+! SBCD
+! UNPK
 : (opcode-8) ( cpu -- )
   drop ;
 
-! SUB SUBX
+! SUB SUBA SUBX
 : (opcode-9) ( cpu -- )
   drop ;
 
@@ -282,23 +308,30 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 : (opcode-A) ( cpu -- )
   drop ;
 
-! CMP EOR
+! CMP CMPA CMPM
+! EOR
 : (opcode-B) ( cpu -- )
   drop ;
 
-! AND MUL ABCD EXG
+! AND ABCD EXG MUL MULS MULU
 : (opcode-C) ( cpu -- )
   drop ;
 
-! ADD ADDX
+! ADD ADDA ADDX
 : (opcode-D) ( cpu -- )
   drop ;
 
 ! Shift Rotate Bit Field
+! ASR
+! BFCHG BFCLR BFEXTS BFEXTU BFFFO BFINS BFSET BFTST BKPT
+! LSL LSR
+! ROL ROR ROXL ROXR
 : (opcode-E) ( cpu -- )
   drop ;
 
 ! Coprocessor Interface
+! cpBcc cpDBcc cpGEN cpScc cpTRAPcc
+! MOVE16
 : (opcode-F) ( cpu -- )
   drop ;
 

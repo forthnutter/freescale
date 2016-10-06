@@ -7,7 +7,7 @@ USING:
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
     freescale.68000.emulator.alu 
-    models models.memory ;
+    models models.memory ascii ;
 
 
 IN: freescale.68000.emulator
@@ -234,7 +234,13 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 
 : cpu-pc-read ( cpu -- d )
     [ PC> ] keep cpu-read-word ;
+ 
+
+ : extract-opcode ( instruct -- opcode )
+    15 12 bit-range 4 bits ;
     
+    
+! extract destination mode
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
@@ -335,6 +341,23 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 : (opcode-F) ( cpu -- )
   drop ;
 
+! temp opcode 
+: not-implemented ( cpu -- )
+  drop ;
+
+! generate the opcode array here
+: opcode-build ( cpu -- )
+    opcodes>> dup
+    [
+        [ drop ] dip
+        [
+            >hex >upper
+            "(opcode-" swap append ")" append
+            "freescale.68000.emulator" lookup-word 1quotation
+        ] keep
+        [ swap ] dip swap [ set-nth ] keep
+    ] each-index drop ;
+  
 : reset-exception ( cpu -- )
     break
     [ alu>> alu-s-set ] keep
@@ -348,7 +371,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
     CPU-RESET >>state drop ;
 
 : opcode-save ( opc cpu -- cpu )
-    [ >>copcode ] keep ;
+    >>copcode ;
 
 : opcode-read ( cpu -- opc cpu )
     [ copcode>> ] keep ;
@@ -363,8 +386,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 
 ! Deep within the instruction is the opcode
 ! routine to extract
-: extract-opcode ( instruct -- opcode )
-    15 12 bit-range 4 bits ;
+
 
 ! execute one instruction
 : execute-pc-opcode ( cpu -- )
@@ -412,4 +434,9 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
   9 f <array> >>ar
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
-  [ f swap power ] keep ;
+  [ f swap power ] keep 
+  16 [ not-implemented ] <array> >>opcodes 
+  [ opcode-build ] keep ;
+  
+  
+  

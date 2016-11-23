@@ -15,6 +15,7 @@ IN: freescale.68000.emulator
 
 CONSTANT: CPU-RESET 0
 CONSTANT: CPU-RUNNING 1
+CONSTANT: CPU-READY 2
 CONSTANT: ACCESS-FAULT 8
 CONSTANT: ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
@@ -403,20 +404,26 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
     2drop
 ;
 
+! Get the cpu state
+: cpu-state ( cpu -- cpu state )
+    [ state>> ] keep swap ;
+
+! I want to know if we are in Ready to execute state
+: cpu-ready? ( cpu -- cpu ? )
+    cpu-state CPU-READY = ;
 
 ! Execute one cycles
 : execute-cycle ( cpu -- )
-    [ state>> ] keep swap
-    {
-        { CPU-RESET [ reset-exception ] }   ! do reset cycle
-        { CPU-UNKNOWN [ reset ] }
-        { CPU-RUNNING [ execute-pc-opcode ] }
-        [ drop CPU-UNKNOWN >>state drop ]
-    } case
-;
-
-
-
+    [ cpu-ready? ]
+    [
+        cpu-state
+        {
+            { CPU-RESET [ reset-exception ] }   ! do reset cycle
+            { CPU-UNKNOWN [ reset ] }
+            { CPU-RUNNING [ execute-pc-opcode ] }
+            [ drop CPU-UNKNOWN >>state drop ]
+        } case
+    ] until ;
 
 ! Reset Process
 : power ( reset cpu -- )

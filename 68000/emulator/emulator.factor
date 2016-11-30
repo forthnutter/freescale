@@ -405,23 +405,23 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 ;
 
 ! Get the cpu state
-: cpu-state ( cpu -- cpu state )
-    [ state>> ] keep swap ;
+: cpu-state ( cpu -- state )
+    state>> ;
 
 ! I want to know if we are in Ready to execute state
-: cpu-ready? ( cpu -- cpu ? )
+: cpu-ready? ( cpu -- ? )
     cpu-state CPU-READY = ;
 
 ! Execute one cycles
 : execute-cycle ( cpu -- )
     [ cpu-ready? ]
     [
-        cpu-state
+        [ cpu-state ] keep swap
         {
-            { CPU-RESET [ reset-exception ] }   ! do reset cycle
-            { CPU-UNKNOWN [ reset ] }
-            { CPU-RUNNING [ execute-pc-opcode ] }
-            [ drop CPU-UNKNOWN >>state drop ]
+            { [ CPU-RESET [ reset-exception ] ] keep }   ! do reset cycle
+            { [ CPU-UNKNOWN [ reset ] ] keep }
+            { [ CPU-RUNNING [ execute-pc-opcode ] ] keep }
+            [ drop CPU-UNKNOWN >>state ]
         } case
     ] until ;
 

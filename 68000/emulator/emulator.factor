@@ -414,16 +414,16 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 
 ! Execute one cycles
 : execute-cycle ( cpu -- )
-    [ cpu-ready? ]
+    [ dup cpu-ready? ]
     [
-        [ cpu-state ] keep swap
+        dup cpu-state
         {
-            { [ CPU-RESET [ reset-exception ] ] keep }   ! do reset cycle
-            { [ CPU-UNKNOWN [ reset ] ] keep }
-            { [ CPU-RUNNING [ execute-pc-opcode ] ] keep }
+            { CPU-RESET [ dup reset-exception ] }   ! do reset cycle
+            { CPU-UNKNOWN [ dup reset ] }
+            { CPU-RUNNING [ dup execute-pc-opcode ] }
             [ drop CPU-UNKNOWN >>state ]
         } case
-    ] until ;
+    ] until drop ;
 
 ! Reset Process
 : power ( reset cpu -- )

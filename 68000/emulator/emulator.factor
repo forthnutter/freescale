@@ -22,8 +22,12 @@ CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
 
-
-TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
+! memory is a memory model
+! alu is Arithmatic Logic Unit
+! ar is a set of address registers
+! dr is a set of data registes
+! reset is model to run all things that need to reset
+TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception ;
 
 : cpu-exception ( excep cpu -- )
     state<< ;
@@ -358,14 +362,21 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
         ] keep
         [ swap ] dip swap [ set-nth ] keep
     ] each-index drop ;
-  
+
+
+
+! reset models
+: cpu-reset-models ( cpu -- cpu )
+    [ f ] dip [ reset>> set-model ] keep
+    [ t ] dip [ reset>> set-model ] keep ;
+    
 : reset-exception ( cpu -- )
-    break
     [ alu>> alu-s-set ] keep
     [ alu>> alu-t-clr ] keep
     [ alu>> 7 swap alu-imask-write ] keep
     [ 0 ] dip [ cpu-read-long ] keep [ >A7? ] keep
     [ 4 ] dip [ cpu-read-long ] keep [ >PC? ] keep
+    cpu-reset-models
     CPU-RUNNING >>state drop ;
 
 : reset ( cpu -- )
@@ -412,6 +423,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
 : cpu-ready? ( cpu -- ? )
     cpu-state CPU-READY = ;
 
+    
+! here we process exception
+: cpu-exception-execute ( cpu -- )
+    dup exception>> drop drop ;
+    
 ! Execute one cycles
 : execute-cycle ( cpu -- )
     [ dup cpu-ready? ]
@@ -426,7 +442,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
     ] until drop ;
 
 ! Reset Process
-: power ( reset cpu -- )
+: cpu-power ( reset cpu -- )
     [ 0 swap >USP ] keep
     [ dr>> [ drop 0 ] map ] keep swap >>dr
     [ ar>> [ drop 0 ] map ] keep swap >>ar
@@ -441,9 +457,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state ;
   9 f <array> >>ar
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
-  [ f swap power ] keep 
+  [ f swap cpu-power ] keep 
   16 [ not-implemented ] <array> >>opcodes 
-  [ opcode-build ] keep ;
+  [ opcode-build ] keep
+    f <model> >>reset ;
   
   
   

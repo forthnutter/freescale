@@ -239,10 +239,26 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception
 
 : cpu-pc-read ( cpu -- d )
     [ PC> ] keep cpu-read-word ;
- 
 
- : extract-opcode ( instruct -- opcode )
+! returns array of words    
+: cpu-pc-read-array ( n cpu -- array )
+    [ <array> ] dip ;
+    
+
+: extract-opcode ( instruct -- opcode )
     15 12 bit-range 4 bits ;
+    
+: destination-register ( instruct -- regnum )
+    11 9 bit-range 3 bits ;
+    
+: destination-mode ( instruct -- mode )
+    8 6 bit-range 3 bits ;
+
+: source-register ( instruct -- regnum )
+    2 0 bit-range 3 bits ;
+    
+: source-mode ( instruct -- mode )
+    5 3 bit-range 3 bits ;
     
     
 ! extract destination mode
@@ -263,7 +279,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
-  drop ;
+    break
+    [ cpu-pc-read destination-register ] keep
+    [ cpu-pc-read destination-mode ] keep
+    [ cpu-pc-read source-mode ] keep
+    [ cpu-pc-read source-register ] keep
+    drop drop drop drop drop ;
 
 ! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )

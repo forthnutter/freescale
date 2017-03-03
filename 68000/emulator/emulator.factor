@@ -3,7 +3,7 @@
 !
 USING:
     accessors arrays kernel math sequences byte-arrays io
-    math.parser unicode.case namespaces parser lexer
+    math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
     freescale.68000.emulator.alu 
@@ -27,7 +27,7 @@ CONSTANT: CPU-UNKNOWN 32
 ! ar is a set of address registers
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
-TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception ;
+TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exception ;
 
 : cpu-exception ( excep cpu -- )
     state<< ;
@@ -242,7 +242,9 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception
 
 ! returns array of words    
 : cpu-pc-read-array ( n cpu -- array )
-    [ <array> ] dip ;
+    [ 0 swap 2 <range> >array ] dip
+    [ [ PC> + ] curry map ] keep
+    [ cpu-read-word ] curry map ;
     
 
 : extract-opcode ( instruct -- opcode )
@@ -280,10 +282,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception
 ! Move Byte
 : (opcode-1) ( cpu -- )
     break
-    [ cpu-pc-read destination-register ] keep
-    [ cpu-pc-read destination-mode ] keep
-    [ cpu-pc-read source-mode ] keep
-    [ cpu-pc-read source-register ] keep
+    [ cashe>> first destination-register ] keep
+    [ cashe>> first destination-mode ] keep
+    [ cashe>> first source-mode ] keep
+    [ cashe>> first source-register ] keep
     drop drop drop drop drop ;
 
 ! Move Long MOVE MOVEA
@@ -423,7 +425,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles copcode opcodes state reset exception
 
 ! execute one instruction
 : execute-pc-opcode ( cpu -- )
-    [ cpu-pc-read ] keep
+    [ 6 swap cpu-pc-read-array ] keep [ cashe<< ] keep [ cashe>> first ] keep
     [ extract-opcode ] dip [ opcodes>> nth ] keep swap call( cpu -- )
 ;
 

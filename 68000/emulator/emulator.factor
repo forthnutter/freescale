@@ -6,7 +6,7 @@ USING:
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise
-    freescale.68000.emulator.alu 
+    freescale.68000.emulator.alu
     models models.memory ascii ;
 
 
@@ -41,8 +41,8 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     dup f = swap dup t = swap [ or ] dip swap
     [
         drop ADDRESS-ERROR >>state drop
-    ] [ swap >PC ] if ;    
-    
+    ] [ swap >PC ] if ;
+
 : PC> ( cpu -- d )
     pc>> ;
 
@@ -78,8 +78,8 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [
         drop ADDRESS-ERROR >>state drop
     ] [ swap >A7 ] if ;
-        
-    
+
+
 ! get A7
 : A7> ( cpu -- d )
   [ alu>> alu-mode? ] keep swap
@@ -240,29 +240,41 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : cpu-pc-read ( cpu -- d )
     [ PC> ] keep cpu-read-word ;
 
-! returns array of words    
+! returns array of words
 : cpu-pc-read-array ( n cpu -- array )
     [ 0 swap 2 <range> >array ] dip
     [ [ PC> + ] curry map ] keep
     [ cpu-read-word ] curry map ;
-    
+
 
 : extract-opcode ( instruct -- opcode )
     15 12 bit-range 4 bits ;
-    
+
 : destination-register ( instruct -- regnum )
     11 9 bit-range 3 bits ;
-    
+
 : destination-mode ( instruct -- mode )
     8 6 bit-range 3 bits ;
 
 : source-register ( instruct -- regnum )
     2 0 bit-range 3 bits ;
-    
+
 : source-mode ( instruct -- mode )
     5 3 bit-range 3 bits ;
-    
-    
+
+: cpu-source ( d m cpu -- n )
+  {
+    { 0 [ ] }
+    { 1 [ ] }
+    { 2 [ ] }
+    { 3 [ ] }
+    { 4 [ ] }
+    { 5 [ ] }
+    { 6 [ ] }
+    { 7 [ ] }
+    [ ]
+  } case ;
+
 ! extract destination mode
 
 ! the opcodes are divide into 16
@@ -369,7 +381,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : (opcode-F) ( cpu -- )
   drop ;
 
-! temp opcode 
+! temp opcode
 : not-implemented ( cpu -- )
   drop ;
 
@@ -392,7 +404,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : cpu-reset-models ( cpu -- cpu )
     [ f ] dip [ reset>> set-model ] keep
     [ t ] dip [ reset>> set-model ] keep ;
-    
+
 : reset-exception ( cpu -- )
     [ alu>> alu-s-set ] keep
     [ alu>> alu-t-clr ] keep
@@ -446,11 +458,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : cpu-ready? ( cpu -- ? )
     cpu-state CPU-READY = ;
 
-    
+
 ! here we process exception
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
-    
+
 ! Execute one cycles
 : execute-cycle ( cpu -- )
     [ dup cpu-ready? ]
@@ -480,10 +492,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   9 f <array> >>ar
   [ alu>> 7 swap alu-imask-write ] keep
   [ alu>> alu-s-set ] keep
-  [ f swap cpu-power ] keep 
-  16 [ not-implemented ] <array> >>opcodes 
+  [ f swap cpu-power ] keep
+  16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
     f <model> >>reset ;
-  
-  
-  

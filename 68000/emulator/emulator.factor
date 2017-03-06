@@ -46,6 +46,14 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : PC> ( cpu -- d )
     pc>> ;
 
+! increment PC+2
+: PC+ ( cpu -- )
+  [ PC> 2 + ] keep >PC ;
+
+! increment PC+4
+: PC++ ( cpu -- )
+  [ PC+ ] keep PC+ ;
+
 ! write to user sp
 : >USP ( d cpu -- )
    ar>> 7 swap set-nth ;
@@ -262,20 +270,125 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : source-mode ( instruct -- mode )
     5 3 bit-range 3 bits ;
 
-: cpu-source ( d m cpu -- n )
+! generates a 6 bit mode value
+: move-mode ( instruct -- mode )
+  8 3 bit-range 6 bits ;
+
+: cpu-absolute-data-long ( cpu -- l )
+  [ cashe>> second ] keep
+  cashe>> third words-long ;
+
+: cpu-absolute-data-word ( cpu -- w )
+  cashe>> second ;
+
+
+: cpu-read-dregister ( d cpu -- n )
+  swap
   {
-    { 0 [ ] }
-    { 1 [ ] }
-    { 2 [ ] }
-    { 3 [ ] }
-    { 4 [ ] }
-    { 5 [ ] }
-    { 6 [ ] }
-    { 7 [ ] }
-    [ ]
+    { 0 [ D0> ] }
+    { 1 [ D1> ] }
+    { 2 [ D2> ] }
+    { 3 [ D3> ] }
+    { 4 [ D4> ] }
+    { 5 [ D5> ] }
+    { 6 [ D6> ] }
+    { 7 [ D7> ] }
+    [ drop drop f ]
   } case ;
 
-! extract destination mode
+: cpu-write-dregister ( d reg cpu -- )
+  swap
+  {
+    { 0 [ >D0 ] }
+    { 1 [ >D1 ] }
+    { 2 [ >D2 ] }
+    { 3 [ >D3 ] }
+    { 4 [ >D4 ] }
+    { 5 [ >D5 ] }
+    { 6 [ >D6 ] }
+    { 7 [ >D7 ] }
+    [ drop drop drop ]
+  } case ;
+
+: cpu-absolute-data-address ( d cpu -- n )
+  swap
+  {
+    { 0 [ [ cpu-absolute-data-word ] keep PC++ ] }
+    { 1 [ [ cpu-absolute-data-long ] keep [ PC++ ] keep PC+ ] }
+    [ drop drop f ]
+  } case ;
+
+
+: cpu-wb-dreg-mem ( cpu -- )
+  [ cashe>> first source-register ] keep
+  [ cpu-read-dregister ] keep
+  [ cashe>> first destination-register ] keep
+  [ cpu-absolute-data-address ] keep
+  cpu-write-byte drop ;
+
+: cpu-move-effective-address ( mode cpu -- )
+  swap
+  {
+    { 0  [ drop ] }
+    { 1  [ drop ] }
+    { 56 [ cpu-wb-dreg-mem ] }
+    [ drop drop ]
+  } case ;
+
+
+: cpu-read-ea ( reg mode cpu -- d )
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    { 7 [ drop ]} ! Status register
+    [ drop drop ]
+  } case ;
+
+: cpu-write-ea ( data reg mode cpu -- )
+  swap
+  {
+    { 0 [ cpu-write-dregister ] }
+    [ drop drop drop drop ]
+  } case ;
+
+: ori-ea-mode ( d -- mode )
+  5 3 bit-range 3 bits ;
+
+: ori-ea-reg ( d -- reg )
+  2 0 bit-range 3 bits ;
+
+: cpu-ori-byte-data ( cpu -- )
+  [ cashe>> second 8 bits ] keep
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-read-ea ] keep
+  [ bitor ] dip
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-write-ea ] keep
+  PC++ ;
+
+
+: cpu-ori-word-data ( cpu -- )
+  [ cashe>> second 16 bits ] keep
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-read-ea ] keep
+  [ bitor ] dip
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-write-ea ] keep
+  PC++ ;
+
+: cpu-ori ( cpu -- )
+  [ cashe>> first 7 6 bit-range 2 bits ] keep swap ! size
+  {
+    { 0 [ cpu-ori-byte-data ] }     ! Byte
+    { 1 [ cpu-ori-word-data ] }     ! word
+    { 2 [ drop ] }     ! long
+    [ drop drop ]
+  } case ;
+
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
@@ -288,17 +401,19 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
-  drop ;
+  break
+  [ cashe>> first 11 8 bit-range 4 bits ] keep swap
+  {
+    { 0 [ cpu-ori ] }  ! ORI
+    [ drop drop ]
+  } case ;
+
 
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
-    break
-    [ cashe>> first destination-register ] keep
-    [ cashe>> first destination-mode ] keep
-    [ cashe>> first source-mode ] keep
-    [ cashe>> first source-register ] keep
-    drop drop drop drop drop ;
+  [ cashe>> first move-mode ] keep
+  cpu-move-effective-address ;
 
 ! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )

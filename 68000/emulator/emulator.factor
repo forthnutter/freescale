@@ -196,11 +196,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 : SR> ( cpu -- d )
     alu>> alu-sr> ;
-    
+
 : >SR ( d cpu -- )
     alu>> >alu-sr ;
-    
-    
+
+
 ! split a word value to bytes
 : word-bytes ( w -- a b )
     [ 15 8 bit-range ] keep 7 0 bit-range ;
@@ -265,10 +265,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : extract-opcode ( instruct -- opcode )
     15 12 bit-range 4 bits ;
 
-: destination-register ( instruct -- regnum )
+: move-dest-reg ( instruct -- regnum )
     11 9 bit-range 3 bits ;
 
-: destination-mode ( instruct -- mode )
+: move-dest-mode ( instruct -- mode )
     8 6 bit-range 3 bits ;
 
 : move-source-reg ( instruct -- regnum )
@@ -280,13 +280,6 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! generates a 6 bit mode value
 : move-mode ( instruct -- mode )
   8 3 bit-range 6 bits ;
-
-: cpu-absolute-data-long ( cpu -- l )
-  [ cashe>> second ] keep
-  cashe>> third words-long ;
-
-: cpu-absolute-data-word ( cpu -- w )
-  cashe>> second ;
 
 
 : cpu-read-dregister ( d cpu -- n )
@@ -317,63 +310,130 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ drop drop drop ]
   } case ;
 
-: cpu-absolute-data-address ( d cpu -- n )
-  swap
-  {
-    { 0 [ [ cpu-absolute-data-word ] keep PC++ ] }
-    { 1 [ [ cpu-absolute-data-long ] keep [ PC++ ] keep PC+ ] }
-    [ drop drop f ]
-  } case ;
 
+! get absolute long address read byte
+: cpu-rb-along ( cpu -- l )
+  [ PC++ ] keep
+  [ cashe>> second ] keep
+  [ PC+ ] keep
+  [ cashe>> third words-long ] keep
+  cpu-read-byte ;
 
-: cpu-wb-dreg-mem ( cpu -- )
-  [ cashe>> first source-register ] keep
-  [ cpu-read-dregister ] keep
-  [ cashe>> first destination-register ] keep
-  [ cpu-absolute-data-address ] keep
-  cpu-write-byte drop ;
+! get absolute word address read byte
+: cpu-rb-aword ( cpu -- w )
+  [ PC++ ] keep
+  [ cashe>> second ] keep
+  cpu-read-byte ;
 
-: cpu-move-ea ( mode cpu -- )
-  swap
-  {
-    { 0  [ drop ] }
-    { 1  [ drop ] }
-    { 56 [ cpu-wb-dreg-mem ] }
-    [ drop drop ]
-  } case ;
-
-: cpu-read-ea-reg ( reg cpu -- d )
+! read byte
+: cpu-rb-mode-seven ( reg cpu -- d )
     swap
     {
-        { 0 [ drop f ] }   ! imeadiate word
-        { 1 [ drop f ] }    ! imeadiate long
-        { 4 [ SR> ] }    
+        { 0 [ cpu-rb-aword ] }   ! absolute word
+        { 1 [ cpu-rb-along ] }    ! absolute long
+        { 4 [ SR> ] }
         [ drop drop f ]
     } case ;
 
-: cpu-read-ea ( reg mode cpu -- d )
+: cpu-rb-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister ] }
-    { 7 [ cpu-read-ea-reg ] } ! Status register
+    { 0 [ cpu-read-dregister 8 bits ] }
+    { 7 [ cpu-rb-mode-seven ] }
     [ drop drop ]
   } case ;
 
-: cpu-write-ea-reg ( d reg cpu -- )
+
+: cpu-rw-ea ( reg mode cpu -- d )
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    { 7 [ cpu-rb-mode-seven ] }
+    [ drop drop ]
+  } case ;
+
+: cpu-rl-along ( cpu -- l )
+  [ PC++ ] keep
+  [ cashe>> second ] keep
+  [ PC+ ] keep
+  [ cashe>> third words-long ] keep
+  cpu-read-long ;
+
+: cpu-rl-mode-seven ( reg cpu -- d )
     swap
     {
-        { 0 [ drop drop ] }     ! imeadiate word
-        { 1 [ drop drop ] }     ! long
-        { 4 [ >SR ] }
-        [ drop drop drop ]
+        { 0 [ cpu-rb-aword ] }   ! absolute word
+        { 1 [ cpu-rl-along ] }    ! absolute long
+        { 4 [ SR> ] }
+        [ drop drop f ]
     } case ;
-    
-    
-: cpu-write-ea ( data reg mode cpu -- )
+
+
+: cpu-rl-ea ( reg mode cpu -- d )
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    { 7 [ cpu-rl-mode-seven ] }
+    [ drop drop ]
+  } case ;
+
+: cpu-wb-along ( data cpu -- )
+  [ PC++ ] keep
+  [ cashe>> second ] keep
+  [ PC+ ] keep
+  [ cashe>> third words-long ] keep
+  cpu-write-byte drop ;
+
+: cpu-write-mode-one ( d reg cpu -- )
+  swap
+  {
+    { 0 [ >A0 ] }
+    { 1 [ >A1 ] }
+    { 2 [ >A2 ] }
+    { 3 [ >A3 ] }
+    { 4 [ >A4 ] }
+    { 5 [ >A5 ] }
+    { 6 [ >A6 ] }
+    { 7 [ >A7 ] }
+    [ drop drop drop ]
+  } case ;
+
+
+
+: cpu-wb-mode-seven ( data reg cpu -- )
+  swap
+  {
+    { 0 [ drop drop ] }
+    { 1 [ cpu-wb-along ] }
+    { 4 [ >SR ] }
+    [ drop drop drop ]
+  } case ;
+
+
+: cpu-wb-ea ( data reg mode cpu -- )
   swap
   {
     { 0 [ cpu-write-dregister ] }
-    { 7 [ cpu-write-ea-reg ] }
+    { 1 [ cpu-write-mode-one ] }
+    { 7 [ cpu-wb-mode-seven ] }
+    [ drop drop drop drop ]
+  } case ;
+
+: cpu-ww-ea ( data reg mode cpu -- )
+  swap
+  {
+    { 0 [ cpu-write-dregister ] }
+    { 1 [ cpu-write-mode-one ] }
+    { 7 [ cpu-wb-mode-seven ] }
+    [ drop drop drop drop ]
+  } case ;
+
+: cpu-wl-ea ( data reg mode cpu -- )
+  swap
+  {
+    { 0 [ cpu-write-dregister ] }
+    { 1 [ cpu-write-mode-one ] }
+    { 7 [ cpu-wb-mode-seven ] }
     [ drop drop drop drop ]
   } case ;
 
@@ -387,11 +447,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ cashe>> second 8 bits ] keep
   [ cashe>> first ori-ea-reg ] keep
   [ cashe>> first ori-ea-mode ] keep
-  [ cpu-read-ea ] keep
+  [ cpu-rb-ea ] keep
   [ bitor ] dip
   [ cashe>> first ori-ea-reg ] keep
   [ cashe>> first ori-ea-mode ] keep
-  [ cpu-write-ea ] keep
+  [ cpu-wb-ea ] keep
   PC++ ;
 
 
@@ -399,11 +459,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ cashe>> second 16 bits ] keep
   [ cashe>> first ori-ea-reg ] keep
   [ cashe>> first ori-ea-mode ] keep
-  [ cpu-read-ea ] keep
+  [ cpu-rw-ea ] keep
   [ bitor ] dip
   [ cashe>> first ori-ea-reg ] keep
   [ cashe>> first ori-ea-mode ] keep
-  [ cpu-write-ea ] keep
+  [ cpu-ww-ea ] keep
   PC++ ;
 
 : cpu-ori ( cpu -- )
@@ -438,17 +498,22 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! Move Byte
 : (opcode-1) ( cpu -- )
     break
-  [ cashe>> first move-mode ] keep
-  cpu-move-ea ;
+  [ cashe>> first move-source-reg ] keep
+  [ cashe>> first move-source-mode ] keep
+  [ cpu-rb-ea ] keep
+  [ cashe>> first move-dest-reg ] keep
+  [ cashe>> first move-dest-mode ] keep
+  [ cpu-wb-ea ] keep drop ;
 
 ! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )
     break
     [ cashe>> first move-source-reg ] keep
     [ cashe>> first move-source-mode ] keep
-    [ cpu-read-ea ] keep
+    [ cpu-rl-ea ] keep
     [ cashe>> first move-dest-reg ] keep
-    cpu-move-ea ;
+    [ cashe>> first move-dest-mode ] keep
+    [ cpu-wl-ea ] keep drop ;
 
 
 ! Move word MOVE MOVEA

@@ -226,3 +226,12 @@ M: alu model-activated
 ! clear the trace
 : alu-t-clr ( alu -- )
     [ value>> T-BIT clear-bit ] keep set-model ;
+    
+! read Status Register
+: alu-sr> ( alu -- sr )
+    value>> 16 bits ;
+    
+! write Status Register
+: >alu-sr ( d cpu -- )
+    [ 16 bits ] dip set-model ;
+    

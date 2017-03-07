@@ -194,6 +194,13 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : D0> ( cpu -- d )
   dr>> 0 swap nth ;
 
+: SR> ( cpu -- d )
+    alu>> alu-sr> ;
+    
+: >SR ( d cpu -- )
+    alu>> >alu-sr ;
+    
+    
 ! split a word value to bytes
 : word-bytes ( w -- a b )
     [ 15 8 bit-range ] keep 7 0 bit-range ;
@@ -264,10 +271,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : destination-mode ( instruct -- mode )
     8 6 bit-range 3 bits ;
 
-: source-register ( instruct -- regnum )
+: move-source-reg ( instruct -- regnum )
     2 0 bit-range 3 bits ;
 
-: source-mode ( instruct -- mode )
+: move-source-mode ( instruct -- mode )
     5 3 bit-range 3 bits ;
 
 ! generates a 6 bit mode value
@@ -326,7 +333,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ cpu-absolute-data-address ] keep
   cpu-write-byte drop ;
 
-: cpu-move-effective-address ( mode cpu -- )
+: cpu-move-ea ( mode cpu -- )
   swap
   {
     { 0  [ drop ] }
@@ -335,19 +342,38 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ drop drop ]
   } case ;
 
+: cpu-read-ea-reg ( reg cpu -- d )
+    swap
+    {
+        { 0 [ drop f ] }   ! imeadiate word
+        { 1 [ drop f ] }    ! imeadiate long
+        { 4 [ SR> ] }    
+        [ drop drop f ]
+    } case ;
 
 : cpu-read-ea ( reg mode cpu -- d )
   swap
   {
     { 0 [ cpu-read-dregister ] }
-    { 7 [ drop ]} ! Status register
+    { 7 [ cpu-read-ea-reg ] } ! Status register
     [ drop drop ]
   } case ;
 
+: cpu-write-ea-reg ( d reg cpu -- )
+    swap
+    {
+        { 0 [ drop drop ] }     ! imeadiate word
+        { 1 [ drop drop ] }     ! long
+        { 4 [ >SR ] }
+        [ drop drop drop ]
+    } case ;
+    
+    
 : cpu-write-ea ( data reg mode cpu -- )
   swap
   {
     { 0 [ cpu-write-dregister ] }
+    { 7 [ cpu-write-ea-reg ] }
     [ drop drop drop drop ]
   } case ;
 
@@ -401,7 +427,6 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
-  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
@@ -412,12 +437,19 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
+    break
   [ cashe>> first move-mode ] keep
-  cpu-move-effective-address ;
+  cpu-move-ea ;
 
 ! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )
-  drop ;
+    break
+    [ cashe>> first move-source-reg ] keep
+    [ cashe>> first move-source-mode ] keep
+    [ cpu-read-ea ] keep
+    [ cashe>> first move-dest-reg ] keep
+    cpu-move-ea ;
+
 
 ! Move word MOVE MOVEA
 : (opcode-3) ( cpu -- )

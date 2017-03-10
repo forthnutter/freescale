@@ -475,6 +475,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ drop drop ]
   } case ;
 
+! reset models
+: cpu-reset-models ( cpu -- cpu )
+    [ f ] dip [ reset>> set-model ] keep
+    [ t ] dip [ reset>> set-model ] keep ;
+
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
@@ -518,6 +523,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 ! Move word MOVE MOVEA
 : (opcode-3) ( cpu -- )
+  break
   drop ;
 
 ! Miscellaneous
@@ -529,12 +535,17 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! MOVEM
 ! NBCD NEG NEGX NOP NOT
 ! PACK PEA
-! RTD RTR RTS
+! RESET RTD RTR RTS
 ! SWAP
 ! TAS TRAP TRAPV TST
 ! UNLK
 : (opcode-4) ( cpu -- )
-  drop ;
+  break
+  [ cashe>> first ] keep swap
+  {
+    { 0x4E70 [ cpu-reset-models drop ] }
+    [ drop drop ]
+  } case ;
 
 ! ADDQ
 ! DBcc
@@ -612,10 +623,6 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 
 
-! reset models
-: cpu-reset-models ( cpu -- cpu )
-    [ f ] dip [ reset>> set-model ] keep
-    [ t ] dip [ reset>> set-model ] keep ;
 
 : reset-exception ( cpu -- )
     [ alu>> alu-s-set ] keep

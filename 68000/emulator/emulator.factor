@@ -543,7 +543,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   break
   [ cashe>> first ] keep swap
   {
-    { 0x4E70 [ cpu-reset-models drop ] }
+    { 0x4E70 [ cpu-reset-models PC+ ] }
     [ drop drop ]
   } case ;
 
@@ -552,11 +552,47 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! SUBQ SUBX Scc
 ! TRAPcc
 : (opcode-5) ( cpu -- )
+  break
   drop ;
+
+! get branch condition
+: branch-condition ( op -- con )
+    11 8 bit-range 4 bits ;
+
+: branch-displacement ( op -- disp )
+    7 0 bit-range 8 bits ;
+
+: cpu-bmi ( cpu -- )
+  [ cashe>> first branch-displacement ] keep swap
+  {
+    { 0 [ drop ] }  ! 16 bit displacement
+    [ drop drop ]
+  } case ;
+
 
 ! Bcc BSR BRA
 : (opcode-6) ( cpu -- )
-  drop ;
+  break
+  [ cashe>> first branch-condition ] keep swap
+  {
+    { 0 [ drop ] }  ! BRA
+    { 1 [ drop ] }  ! BSR
+    { 2 [ drop ] }  ! BHI
+    { 3 [ drop ] }  ! BLS
+    { 4 [ drop ] }  ! BCC
+    { 5 [ drop ] }  ! BCS
+    { 6 [ drop ] }  ! BNE
+    { 7 [ drop ] }  ! BEQ
+    { 8 [ drop ] }  ! BVC
+    { 9 [ drop ] }  ! BVS
+    { 10 [ drop ] } ! BPL
+    { 11 [ drop ] } ! BMI
+    { 12 [ drop ] } ! BGE
+    { 13 [ drop ] } ! BLT
+    { 14 [ drop ] } ! BGT
+    { 15 [ drop ] } ! BLE
+    [ drop drop ]
+} case ;
 
 ! MOVEQ
 : (opcode-7) ( cpu -- )

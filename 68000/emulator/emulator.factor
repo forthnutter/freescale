@@ -466,8 +466,13 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ cpu-ww-ea ] keep
   PC++ ;
 
+! get the size from instruction
+: cpu-size ( cpu -- size )
+  cashe>> first 7 6 bit-range 2 bits ;
+
+
 : cpu-ori ( cpu -- )
-  [ cashe>> first 7 6 bit-range 2 bits ] keep swap ! size
+  [ cpu-size ] keep swap ! size
   {
     { 0 [ cpu-ori-byte-data ] }     ! Byte
     { 1 [ cpu-ori-word-data ] }     ! word
@@ -562,11 +567,23 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : branch-displacement ( op -- disp )
     7 0 bit-range 8 bits ;
 
+: cpu-word-displacement ( cpu -- )
+  [ PC+ ] keep
+  [ alu>> alu-n? ] keep swap
+  [
+    [ PC+ ] keep
+    [ cashe>> second 16 >signed ] keep
+    [ PC> + ] keep >PC
+  ]
+  [
+    PC+
+  ] if ;
+
 : cpu-bmi ( cpu -- )
   [ cashe>> first branch-displacement ] keep swap
   {
-    { 0 [ drop ] }  ! 16 bit displacement
-    [ drop drop ]
+    { 0 [ cpu-word-displacement ] }  ! 16 bit displacement
+    [ drop drop ]   ! default is 8 bit displacement
   } case ;
 
 
@@ -586,7 +603,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     { 8 [ drop ] }  ! BVC
     { 9 [ drop ] }  ! BVS
     { 10 [ drop ] } ! BPL
-    { 11 [ drop ] } ! BMI
+    { 11 [ cpu-bmi ] } ! BMI
     { 12 [ drop ] } ! BGE
     { 13 [ drop ] } ! BLT
     { 14 [ drop ] } ! BGT
@@ -596,6 +613,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 ! MOVEQ
 : (opcode-7) ( cpu -- )
+  break
   drop ;
 
 ! DIV DIVS DIVL DIVU DIVUL
@@ -603,41 +621,65 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! SBCD
 ! UNPK
 : (opcode-8) ( cpu -- )
+  break
   drop ;
 
 ! SUB SUBA SUBX
 : (opcode-9) ( cpu -- )
+  break
   drop ;
 
 ! Reserved
 : (opcode-A) ( cpu -- )
+  break
   drop ;
 
 ! CMP CMPA CMPM
 ! EOR
 : (opcode-B) ( cpu -- )
+  break
   drop ;
 
 ! AND ABCD EXG MUL MULS MULU
 : (opcode-C) ( cpu -- )
+  break
   drop ;
 
 ! ADD ADDA ADDX
 : (opcode-D) ( cpu -- )
+  break
   drop ;
+
+
+: cpu-shift-byte ( cpu -- )
+  [ cashe>> 4 3 bit-range 2 bits ] keep swap ! what function
+  {
+    { 0 [ drop ] }  ! Arithmatic shift
+    { 1 [ drop ] }  ! Logical shift
+    { 2 [ drop ] }  ! Rotate with extend
+    [ drop  drop ]  ! Rotate
+  } case ;
 
 ! Shift Rotate Bit Field
 ! ASR
-! BFCHG BFCLR BFEXTS BFEXTU BFFFO BFINS BFSET BFTST BKPT
 ! LSL LSR
 ! ROL ROR ROXL ROXR
 : (opcode-E) ( cpu -- )
+  break
+  [ cpu-size ] keep swap
+  {
+    { 0 [ drop ] }  ! byte
+    { 1 [ drop ] }  ! word
+    { 2 [ drop ] }  ! long
+    [ drop drop ]   ! memory shift
+  } case ;
   drop ;
 
 ! Coprocessor Interface
 ! cpBcc cpDBcc cpGEN cpScc cpTRAPcc
 ! MOVE16
 : (opcode-F) ( cpu -- )
+  break
   drop ;
 
 ! temp opcode

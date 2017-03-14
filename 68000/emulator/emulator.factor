@@ -650,12 +650,43 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   break
   drop ;
 
+: cpu-shift-ir ( cpu -- ? )
+  cashe>> first 5 bit? ;
+
+: cpu-shift-rcount ( cpu -- reg )
+  cashe>> first 11 9 bit-range 3 bits ;
+
+: cpu-shift-dir ( cpu -- ? )
+  cashe>> first 8 bit? ;
+
+: cpu-shift-register ( cpu -- reg )
+  cashe>> first 2 0 bit-range 3 bits ;
+
+: cpu-ls-byte ( cpu -- )
+  [ cpu-shift-ir ] keep swap
+  [
+    [ cpu-shift-rcount ] keep
+    [ cpu-read-dregister ] keep
+    [ cpu-shift-register ] keep
+    [ cpu-shift-dir ] keep swap
+    [ [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if ] keep
+    [ cpu-shift-register ] keep
+    cpu-write-dregister
+  ]
+  [
+    [ cpu-shift-rcount ] keep
+    [ cpu-shift-register ] keep
+    [ cpu-shift-dir ] keep swap
+    [ [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if ] keep
+    [ cpu-shift-register ] keep
+    cpu-write-dregister
+  ] if ;
 
 : cpu-shift-byte ( cpu -- )
-  [ cashe>> 4 3 bit-range 2 bits ] keep swap ! what function
+  [ cashe>> first 4 3 bit-range 2 bits ] keep swap ! what function
   {
     { 0 [ drop ] }  ! Arithmatic shift
-    { 1 [ drop ] }  ! Logical shift
+    { 1 [ cpu-ls-byte ] }  ! Logical shift
     { 2 [ drop ] }  ! Rotate with extend
     [ drop  drop ]  ! Rotate
   } case ;
@@ -668,12 +699,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   break
   [ cpu-size ] keep swap
   {
-    { 0 [ drop ] }  ! byte
+    { 0 [ cpu-shift-byte ] }  ! byte
     { 1 [ drop ] }  ! word
     { 2 [ drop ] }  ! long
     [ drop drop ]   ! memory shift
   } case ;
-  drop ;
+
 
 ! Coprocessor Interface
 ! cpBcc cpDBcc cpGEN cpScc cpTRAPcc

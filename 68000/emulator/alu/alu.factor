@@ -1,7 +1,7 @@
 ! Copyright (C) 2011 Joseph Moschini.
 ! See http://factorcode.org/license.txt for BSD license.
 !
-USING: 
+USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep
@@ -226,12 +226,45 @@ M: alu model-activated
 ! clear the trace
 : alu-t-clr ( alu -- )
     [ value>> T-BIT clear-bit ] keep set-model ;
-    
+
 ! read Status Register
 : alu-sr> ( alu -- sr )
     value>> 16 bits ;
-    
+
 ! write Status Register
 : >alu-sr ( d cpu -- )
     [ 16 bits ] dip set-model ;
-    
+
+: alu-lsl-byte ( count d alu -- r )
+  [
+    rot
+    [
+      [ dup 7 bit? ] dip
+      [ ?alu-c ] keep
+      [ dup 7 bit? ] dip
+      [ ?alu-x ] keep
+      [ -1 8 bitroll 0 clear-bit ] dip
+      [ dup 7 bit? ] dip
+      [ ?alu-n ] keep
+      [ dup 8 bits 0 = ] dip
+      [ ?alu-z ] keep
+      alu-v-clr
+    ] loop
+  ] keep ;
+
+: alu-lsr-byte ( count d alu -- r )
+  [
+    rot
+    [
+      [ dup 7 bit? ] dip
+      [ ?alu-c ] keep
+      [ dup 7 bit? ] dip
+      [ ?alu-x ] keep
+      [ -1 8 bitroll 0 clear-bit ] dip
+      [ dup 7 bit? ] dip
+      [ ?alu-n ] keep
+      [ dup 8 bits 0 = ] dip
+      [ ?alu-z ] keep
+      [ alu-v-clr ] keep
+    ] loop
+  ] keep ;

@@ -437,34 +437,66 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ drop drop drop drop ]
   } case ;
 
-: ori-ea-mode ( d -- mode )
+
+! read byte
+: cpu-0-rb-seven ( reg cpu -- d )
+    swap
+    {
+        { 0 [ cpu-rb-aword ] }   ! absolute word
+        { 1 [ cpu-rb-along ] }    ! absolute long
+        { 4 [ SR> ] }
+        [ drop drop f ]
+    } case ;
+
+
+: cpu-0-rb-ea ( reg mode cpu -- d )
+  swap
+  {
+    { 0 [ cpu-read-dregister 8 bits ] }
+    { 7 [ cpu-0-rb-seven ] }
+    [ drop drop ]
+  } case ;
+
+: cpu-0-wb-ea ( data reg mode cpu -- )
+  swap
+  {
+    { 0 [ cpu-write-dregister ] }
+    { 1 [ cpu-write-mode-one ] }
+    { 7 [ cpu-wb-mode-seven ] }
+    [ drop drop drop drop ]
+  } case ;
+
+
+: code0-ea-mode ( d -- mode )
   5 3 bit-range 3 bits ;
 
-: ori-ea-reg ( d -- reg )
+: code0-ea-reg ( d -- reg )
   2 0 bit-range 3 bits ;
 
 : cpu-ori-byte-data ( cpu -- )
+  [ PC+ ] keep
   [ cashe>> second 8 bits ] keep
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
-  [ cpu-rb-ea ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-rb-ea ] keep
   [ bitor ] dip
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
-  [ cpu-wb-ea ] keep
-  PC++ ;
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-wb-ea ] keep
+  PC+ ;
 
 
 : cpu-ori-word-data ( cpu -- )
+  [ PC+ ] keep
   [ cashe>> second 16 bits ] keep
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-rw-ea ] keep
   [ bitor ] dip
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-ww-ea ] keep
-  PC++ ;
+  PC+ ;
 
 ! get the size from instruction
 : cpu-size ( cpu -- size )
@@ -487,12 +519,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 : cpu-andi-word-data ( cpu -- )
   [ cashe>> second 16 bits ] keep
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-rw-ea ] keep
   [ bitor ] dip
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-ww-ea ] keep
   PC++ ;
 
@@ -502,12 +534,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ PC+ ] keep
   [ cashe>> third 16 bits ] keep
   [ words-long ] dip
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-rl-ea ] keep
   [ alu>> alu-and-long ] keep
-  [ cashe>> first ori-ea-reg ] keep
-  [ cashe>> first ori-ea-mode ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
   [ cpu-wl-ea ] keep
   PC+ ;
 

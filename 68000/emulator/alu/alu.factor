@@ -243,7 +243,7 @@ M: alu model-activated
     [ ?alu-c ] keep
     [ dup 7 bit? ] dip
     [ ?alu-x ] keep
-    [ -1 8 bitroll 0 clear-bit ] dip
+    [ 1 8 bitroll 0 clear-bit ] dip
     [ dup 7 bit? ] dip
     [ ?alu-n ] keep
     [ dup 8 bits 0 = ] dip
@@ -271,30 +271,34 @@ M: alu model-activated
   [ [ dup 0 = not ] 2dip rot ]
   [
     [ 1 - ] 2dip
-    [ dup 7 bit? ] dip
+    [ dup 31 bit? ] dip
     [ ?alu-c ] keep
-    [ dup 7 bit? ] dip
+    [ dup 31 bit? ] dip
     [ ?alu-x ] keep
-    [ -1 8 bitroll 0 clear-bit ] dip
-    [ dup 7 bit? ] dip
+    [ 1 bitroll-32 0 clear-bit ] dip
+    [ dup 31 bit? ] dip
     [ ?alu-n ] keep
-    [ dup 8 bits 0 = ] dip
+    [ dup 32 bits 0 = ] dip
     [ ?alu-z ] keep
-    [ alu-v-clr ] keep
+    [ dup 31 bit? ] dip
+    [ alu-x? xor ] keep
+    [ ?alu-v ] keep
   ] while drop swap drop ;
 
 : alu-asr-long ( count d alu -- r )
   [ [ dup 0 = not ] 2dip rot ]
   [
     [ 1 - ] 2dip
-    [ dup 7 bit? ] dip
+    [ dup 0 bit? ] dip
     [ ?alu-c ] keep
-    [ dup 7 bit? ] dip
+    [ dup 0 bit? ] dip
     [ ?alu-x ] keep
-    [ -1 8 bitroll 0 clear-bit ] dip
-    [ dup 7 bit? ] dip
+    [ dup 31 bit? ] dip
+    [ -1 bitroll-32 ] 2dip
+    [ [ 31 set-bit ] [ 31 clear-bit ] if ] dip
+    [ dup 31 bit? ] dip
     [ ?alu-n ] keep
-    [ dup 8 bits 0 = ] dip
+    [ dup 32 bits 0 = ] dip
     [ ?alu-z ] keep
     [ alu-v-clr ] keep
   ] while drop swap drop ;

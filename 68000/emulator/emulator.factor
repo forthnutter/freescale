@@ -485,6 +485,41 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ f ] dip [ reset>> set-model ] keep
     [ t ] dip [ reset>> set-model ] keep ;
 
+: cpu-andi-word-data ( cpu -- )
+  [ cashe>> second 16 bits ] keep
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-rw-ea ] keep
+  [ bitor ] dip
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-ww-ea ] keep
+  PC++ ;
+
+: cpu-andi-long-data ( cpu -- )
+  [ PC+ ] keep
+  [ cashe>> second 16 bits ] keep
+  [ PC+ ] keep
+  [ cashe>> third 16 bits ] keep
+  [ words-long ] dip
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-rl-ea ] keep
+  [ alu>> alu-and-long ] keep
+  [ cashe>> first ori-ea-reg ] keep
+  [ cashe>> first ori-ea-mode ] keep
+  [ cpu-wl-ea ] keep
+  PC+ ;
+
+: cpu-andi ( cpu -- )
+  [ cpu-size ] keep swap
+  {
+    { 0 [ drop ] }  ! byte
+    { 1 [ drop ] }  ! word
+    { 2 [ cpu-andi-long-data ] }  ! long
+    [ drop drop ]
+  } case ;
+
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
@@ -497,9 +532,11 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
+  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
+    { 2 [ cpu-andi ] } ! ANDI
     [ drop drop ]
   } case ;
 
@@ -663,21 +700,28 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   cashe>> first 2 0 bit-range 3 bits ;
 
 : cpu-ls-byte ( cpu -- )
+  [ PC+ ] keep
   [ cpu-shift-ir ] keep swap
   [
     [ cpu-shift-rcount ] keep
     [ cpu-read-dregister ] keep
     [ cpu-shift-register ] keep
-    [ cpu-shift-dir ] keep swap
-    [ [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if ] keep
+    [
+      [ alu>> ] keep
+      cpu-shift-dir
+      [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if
+    ] keep
     [ cpu-shift-register ] keep
     cpu-write-dregister
   ]
   [
     [ cpu-shift-rcount ] keep
     [ cpu-shift-register ] keep
-    [ cpu-shift-dir ] keep swap
-    [ [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if ] keep
+    [
+      [ alu>> ] keep
+      cpu-shift-dir
+      [ alu-lsl-byte ] [ alu-lsr-byte ] if
+    ] keep
     [ cpu-shift-register ] keep
     cpu-write-dregister
   ] if ;
@@ -691,6 +735,35 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
     [ drop  drop ]  ! Rotate
   } case ;
 
+
+: cpu-as-long ( cpu -- )
+  [ PC+ ] keep
+  [ cpu-shift-ir ] keep swap
+  [
+    [ cpu-shift-rcount ] keep
+    [ cpu-read-dregister ] keep
+  ]
+  [
+    [ cpu-shift-rcount ] keep
+  ] if
+  [ cpu-shift-register ] keep
+  [
+    [ alu>> ] keep
+    cpu-shift-dir
+    [ alu-asl-long ] [ alu-asr-long ] if
+  ] keep
+  [ cpu-shift-register ] keep
+  cpu-write-dregister ;
+
+: cpu-shift-long ( cpu -- )
+  [ cashe>> first 4 3 bit-range 2 bits ] keep swap
+  {
+    { 0 [ cpu-as-long ] }  ! Arithmatic Shift
+    { 1 [ drop ] }  ! Logical Shift
+    { 2 [ drop ] }  ! Rotate with extend
+    [ drop drop ]   ! Rotate
+  } case ;
+
 ! Shift Rotate Bit Field
 ! ASR
 ! LSL LSR
@@ -701,7 +774,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   {
     { 0 [ cpu-shift-byte ] }  ! byte
     { 1 [ drop ] }  ! word
-    { 2 [ drop ] }  ! long
+    { 2 [ cpu-shift-long ] }  ! long
     [ drop drop ]   ! memory shift
   } case ;
 
@@ -715,6 +788,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 ! temp opcode
 : not-implemented ( cpu -- )
+  break
   drop ;
 
 ! generate the opcode array here

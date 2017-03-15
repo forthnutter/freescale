@@ -236,35 +236,76 @@ M: alu model-activated
     [ 16 bits ] dip set-model ;
 
 : alu-lsl-byte ( count d alu -- r )
+  [ [ dup 0 = not ] 2dip rot ]
   [
-    rot
-    [
-      [ dup 7 bit? ] dip
-      [ ?alu-c ] keep
-      [ dup 7 bit? ] dip
-      [ ?alu-x ] keep
-      [ -1 8 bitroll 0 clear-bit ] dip
-      [ dup 7 bit? ] dip
-      [ ?alu-n ] keep
-      [ dup 8 bits 0 = ] dip
-      [ ?alu-z ] keep
-      alu-v-clr
-    ] loop
-  ] keep ;
+    [ 1 - ] 2dip
+    [ dup 7 bit? ] dip
+    [ ?alu-c ] keep
+    [ dup 7 bit? ] dip
+    [ ?alu-x ] keep
+    [ -1 8 bitroll 0 clear-bit ] dip
+    [ dup 7 bit? ] dip
+    [ ?alu-n ] keep
+    [ dup 8 bits 0 = ] dip
+    [ ?alu-z ] keep
+    [ alu-v-clr ] keep
+  ] while drop swap drop ;
 
 : alu-lsr-byte ( count d alu -- r )
+  [ [ dup 0 = not ] 2dip rot ]
   [
-    rot
-    [
-      [ dup 7 bit? ] dip
-      [ ?alu-c ] keep
-      [ dup 7 bit? ] dip
-      [ ?alu-x ] keep
-      [ -1 8 bitroll 0 clear-bit ] dip
-      [ dup 7 bit? ] dip
-      [ ?alu-n ] keep
-      [ dup 8 bits 0 = ] dip
-      [ ?alu-z ] keep
-      [ alu-v-clr ] keep
-    ] loop
-  ] keep ;
+    [ 1 - ] 2dip
+    [ dup 7 bit? ] dip
+    [ ?alu-c ] keep
+    [ dup 7 bit? ] dip
+    [ ?alu-x ] keep
+    [ -1 8 bitroll 0 clear-bit ] dip
+    [ dup 7 bit? ] dip
+    [ ?alu-n ] keep
+    [ dup 8 bits 0 = ] dip
+    [ ?alu-z ] keep
+    [ alu-v-clr ] keep
+  ] while drop swap drop ;
+
+: alu-asl-long ( count d alu -- r )
+  [ [ dup 0 = not ] 2dip rot ]
+  [
+    [ 1 - ] 2dip
+    [ dup 7 bit? ] dip
+    [ ?alu-c ] keep
+    [ dup 7 bit? ] dip
+    [ ?alu-x ] keep
+    [ -1 8 bitroll 0 clear-bit ] dip
+    [ dup 7 bit? ] dip
+    [ ?alu-n ] keep
+    [ dup 8 bits 0 = ] dip
+    [ ?alu-z ] keep
+    [ alu-v-clr ] keep
+  ] while drop swap drop ;
+
+: alu-asr-long ( count d alu -- r )
+  [ [ dup 0 = not ] 2dip rot ]
+  [
+    [ 1 - ] 2dip
+    [ dup 7 bit? ] dip
+    [ ?alu-c ] keep
+    [ dup 7 bit? ] dip
+    [ ?alu-x ] keep
+    [ -1 8 bitroll 0 clear-bit ] dip
+    [ dup 7 bit? ] dip
+    [ ?alu-n ] keep
+    [ dup 8 bits 0 = ] dip
+    [ ?alu-z ] keep
+    [ alu-v-clr ] keep
+  ] while drop swap drop ;
+
+
+
+: alu-and-long ( a b alu -- r )
+  [ bitand ] dip
+  [ dup 31 bit? ] dip
+  [ ?alu-n ] keep
+  [ dup 32 bits 0 = ] dip
+  [ ?alu-z ] keep
+  [ alu-v-clr ] keep
+  [ alu-c-clr ] keep drop ;

@@ -313,3 +313,16 @@ M: alu model-activated
   [ ?alu-z ] keep
   [ alu-v-clr ] keep
   [ alu-c-clr ] keep drop ;
+
+
+
+: alu-or-word ( a b alu -- r )
+  [ bitor ] dip
+  [ dup 15 bit? ] dip
+  [ ?alu-n ] keep
+  [ dup 16 bits 0 = ] dip
+  [ ?alu-z ] keep
+  [ alu-v-clr ] keep
+  alu-c-clr ;
+
+  

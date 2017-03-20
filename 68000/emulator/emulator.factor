@@ -5,7 +5,7 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.bitwise
+    words quotations math.bitwise freescale.68000.emulator.exception
     freescale.68000.emulator.alu
     models models.memory ascii ;
 
@@ -30,7 +30,7 @@ CONSTANT: CPU-UNKNOWN 32
 TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exception ;
 
 : cpu-exception ( excep cpu -- )
-    state<< ;
+    drop drop ;
 
 : >PC ( d cpu -- )
     pc<< ;
@@ -979,4 +979,5 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
   [ f swap cpu-power ] keep
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
-    f <model> >>reset ;
+  f <model> >>reset
+  <exception> >>exception ;

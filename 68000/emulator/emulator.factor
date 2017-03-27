@@ -890,6 +890,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 
 : reset-exception ( cpu -- )
+  break
     [ alu>> alu-s-set ] keep
     [ alu>> alu-t-clr ] keep
     [ alu>> 7 swap alu-imask-write ] keep
@@ -942,6 +943,9 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 : cpu-ready? ( cpu -- ? )
     cpu-state CPU-READY = ;
 
+: cpu-running? ( cpu -- ? )
+  cpu-state CPU-RUNNING = ;
+
 
 ! here we process exception
 : cpu-exception-execute ( cpu -- )
@@ -949,7 +953,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
 
 ! Execute one cycles
 : execute-cycle ( cpu -- )
-    [ dup cpu-ready? ]
+    [ dup cpu-running? ]
     [
         dup cpu-state
         {
@@ -958,7 +962,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exc
             { CPU-RUNNING [ dup execute-pc-opcode ] }
             [ drop CPU-UNKNOWN >>state ]
         } case
-    ] until drop ;
+    ] do until drop ;
 
 ! Reset Process
 : cpu-power ( reset cpu -- )

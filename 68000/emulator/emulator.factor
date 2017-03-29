@@ -5,8 +5,8 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.bitwise freescale.68000.emulator.exception
-    freescale.68000.emulator.alu
+    words quotations math.bitwise freescale.68000.disassembler
+    freescale.68000.emulator.exception freescale.68000.emulator.alu 
     models models.memory ascii ;
 
 
@@ -27,7 +27,7 @@ CONSTANT: CPU-UNKNOWN 32
 ! ar is a set of address registers
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
-TUPLE: cpu < memory alu ar dr pc rx cycles cashe copcode opcodes state reset exception ;
+TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception disasm ;
 
 : cpu-exception ( excep cpu -- )
     drop drop ;

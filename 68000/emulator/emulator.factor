@@ -6,7 +6,7 @@ USING:
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise freescale.68000.disassembler
-    freescale.68000.emulator.exception freescale.68000.emulator.alu 
+    freescale.68000.emulator.exception freescale.68000.emulator.alu
     models models.memory ascii ;
 
 
@@ -902,22 +902,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception d
 : reset ( cpu -- )
     CPU-RESET >>state drop ;
 
-: opcode-save ( opc cpu -- cpu )
-    >>copcode ;
-
-: opcode-read ( cpu -- opc cpu )
-    [ copcode>> ] keep ;
-
-
 ! execute one instruction
 : execute-pc-opcodes ( cpu -- )
 !    [ rom-pc-read ] keep
 !    [ opcodes>> nth [ break ] prepose ] keep swap call( cpu -- )
         drop
 ;
-
-! Deep within the instruction is the opcode
-! routine to extract
 
 
 ! execute one instruction
@@ -926,14 +916,6 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception d
     [ extract-opcode ] dip [ opcodes>> nth ] keep swap call( cpu -- )
 ;
 
-! Execute to an address
-: execute-address ( addr cpu -- )
-!    [
- !       [ pc>> = ] 2keep rot ]
-!        [ [ execute-pc-opcode ] keep
-!    ] until
-    2drop
-;
 
 ! Get the cpu state
 : cpu-state ( cpu -- state )
@@ -984,4 +966,5 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception d
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception ;
+  <exception> >>exception
+  <disassembler> >>disasm ;

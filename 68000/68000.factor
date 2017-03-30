@@ -20,13 +20,13 @@ IN: freescale.68000
 : mdb ( n address cpu -- str/f )
   [ memory-read ] 2keep drop [ dup f = ] dip swap
   [
-    [ drop ] dip 
+    [ drop ] dip
   ]
   [
     >hex 8 CHAR: 0 pad-head >upper ": " append swap
     [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
-    
+
 
 ! need turn a byte array into word array
 : >word< ( a b -- ab )
@@ -49,7 +49,7 @@ IN: freescale.68000
 
         [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
     ] if ;
-    
+
 ! memory display long
 : mdl ( n address cpu -- str/f )
     [ >even 0b11 unmask ] 2dip
@@ -71,16 +71,16 @@ IN: freescale.68000
 : >bin-pad32 ( d -- s )
     >bin 32 CHAR: 0 pad-head ;
 
-: string-dr ( d -- str )    
+: string-dr ( d -- str )
     [ >hex-pad8 " " append ] [ >dec-pad9 " " append ] [ >bin-pad32 ] tri
     append append ;
-    
-    
+
+
 ! lets make a string that shows the value of D0 in Hex and Decimal maybe binary
 ! "D0: $XXXXXXXX DDDDDDD BBBB BBBB BBBB BBBBBBBB"
 : string-D0 ( cpu -- s )
     D0> string-dr "D0: " prepend ;
- 
+
  ! lets make a string that shows the value of D1 in Hex and Decimal maybe binary
 ! "D1: $XXXXXXXX DDDDDDD"
 : string-D1 ( cpu -- s )
@@ -90,7 +90,7 @@ IN: freescale.68000
 ! "D2: $XXXXXXXX DDDDDDD"
 : string-D2 ( cpu -- s )
     D2> string-dr "D2: " prepend ;
-    
+
 ! lets make a string that shows the value of D3 in Hex and Decimal maybe binary
 ! "D3: $XXXXXXXX DDDDDDD"
 : string-D3 ( cpu -- s )
@@ -109,8 +109,8 @@ IN: freescale.68000
 ! lets make a string that shows the value of D6 in Hex and Decimal maybe binary
 ! "D6: $XXXXXXXX DDDDDDD"
 : string-D6 ( cpu -- s )
-    D6> string-dr "D6: " prepend ;    
-    
+    D6> string-dr "D6: " prepend ;
+
 ! lets make a string that shows the value of D7 in Hex and Decimal maybe binary
 ! "D7: $XXXXXXXX DDDDDDD"
 : string-D7 ( cpu -- s )
@@ -125,13 +125,13 @@ IN: freescale.68000
         1quotation [ dup ] dip call( cpu -- str )
     ] map [ drop ] dip ;
 
-    
+
 ! lets make a string that shows the value of D0 in Hex and Decimal maybe binary
 ! "A0: $XXXXXXXX DDDDDDD"
 : string-A0 ( cpu -- s )
     [ A0> >hex-pad8 ] [ A0> >dec-pad9 ] bi
     [ " " append ] dip append "A0: " prepend ;
- 
+
  ! lets make a string that shows the value of D1 in Hex and Decimal maybe binary
 ! "A1: $XXXXXXXX DDDDDDD"
 : string-A1 ( cpu -- s )
@@ -143,7 +143,7 @@ IN: freescale.68000
 : string-A2 ( cpu -- s )
     [ A2> >hex-pad8 ] [ A2> >dec-pad9 ] bi
     [ " " append ] dip append "A2: " prepend ;
-    
+
 ! lets make a string that shows the value of D3 in Hex and Decimal maybe binary
 ! "A3: $XXXXXXXX DDDDDDD"
 : string-A3 ( cpu -- s )
@@ -166,9 +166,9 @@ IN: freescale.68000
 ! "A6: $XXXXXXXX DDDDDDD"
 : string-A6 ( cpu -- s )
     [ A6> >hex-pad8 ] [ A6> >dec-pad9 ] bi
-    [ " " append ] dip append "A6: " prepend ;    
+    [ " " append ] dip append "A6: " prepend ;
 
-    
+
 ! lets make a string that shows the value of D7 in Hex and Decimal maybe binary
 ! "A7: $XXXXXXXX DDDDDDD"
 : string-A7 ( cpu -- s )
@@ -183,5 +183,9 @@ IN: freescale.68000
         "freescale.68000" lookup-word
         1quotation [ dup ] dip call( cpu -- str )
     ] map [ drop ] dip ;
-        
-    
+
+: string-PC ( cpu -- $ )
+  [ PC> >hex-pad8 ] [ PC> >dec-pad9 ] bi
+  [ " " append ] dip append "PC: " prepend ;
+
+      

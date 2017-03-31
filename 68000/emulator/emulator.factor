@@ -5,9 +5,9 @@ USING:
     accessors arrays kernel math sequences byte-arrays io
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.bitwise freescale.68000.disassembler
-    freescale.68000.emulator.exception freescale.68000.emulator.alu
-    models models.memory ascii ;
+    words quotations math.bitwise freescale.68000.emulator.exception
+    freescale.68000.emulator.alu models models.memory ascii
+    freescale.68000.disassembler ;
 
 
 IN: freescale.68000.emulator

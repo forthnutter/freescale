@@ -4,8 +4,7 @@
 USING:     accessors arrays kernel math sequences byte-arrays io
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
-    words quotations math.bitwise models models.memory ascii
-    freescale.68000.emulator ;
+    words quotations math.bitwise models models.memory ascii ;
 
 IN: freescale.68000.disassembler
 
@@ -15,7 +14,8 @@ TUPLE: disassembler opcodes ;
   drop
   "ILLEGAL-INSTRUCTION" ;
 
-
+: extract-opcode ( instruct -- opcode )
+  15 12 bit-range 4 bits ;
 
 : (opcode$-0) ( array -- $ )
   opcode$-error ;

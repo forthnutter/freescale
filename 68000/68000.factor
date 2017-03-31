@@ -134,7 +134,6 @@ TUPLE: mc68k emu disasm asm ;
 
 ! Build the DX strings into an array
 : string-DX ( mc68k -- array )
-  mc68k-emu
   0 7 [a,b]
   [
     number>string "string-D" prepend
@@ -202,7 +201,6 @@ TUPLE: mc68k emu disasm asm ;
 
 ! Build the DX strings into an array
 : string-AX ( mc68k -- array )
-  mc68k-emu
   0 7 [a,b]
   [
     number>string "string-A" prepend
@@ -212,9 +210,11 @@ TUPLE: mc68k emu disasm asm ;
 
 : string-PC ( mc68k -- $ )
   mc68k-emu
-  [ PC> >hex-pad8 ] [ PC> >dec-pad9 ] bi
-  [ " " append ] dip append "PC: " prepend ;
+  "PC: " [ PC> >hex-pad8 ] dip prepend
+  " " append ;
 
+: single-step ( mc68k -- )
+  mc68k-emu execute-cycle ;
 
 
 : <mc68k> ( -- 68k )

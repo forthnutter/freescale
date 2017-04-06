@@ -13,10 +13,8 @@ USING:
 
 IN: freescale.68000
 
-TUPLE: mc68k emu disasm asm ;
+TUPLE: mc68k < cpu disasm asm ;
 
-: mc68k-emu ( mc68k -- emu )
-  emu>> ;
 
 : mc68k-disasm ( mc68k -- disasm )
   disasm>> ;
@@ -24,7 +22,6 @@ TUPLE: mc68k emu disasm asm ;
 
 ! memory display or dump bytes
 : mdb ( n address mc68k -- str/f )
-  mc68k-emu
   [ memory-read ] 2keep drop [ dup f = ] dip swap
   [
     [ drop ] dip
@@ -45,7 +42,6 @@ TUPLE: mc68k emu disasm asm ;
 
 ! memory display words
 : mdw ( n address mc68k -- str/f )
-  mc68k-emu
   [ >even ] 2dip    ! make sure we have even number of bytes
   [ memory-read ] 2keep drop  [ dup f = ] dip swap
   [
@@ -59,7 +55,6 @@ TUPLE: mc68k emu disasm asm ;
 
 ! memory display long
 : mdl ( n address mc68k -- str/f )
-  mc68k-emu
   [ >even 0b11 unmask ] 2dip
   [ memory-read ] 2keep drop [ dup f = ] dip swap
   [
@@ -87,49 +82,41 @@ TUPLE: mc68k emu disasm asm ;
 ! lets make a string that shows the value of D0 in Hex and Decimal maybe binary
 ! "D0: $XXXXXXXX DDDDDDD BBBB BBBB BBBB BBBBBBBB"
 : string-D0 ( mc68k -- s )
-  mc68k-emu
   D0> string-dr "D0: " prepend ;
 
  ! lets make a string that shows the value of D1 in Hex and Decimal maybe binary
 ! "D1: $XXXXXXXX DDDDDDD"
 : string-D1 ( mc68k -- s )
-  mc68k-emu
   D1> string-dr "D1: " prepend ;
 
 ! lets make a string that shows the value of D2 in Hex and Decimal maybe binary
 ! "D2: $XXXXXXXX DDDDDDD"
 : string-D2 ( mc68k -- s )
-  mc68k-emu
   D2> string-dr "D2: " prepend ;
 
 ! lets make a string that shows the value of D3 in Hex and Decimal maybe binary
 ! "D3: $XXXXXXXX DDDDDDD"
 : string-D3 ( mc68k -- s )
-  mc68k-emu
   D3> string-dr "D3: " prepend ;
 
 ! lets make a string that shows the value of D4 in Hex and Decimal maybe binary
 ! "D4: $XXXXXXXX DDDDDDD"
 : string-D4 ( mc68k -- s )
-  mc68k-emu
   D4> string-dr "D4: " prepend ;
 
 ! lets make a string that shows the value of D5 in Hex and Decimal maybe binary
 ! "D5: $XXXXXXXX DDDDDDD"
 : string-D5 ( mc68k -- s )
-  mc68k-emu
   D5> string-dr "D5: " prepend ;
 
 ! lets make a string that shows the value of D6 in Hex and Decimal maybe binary
 ! "D6: $XXXXXXXX DDDDDDD"
 : string-D6 ( mc68k -- s )
-  mc68k-emu
   D6> string-dr "D6: " prepend ;
 
 ! lets make a string that shows the value of D7 in Hex and Decimal maybe binary
 ! "D7: $XXXXXXXX DDDDDDD"
 : string-D7 ( mc68k -- s )
-  mc68k-emu
   D7> string-dr "D7: " prepend ;
 
 ! Build the DX strings into an array
@@ -145,49 +132,42 @@ TUPLE: mc68k emu disasm asm ;
 ! lets make a string that shows the value of D0 in Hex and Decimal maybe binary
 ! "A0: $XXXXXXXX DDDDDDD"
 : string-A0 ( mc68k -- s )
-  mc68k-emu
   [ A0> >hex-pad8 ] [ A0> >dec-pad9 ] bi
   [ " " append ] dip append "A0: " prepend ;
 
  ! lets make a string that shows the value of D1 in Hex and Decimal maybe binary
 ! "A1: $XXXXXXXX DDDDDDD"
 : string-A1 ( mc68k -- s )
-  mc68k-emu
   [ A1> >hex-pad8 ] [ A1> >dec-pad9 ] bi
   [ " " append ] dip append "A1: " prepend ;
 
 ! lets make a string that shows the value of D2 in Hex and Decimal maybe binary
 ! "A2: $XXXXXXXX DDDDDDD"
 : string-A2 ( mc68k -- s )
-  mc68k-emu
   [ A2> >hex-pad8 ] [ A2> >dec-pad9 ] bi
   [ " " append ] dip append "A2: " prepend ;
 
 ! lets make a string that shows the value of D3 in Hex and Decimal maybe binary
 ! "A3: $XXXXXXXX DDDDDDD"
 : string-A3 ( mc68k -- s )
-  mc68k-emu
   [ A3> >hex-pad8 ] [ A3> >dec-pad9 ] bi
   [ " " append ] dip append "A3: " prepend ;
 
 ! lets make a string that shows the value of D4 in Hex and Decimal maybe binary
 ! "D4: $XXXXXXXX DDDDDDD"
 : string-A4 ( mc68k -- s )
-  mc68k-emu
   [ A4> >hex-pad8 ] [ A4> >dec-pad9 ] bi
   [ " " append ] dip append "A4: " prepend ;
 
 ! lets make a string that shows the value of D5 in Hex and Decimal maybe binary
 ! "A5: $XXXXXXXX DDDDDDD"
 : string-A5 ( mc68k -- s )
-  mc68k-emu
   [ A5> >hex-pad8 ] [ A5> >dec-pad9 ] bi
   [ " " append ] dip append "A5: " prepend ;
 
 ! lets make a string that shows the value of D6 in Hex and Decimal maybe binary
 ! "A6: $XXXXXXXX DDDDDDD"
 : string-A6 ( mc68k -- s )
-  mc68k-emu
   [ A6> >hex-pad8 ] [ A6> >dec-pad9 ] bi
   [ " " append ] dip append "A6: " prepend ;
 
@@ -195,7 +175,6 @@ TUPLE: mc68k emu disasm asm ;
 ! lets make a string that shows the value of D7 in Hex and Decimal maybe binary
 ! "A7: $XXXXXXXX DDDDDDD"
 : string-A7 ( mc68k -- s )
-  mc68k-emu
   [ A7> >hex-pad8 ] [ A7> >dec-pad9 ] bi
   [ " " append ] dip append "A7: " prepend ;
 
@@ -209,15 +188,13 @@ TUPLE: mc68k emu disasm asm ;
   ] map [ drop ] dip ;
 
 : string-PC ( mc68k -- $ )
-  mc68k-emu
   "PC: " [ PC> >hex-pad8 ] dip prepend
   " " append ;
 
 : single-step ( mc68k -- )
-  mc68k-emu execute-cycle ;
+  execute-cycle ;
 
 
 : <mc68k> ( -- 68k )
-  mc68k new
-  <cpu> >>emu
+  mc68k new-cpu
   <disassembler> >>disasm ;

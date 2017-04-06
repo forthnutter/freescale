@@ -6,8 +6,7 @@ USING:
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise freescale.68000.emulator.exception
-    freescale.68000.emulator.alu models models.memory ascii
-    freescale.68000.disassembler ;
+    freescale.68000.emulator.alu models models.memory ascii ;
 
 
 IN: freescale.68000.emulator
@@ -27,7 +26,7 @@ CONSTANT: CPU-UNKNOWN 32
 ! ar is a set of address registers
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
-TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception disasm ;
+TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
 
 : cpu-exception ( excep cpu -- )
     drop drop ;
@@ -953,7 +952,18 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception d
     [ ar>> [ drop 0 ] map ] keep swap >>ar
     swap [ reset ] [ drop ] if ;
 
-
+: new-cpu ( cpu -- cpu' )
+  f swap new-model
+  <alu> >>alu
+  8 f <array> >>dr
+  9 f <array> >>ar
+  [ alu>> 7 swap alu-imask-write ] keep
+  [ alu>> alu-s-set ] keep
+  [ f swap cpu-power ] keep
+  16 [ not-implemented ] <array> >>opcodes
+  [ opcode-build ] keep
+  f <model> >>reset
+  <exception> >>exception ;
 
 : <cpu> ( -- cpu )
   f cpu new-model
@@ -966,5 +976,4 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception d
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception
-  <disassembler> >>disasm ;
+  <exception> >>exception ;

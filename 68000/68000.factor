@@ -188,8 +188,9 @@ TUPLE: mc68k < cpu disasm asm ;
   ] map [ drop ] dip ;
 
 : string-PC ( mc68k -- $ )
-  "PC: " [ PC> >hex-pad8 ] dip prepend
-  " " append ;
+  "PC: " swap [ 6 swap [ PC> ] keep mdw ] keep
+  [ append ] dip
+  [ " " append ] dip [ dup 6 swap cpu-pc-read-array ] dip ;
 
 : single-step ( mc68k -- )
   execute-cycle ;

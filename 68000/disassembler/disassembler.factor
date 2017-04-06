@@ -97,7 +97,7 @@ TUPLE: disassembler opcodes ;
 ! disassemble an array of data
 : disassemble-array ( array disasm -- $ )
     [ dup first ] dip
-    [ extract-opcode ] dip opcodes>> nth call( array -- $ ) ;
+    [ extract-opcode ] dip opcodes>> nth call ( array -- $ ) ;
 
 
 : <disassembler> ( -- dasm )

@@ -190,7 +190,8 @@ TUPLE: mc68k < cpu disasm asm ;
 : string-PC ( mc68k -- $ )
   "PC: " swap [ 6 swap [ PC> ] keep mdw ] keep
   [ append ] dip
-  [ " " append ] dip [ dup 6 swap cpu-pc-read-array ] dip ;
+  [ " " append ] dip [ 6 swap cpu-pc-read-array ] keep
+  [ disasm>> disassemble-array ] keep drop append ;
 
 : single-step ( mc68k -- )
   execute-cycle ;

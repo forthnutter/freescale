@@ -36,12 +36,19 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
+: move-mode-seven$ ( reg array -- $ )
+  swap ! get reg
+  {
+    { 0 [ drop "70" ] }
+    { 1 [ drop "71" ] }
+    [ drop drop "bad" ]
+  } case ;
 
 : move-rb-ea ( reg mode array -- $ )
   swap ! get mode
   {
     { 0 [ drop dregister$ ] }
-    { 7 [ drop drop "7" ] }
+    { 7 [ move-mode-seven$ ] }
     [ drop drop drop "bad" ]
   } case ;
 
@@ -51,6 +58,10 @@ TUPLE: disassembler opcodes ;
   [ "move.b " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep
+  [ move-rb-ea ] keep [ append ] dip
+  [ "," append ] dip
+  [ first move-dest-reg ] keep
+  [ first move-dest-mode ] keep
   [ move-rb-ea ] keep [ append ] dip drop ;
 
 

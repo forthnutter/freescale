@@ -19,17 +19,6 @@ TUPLE: disassembler opcodes ;
   drop
   "ILLEGAL-INSTRUCTION" ;
 
-! : extract-opcode ( instruct -- opcode )
-!  15 12 bit-range 4 bits ;
-
-: (opcode$-0) ( array -- $ )
-  break
-  [ first 11 8 bit-range 4 bits ] keep swap
-  {
-    { 0 [ drop "ORI" ] }  ! ORI
-    { 2 [ cpu-andi ] } ! ANDI
-    [ opcode$-error ]
-  } case ;
 
 
 : dregister$ ( d -- $ )
@@ -43,6 +32,40 @@ TUPLE: disassembler opcodes ;
     { 6 [ "D6" ] }
     { 7 [ "D7" ] }
     [ drop f ]
+  } case ;
+
+
+: op-zero-ea ( reg mode array -- $ )
+  swap
+  {
+    { 0 [ drop dregister$ ] }
+    { 2 [ drop drop "2" ] }
+    { 7 [ drop drop "7" ] }
+    [ drop drop drop "ORI BAD" ]
+  } case ;
+
+: ori-byte ( array -- $ )
+  [ "ORI.B #$" ] dip
+  [ second 8 bits >hex append "," append ] keep
+  [ first 2 0 bit-range 3 bits ] keep ! resister first
+  [ first 5 3 bit-range 3 bits ] keep ! get mode
+  [ op-zero-ea append ] keep drop ;
+
+: ori-word ( array -- $ )
+  [ "ORI.W #$" ] dip
+  [ second >hex append "," append ] keep
+  [ first 2 0 bit-range 3 bits ] keep
+  [ first 5 3 bit-range 3 bits ] keep
+  [ op-zero-ea append ] keep drop ;
+
+: (opcode$-0) ( array -- $ )
+  break
+  [ first 11 6 bit-range 6 bits ] keep swap
+  {
+    { 0 [ ori-byte ] }  ! ORI
+    { 1 [ ori-word ] }  ! ORI
+    { 2 [ drop "ANDI" ] } ! ANDI
+    [ drop opcode$-error ]
   } case ;
 
 

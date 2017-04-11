@@ -889,7 +889,6 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
 
 
 : reset-exception ( cpu -- )
-  break
     [ alu>> alu-s-set ] keep
     [ alu>> alu-t-clr ] keep
     [ alu>> 7 swap alu-imask-write ] keep

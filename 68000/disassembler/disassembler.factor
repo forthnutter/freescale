@@ -35,18 +35,50 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 
-: op-zero-ea ( reg mode array -- $ )
+
+: aregister$ ( d -- $ )
+  {
+    { 0 [ "A0" ] }
+    { 1 [ "A1" ] }
+    { 2 [ "A2" ] }
+    { 3 [ "A3" ] }
+    { 4 [ "A4" ] }
+    { 5 [ "A5" ] }
+    { 6 [ "A6" ] }
+    { 7 [ "A7" ] }
+    [ drop f ]
+  } case ;
+
+
+: op-zero-status ( size array -- $ )
   swap
   {
-    { 0 [ drop dregister$ ] }
-    { 2 [ drop drop "2" ] }
-    { 7 [ drop drop "7" ] }
-    [ drop drop drop "ORI BAD" ]
+    { 0 [ drop "CCR" ] }
+    { 1 [ drop "SR" ] }
+    [ drop drop "BAD SIZE"]
+  } case ;
+
+: op-zero-mode-seven ( size reg array -- $ )
+  swap
+  {
+    { 4 [ op-zero-status ] }
+    [ drop drop drop "BAD REG"]
+  } case ;
+
+
+: op-zero-ea ( size reg mode array -- $ )
+  swap
+  {
+    { 0 [ drop [ drop ] dip  dregister$ ] }
+    { 2 [ drop drop drop "2" ] }
+    { 7 [ op-zero-mode-seven ] }
+    [ drop drop drop drop "BAD MODE" ]
   } case ;
 
 : ori-byte ( array -- $ )
   [ "ORI.B #$" ] dip
   [ second 8 bits >hex append "," append ] keep
+  [ first 7 6 bit-range 2 bits ] keep
   [ first 2 0 bit-range 3 bits ] keep ! resister first
   [ first 5 3 bit-range 3 bits ] keep ! get mode
   [ op-zero-ea append ] keep drop ;
@@ -54,6 +86,7 @@ TUPLE: disassembler opcodes ;
 : ori-word ( array -- $ )
   [ "ORI.W #$" ] dip
   [ second >hex append "," append ] keep
+  [ first 7 6 bit-range 2 bits ] keep
   [ first 2 0 bit-range 3 bits ] keep
   [ first 5 3 bit-range 3 bits ] keep
   [ op-zero-ea append ] keep drop ;
@@ -77,10 +110,11 @@ TUPLE: disassembler opcodes ;
     [ drop drop "bad" ]
   } case ;
 
-: move-rb-ea ( reg mode array -- $ )
+: move-ea ( reg mode array -- $ )
   swap ! get mode
   {
     { 0 [ drop dregister$ ] }
+    { 1 [ drop aregister$ ] }
     { 7 [ move-mode-seven$ ] }
     [ drop drop drop "bad" ]
   } case ;
@@ -91,17 +125,22 @@ TUPLE: disassembler opcodes ;
   [ "MOVE.B " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep
-  [ move-rb-ea ] keep [ append ] dip
+  [ move-ea ] keep [ append ] dip
   [ "," append ] dip
   [ first move-dest-reg ] keep
   [ first move-dest-mode ] keep
-  [ move-rb-ea ] keep [ append ] dip drop ;
-
+  [ move-ea ] keep [ append ] dip drop ;
 
 
 : (opcode$-2) ( array -- $ )
   break
-  opcode$-error ;
+  [ "MOVE.L "] dip
+  [ first move-source-reg ] keep
+  [ first move-source-mode ] keep
+  [ move-ea ] keep [ append ] dip
+  [ first move-dest-reg ] keep
+  [ first move-dest-mode ] keep
+  [ move-ea ] keep [ append ] dip drop ;
 
 
 : (opcode$-3) ( array -- $ )
@@ -111,7 +150,11 @@ TUPLE: disassembler opcodes ;
 
 : (opcode$-4) ( array -- $ )
   break
-  opcode$-error ;
+  [ first ] keep swap
+  {
+    { 0x4E70 [ drop "RESET" ] }
+    [ drop drop "BAD OPCODE 4" ]
+  } case ;
 
 
 : (opcode$-5) ( array -- $ )
@@ -119,9 +162,26 @@ TUPLE: disassembler opcodes ;
   opcode$-error ;
 
 
+: op-branch ( disp cond array -- $ )
+  swap
+  {
+    { 0 [ drop drop "0" ] }
+    { 1 [ drop drop "1" ] }
+    { 2 [ drop drop "2" ] }
+    { 3 [ drop drop "3" ] }
+    { 4 [ drop drop "4" ] }
+    { 5 [ drop drop "5" ] }
+    { 6 [ drop drop "6" ] }
+    { 7 [ drop drop "7" ] }
+    [ drop drop drop "BAD COND"]
+  } case ;
+
+
 : (opcode$-6) ( array -- $ )
   break
-  opcode$-error ;
+  [ first 7 0 bit-range 8 bits ] keep
+  [ first 11 8 bit-range 4 bits ] keep
+  [ op-branch ] keep drop ;
 
 
 : (opcode$-7) ( array -- $ )

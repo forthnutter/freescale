@@ -66,8 +66,7 @@ TUPLE: mc68k < cpu disasm asm ;
     [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
 
-: >hex-pad8 ( d -- s )
-    [ "$" ] dip >hex 8 CHAR: 0 pad-head append ;
+
 
 : >dec-pad9 ( d -- s )
     number>string 9 32 pad-head ;

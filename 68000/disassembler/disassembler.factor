@@ -11,6 +11,10 @@ IN: freescale.68000.disassembler
 
 TUPLE: disassembler opcodes ;
 
+
+: >hex-pad8 ( d -- s )
+    [ "$" ] dip >hex 8 CHAR: 0 pad-head append ;
+
 : opcode$-error ( cpu -- $ )
   drop
   "ILLEGAL-INSTRUCTION" ;
@@ -20,7 +24,12 @@ TUPLE: disassembler opcodes ;
 
 : (opcode$-0) ( array -- $ )
   break
-  opcode$-error ;
+  [ first 11 8 bit-range 4 bits ] keep swap
+  {
+    { 0 [ drop "ORI" ] }  ! ORI
+    { 2 [ cpu-andi ] } ! ANDI
+    [ opcode$-error ]
+  } case ;
 
 
 : dregister$ ( d -- $ )
@@ -36,11 +45,12 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
+
 : move-mode-seven$ ( reg array -- $ )
   swap ! get reg
   {
     { 0 [ drop "70" ] }
-    { 1 [ drop "71" ] }
+    { 1 [ [ "(" ] dip [ second ] keep third words-long >hex-pad8 append ").L" append ] }
     [ drop drop "bad" ]
   } case ;
 
@@ -55,7 +65,7 @@ TUPLE: disassembler opcodes ;
 
 : (opcode$-1) ( array -- $ )
   break
-  [ "move.b " ] dip
+  [ "MOVE.B " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep
   [ move-rb-ea ] keep [ append ] dip

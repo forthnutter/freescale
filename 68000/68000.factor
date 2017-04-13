@@ -27,7 +27,7 @@ TUPLE: mc68k < cpu disasm asm ;
     [ drop ] dip
   ]
   [
-    >hex 8 CHAR: 0 pad-head >upper ": " append swap
+    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
     [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;
 
@@ -48,7 +48,7 @@ TUPLE: mc68k < cpu disasm asm ;
     [ drop ] dip
   ]
   [
-    >hex 8 CHAR: 0 pad-head >upper ": " append swap
+    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
     2 group [ first2 >word< ] map
     [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;

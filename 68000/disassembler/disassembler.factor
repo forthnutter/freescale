@@ -13,7 +13,13 @@ TUPLE: disassembler opcodes ;
 
 
 : >hex-pad8 ( d -- s )
-    [ "$" ] dip >hex 8 CHAR: 0 pad-head append ;
+    [ "$" ] dip >hex 8 CHAR: 0 pad-head >upper append ;
+
+: >hex-pad4 ( d -- $ )
+  [ "$" ] dip >hex 4 CHAR: 0 pad-head >upper append ;
+
+: >hex-pad2 ( d -- $ )
+  [ "$" ] dip >hex 2 CHAR: 0 pad-head >upper append ;
 
 : opcode$-error ( cpu -- $ )
   drop
@@ -49,6 +55,10 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
+: >long< ( wh wl -- l )
+    [ 16 bits 16 shift ] dip 16 bits bitor ;
+
+
 
 : op-zero-status ( size array -- $ )
   swap
@@ -65,6 +75,14 @@ TUPLE: disassembler opcodes ;
     [ drop drop drop "BAD REG"]
   } case ;
 
+: op-zero-size ( array -- n )
+  first 7 6 bit-range 2 bits ;
+
+: op-zero-reg ( array -- n )
+  first 2 0 bit-range 3 bits ;
+
+: op-zero-mode ( array -- n )
+  first 5 3 bit-range 3 bits ;
 
 : op-zero-ea ( size reg mode array -- $ )
   swap
@@ -78,18 +96,28 @@ TUPLE: disassembler opcodes ;
 : ori-byte ( array -- $ )
   [ "ORI.B #$" ] dip
   [ second 8 bits >hex append "," append ] keep
-  [ first 7 6 bit-range 2 bits ] keep
-  [ first 2 0 bit-range 3 bits ] keep ! resister first
-  [ first 5 3 bit-range 3 bits ] keep ! get mode
+  [ op-zero-size ] keep
+  [ op-zero-reg ] keep ! resister first
+  [ op-zero-mode ] keep ! get mode
   [ op-zero-ea append ] keep drop ;
 
 : ori-word ( array -- $ )
   [ "ORI.W #$" ] dip
   [ second >hex append "," append ] keep
-  [ first 7 6 bit-range 2 bits ] keep
-  [ first 2 0 bit-range 3 bits ] keep
-  [ first 5 3 bit-range 3 bits ] keep
+  [ op-zero-size ] keep
+  [ op-zero-reg ] keep
+  [ op-zero-mode ] keep
   [ op-zero-ea append ] keep drop ;
+
+: andi-long ( array -- $ )
+  [ "ANDI.L #$" ] dip
+  [ second ] keep [ third ] keep [ >long<  >hex append "," append ] dip
+  [ op-zero-size ] keep
+  [ op-zero-reg ] keep
+  [ op-zero-mode ] keep
+  op-zero-ea append ;
+
+
 
 : (opcode$-0) ( array -- $ )
   break
@@ -97,7 +125,8 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ ori-byte ] }  ! ORI
     { 1 [ ori-word ] }  ! ORI
-    { 2 [ drop "ANDI" ] } ! ANDI
+    { 2 [ drop "ANDI.B" ] } ! ANDI
+    { 10 [ andi-long ] }
     [ drop opcode$-error ]
   } case ;
 
@@ -107,6 +136,7 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ drop "70" ] }
     { 1 [ [ "(" ] dip [ second ] keep third words-long >hex-pad8 append ").L" append ] }
+    { 4 [ [ "#" ] dip [ second ] keep third words-long >hex-pad8 append ] }
     [ drop drop "bad" ]
   } case ;
 
@@ -137,7 +167,7 @@ TUPLE: disassembler opcodes ;
   [ "MOVE.L "] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep
-  [ move-ea ] keep [ append ] dip
+  [ move-ea "," append ] keep [ append ] dip
   [ first move-dest-reg ] keep
   [ first move-dest-mode ] keep
   [ move-ea ] keep [ append ] dip drop ;
@@ -161,19 +191,39 @@ TUPLE: disassembler opcodes ;
   break
   opcode$-error ;
 
+: >signed$ ( x n -- $ )
+  [ bits ] keep 2dup 1 - bit?
+  [ 2^ - number>string ]
+  [ drop [ "+" ] dip number>string append ] if ;
+
+: op-branch-displace ( disp array -- $ )
+  swap
+  {
+    { 0 [ [ ".W " ] dip second 16 >signed$ append ] }
+    { 0xff [ drop ".L" ] }
+    [ drop drop ".B" ]
+  } case ;
 
 : op-branch ( disp cond array -- $ )
   swap
   {
     { 0 [ drop drop "0" ] }
     { 1 [ drop drop "1" ] }
-    { 2 [ drop drop "2" ] }
-    { 3 [ drop drop "3" ] }
-    { 4 [ drop drop "4" ] }
-    { 5 [ drop drop "5" ] }
-    { 6 [ drop drop "6" ] }
-    { 7 [ drop drop "7" ] }
-    [ drop drop drop "BAD COND"]
+    { 2 [ drop drop "BHI" ] }
+    { 3 [ drop drop "BLS" ] }
+    { 4 [ drop drop "BCC" ] }
+    { 5 [ drop drop "BCS" ] }
+    { 6 [ drop drop "BNE" ] }
+    { 7 [ drop drop "BEQ" ] }
+    { 8 [ drop drop "BVC" ] }
+    { 9 [ drop drop "BVS" ] }
+    { 10 [ [ "BPL" ] 2dip op-branch-displace append ] }
+    { 11 [ [ "BMI" ] 2dip op-branch-displace append ] }
+    { 12 [ drop drop "BGE" ] }
+    { 13 [ drop drop "BLT" ] }
+    { 14 [ drop drop "BGT" ] }
+    { 15 [ drop drop "BLE" ] }
+    [ drop drop drop "BAD COND" ]
   } case ;
 
 
@@ -218,10 +268,51 @@ TUPLE: disassembler opcodes ;
   break
   opcode$-error ;
 
+: ope-count ( cnt -- $ )
+  [ 0 = ] keep swap
+  [ drop 8 number>string ]
+  [ number>string "#" prepend ] if ;
 
-: (opcode$-E) ( cpu -- $ )
+: ope-ir ( array -- $ )
+  [ first 11 9 bit-range 3 bits ] keep
+  first 5 bit?
+  [ dregister$ ] [ ope-count ] if ;
+
+: ope-dir ( array -- $ )
+  first 8 bit?
+  [ "L" ] [ "R" ] if ;
+
+: ope-type ( array -- $ )
+  [ first 4 3 bit-range 2 bits ] keep swap
+  {
+    { 0 [ [ "AS" ] dip ope-dir append ] }
+    { 1 [ [ "LS" ] dip ope-dir append ] }
+    { 2 [ drop "rote" ] }
+    { 3 [ drop "rot" ] }
+    [ drop drop "BAD TYPE" ]
+  } case ;
+
+: (opcode$-E) ( array -- $ )
   break
-  opcode$-error ;
+  [ first 7 6 bit-range 2 bits ] keep swap ! get size to find the mode
+  {
+    {
+      0 [
+          [ ope-type ".B " append ] keep
+          [ ope-ir append "," append ] keep
+          first 2 0 bit-range 3 bits dregister$ append
+        ]
+    }
+    { 1 [ drop "W" ] }
+    {
+      2 [
+          [ ope-type ".L " append ] keep
+          [ ope-ir append "," append ] keep
+          first 2 0 bit-range 3 bits dregister$ append
+        ]
+    }
+    [ drop drop "M" ]   ! memory mode
+  } case ;
 
 
 : (opcode$-F) ( cpu -- $ )

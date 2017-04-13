@@ -27,8 +27,8 @@ TUPLE: mc68k < cpu disasm asm ;
     [ drop ] dip
   ]
   [
-    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
-    [ >hex 2 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    >hex-pad8 swap
+    [ >hex-pad2 ] { } map-as concat append
   ] if ;
 
 
@@ -50,7 +50,7 @@ TUPLE: mc68k < cpu disasm asm ;
   [
     >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
     2 group [ first2 >word< ] map
-    [ >hex 4 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    [ >hex 4 CHAR: 0 pad-head >upper " " append "$" prepend ] { } map-as concat append
   ] if ;
 
 ! memory display long
@@ -61,7 +61,7 @@ TUPLE: mc68k < cpu disasm asm ;
     [ drop ] dip
   ]
   [
-    >hex 8 CHAR: 0 pad-head >upper ": " append swap
+    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
     4 group [ first4 >long< ] map
     [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
   ] if ;

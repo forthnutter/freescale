@@ -16,7 +16,7 @@ CONSTANT: CPU-RESET 0
 CONSTANT: CPU-RUNNING 1
 CONSTANT: CPU-READY 2
 CONSTANT: ACCESS-FAULT 8
-CONSTANT: ADDRESS-ERROR 12
+CONSTANT: CPU-ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
@@ -39,7 +39,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
     swap
     dup f = swap dup t = swap [ or ] dip swap
     [
-        drop ADDRESS-ERROR >>state drop
+        drop CPU-ADDRESS-ERROR >>state drop
     ] [ swap >PC ] if ;
 
 : PC> ( cpu -- d )
@@ -83,7 +83,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
     swap
     dup f = swap dup t = swap [ or ] dip swap
     [
-        drop ADDRESS-ERROR >>state drop
+        drop CPU-ADDRESS-ERROR >>state drop
     ] [ swap >A7 ] if ;
 
 
@@ -462,6 +462,10 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
 : cpu-reset-models ( cpu -- cpu )
     [ f ] dip [ reset>> set-model ] keep
     [ t ] dip [ reset>> set-model ] keep ;
+
+: cpu-add-reset ( obj cpu -- cpu )
+  [ reset>> add-connection ] keep ;
+
 
 : cpu-andi-word-data ( cpu -- )
   [ cashe>> second 16 bits ] keep
@@ -931,6 +935,16 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
 
+: cpu-address-exception ( cpu -- )
+  [ inexception>> ] keep swap
+  [  ]
+  [
+    [ t >>inexception drop ] keep
+
+    [ f >>inexception drop ] keep
+  ] if ;
+
+
 ! Execute one cycles
 : execute-cycle ( cpu -- )
     [ dup cpu-running? ]
@@ -938,6 +952,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
         dup cpu-state
         {
             { CPU-RESET [ dup reset-exception ] }   ! do reset cycle
+            { CPU-ADDRESS-ERROR [ dup address-exception ] }
             { CPU-UNKNOWN [ dup reset ] }
             { CPU-RUNNING [ dup execute-pc-opcode ] }
             [ drop CPU-UNKNOWN >>state ]
@@ -975,4 +990,4 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception ;
+  <exception> >>exception [ exception>> ] keep cpu-add-reset ;

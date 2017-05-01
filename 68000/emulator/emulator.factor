@@ -936,12 +936,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
     dup exception>> drop drop ;
 
 : cpu-address-exception ( cpu -- )
-  [ inexception>> ] keep swap
+  [ exception>> ] keep swap
   [  ]
   [
-    [ t >>inexception drop ] keep
+    [ t >>exception drop ] keep
 
-    [ f >>inexception drop ] keep
+    [ f >>exception drop ] keep
   ] if ;
 
 
@@ -952,7 +952,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
         dup cpu-state
         {
             { CPU-RESET [ dup reset-exception ] }   ! do reset cycle
-            { CPU-ADDRESS-ERROR [ dup address-exception ] }
+            { CPU-ADDRESS-ERROR [ dup execute-pc-opcode ] }
             { CPU-UNKNOWN [ dup reset ] }
             { CPU-RUNNING [ dup execute-pc-opcode ] }
             [ drop CPU-UNKNOWN >>state ]
@@ -990,4 +990,4 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception [ exception>> ] keep cpu-add-reset ;
+  EXCEPTION-RESET <exception> >>exception ;

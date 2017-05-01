@@ -1,23 +1,24 @@
 ! Exception routine
 
-USING: kernel ;
+USING: kernel accessors models ;
 
 IN: freescale.68000.emulator.exception
 
 
+CONSTANT: EXCEPTION-RESET 0
+CONSTANT: EXCEPTION-RUNNING 1
+CONSTANT: EXCEPTION-READY 2
+CONSTANT: EXCEPTION-ACCESS-FAULT 8
+CONSTANT: EXCEPTION-ADDRESS-ERROR 12
+CONSTANT: EXCEPTION-ILLEGAL-INSTRUCTION 16
+CONSTANT: EXCEPTION-UNKNOWN 32
 
-TUPLE: exception program read instruction ;
+TUPLE: exception model program read instruction ;
 
 
 
-: <exception> ( -- exception )
-    exception new ;
+: <exception> ( value -- exception )
+    exception new-model ;
 
-
-! this changeds when reset happlens
-: exception model-changed
-  f >>program
-  t >>read
-  t >>instruction drop ;
-
-  
+: exception-set ( value exception -- )
+  drop ;

@@ -227,6 +227,15 @@ M: alu model-activated
 : alu-t-clr ( alu -- )
     [ value>> T-BIT clear-bit ] keep set-model ;
 
+! trace read
+: alu-t> ( alu -- b )
+  value>> T-BIT dup bit-range ;
+
+! get staus of trace
+: alu-t? ( alu -- ? )
+    alu-t> 0 = not ;
+
+
 ! read Status Register
 : alu-sr> ( alu -- sr )
     value>> 16 bits ;
@@ -324,5 +333,3 @@ M: alu model-activated
   [ ?alu-z ] keep
   [ alu-v-clr ] keep
   alu-c-clr ;
-
-  

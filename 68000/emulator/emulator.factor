@@ -26,7 +26,9 @@ CONSTANT: CPU-UNKNOWN 32
 ! ar is a set of address registers
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
-TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
+TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state
+    reset exception doublefault stop trace halt sync ;
+
 
 : cpu-exception ( excep cpu -- )
     drop drop ;
@@ -966,6 +968,31 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
     [ ar>> [ drop 0 ] map ] keep swap >>ar
     swap [ reset ] [ drop ] if ;
 
+: cpu-halted ( cpu -- ? )
+  doublefault>> ;
+
+: process ( cpu -- )
+  [ cpu-halted ] keep swap
+  [
+    [ halt>> 0 set-model ] keep
+    [ sync>> 4 set-model ] keep
+  ]
+  [
+    [ 1 swap exception ] keep
+    [
+      [ stop>> ] keep swap
+      [
+!        [ irq-sample ] keep
+        [ sync>> 2 set-model ] keep
+      ]
+      [
+        [ alu>> t? ] keep swap >>trace
+        execute-pc-opcode
+      ] if
+    ] keep
+  ] if ;
+
+
 : new-cpu ( cpu -- cpu' )
   f swap new-model
   <alu> >>alu
@@ -977,7 +1004,12 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception ;
+  <exception> >>exception
+  f >>doublefault
+  f >>stop
+  f >>trace
+  f <model> >>halt
+  f <model> >>sync ;
 
 : <cpu> ( -- cpu )
   f cpu new-model
@@ -990,4 +1022,9 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state reset exception ;
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  EXCEPTION-RESET <exception> >>exception ;
+  EXCEPTION-RESET <exception> >>exception
+  f >>doublefault
+  f >>stop
+  f >>trace
+  f <model> >>halt
+  f <model> >>sync ;

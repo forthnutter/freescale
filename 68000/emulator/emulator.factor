@@ -20,6 +20,9 @@ CONSTANT: CPU-ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
+! Generic functions read and write memory
+GENERIC: read-byte ( n address cpu -- seq )
+GENERIC: write-byte ( n seq address cpu -- )
 
 ! memory is a memory model
 ! alu is Arithmatic Logic Unit
@@ -28,6 +31,10 @@ CONSTANT: CPU-UNKNOWN 32
 ! reset is model to run all things that need to reset
 TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state
     reset exception doublefault stop trace halt sync ;
+
+
+
+
 
 
 : cpu-exception ( excep cpu -- )
@@ -937,14 +944,14 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
 
-: cpu-address-exception ( cpu -- )
-  [ exception>> ] keep swap
-  [  ]
-  [
-    [ t >>exception drop ] keep
-
-    [ f >>exception drop ] keep
-  ] if ;
+! : cpu-address-exception ( cpu -- )
+!  [ exception>> ] keep swap
+!  [  ]
+!  [
+!    [ t >>exception drop ] keep
+!
+!    [ f >>exception drop ] keep
+!  ] if ;
 
 
 ! Execute one cycles
@@ -971,26 +978,26 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state
 : cpu-halted ( cpu -- ? )
   doublefault>> ;
 
-: process ( cpu -- )
-  [ cpu-halted ] keep swap
-  [
-    [ halt>> 0 set-model ] keep
-    [ sync>> 4 set-model ] keep
-  ]
-  [
-    [ 1 swap exception ] keep
-    [
-      [ stop>> ] keep swap
-      [
+! : process ( cpu -- )
+!  [ cpu-halted ] keep swap
+!  [
+!    [ halt>> 0 set-model ] keep
+!    [ sync>> 4 set-model ] keep
+!  ]
+!  [
+!    [ 1 swap exception ] keep
+!    [
+!      [ stop>> ] keep swap
+!      [
 !        [ irq-sample ] keep
-        [ sync>> 2 set-model ] keep
-      ]
-      [
-        [ alu>> t? ] keep swap >>trace
-        execute-pc-opcode
-      ] if
-    ] keep
-  ] if ;
+!        [ sync>> 2 set-model ] keep
+!      ]
+!      [
+!        [ alu>> t? ] keep swap >>trace
+!        execute-pc-opcode
+!      ] if
+!    ] keep
+!  ] if ;
 
 
 : new-cpu ( cpu -- cpu' )
@@ -1004,7 +1011,7 @@ TUPLE: cpu < memory alu ar dr pc rx cycles cashe opcodes state
   16 [ not-implemented ] <array> >>opcodes
   [ opcode-build ] keep
   f <model> >>reset
-  <exception> >>exception
+  f <exception> >>exception
   f >>doublefault
   f >>stop
   f >>trace

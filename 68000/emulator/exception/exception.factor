@@ -13,7 +13,7 @@ CONSTANT: EXCEPTION-ADDRESS-ERROR 12
 CONSTANT: EXCEPTION-ILLEGAL-INSTRUCTION 16
 CONSTANT: EXCEPTION-UNKNOWN 32
 
-TUPLE: exception model program read instruction ;
+TUPLE: exception < model program read instruction ;
 
 
 
@@ -21,4 +21,4 @@ TUPLE: exception model program read instruction ;
     exception new-model ;
 
 : exception-set ( value exception -- )
-  drop ;
+  drop drop ;

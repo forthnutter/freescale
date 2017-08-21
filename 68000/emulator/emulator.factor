@@ -21,8 +21,8 @@ CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
 ! Generic functions read and write memory
-GENERIC: read-byte ( n address cpu -- seq )
-GENERIC: write-byte ( n seq address cpu -- )
+GENERIC: read-bytes ( n address cpu -- seq )
+GENERIC: write-bytes ( n seq address cpu -- )
 
 ! memory is a memory model
 ! alu is Arithmatic Logic Unit

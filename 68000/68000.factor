@@ -43,7 +43,7 @@ TUPLE: mc68k < cpu disasm asm ;
 ! memory display words
 : mdw ( n address mc68k -- str/f )
   [ >even ] 2dip    ! make sure we have even number of bytes
-  [ memory-read ] 2keep drop  [ dup f = ] dip swap
+  [ read-bytes ] 2keep drop  [ dup f = ] dip swap
   [
     [ drop ] dip
   ]
@@ -119,7 +119,7 @@ TUPLE: mc68k < cpu disasm asm ;
   D7> string-dr "D7: " prepend ;
 
 ! Build the DX strings into an array
-: string-DX ( mc68k -- array )
+: string-DX ( cpu -- array )
   0 7 [a,b]
   [
     number>string "string-D" prepend
@@ -186,13 +186,13 @@ TUPLE: mc68k < cpu disasm asm ;
     1quotation [ dup ] dip call( cpu -- str )
   ] map [ drop ] dip ;
 
-: string-PC ( mc68k -- $ )
+: string-PC ( cpu -- $ )
   "PC: " swap [ 6 swap [ PC> ] keep mdw ] keep
   [ append ] dip
   [ " " append ] dip [ 6 swap cpu-pc-read-array ] keep
   [ disasm>> disassemble-array ] keep drop append ;
 
-: single-step ( mc68k -- )
+: single-step ( cpu -- )
   execute-cycle ;
 
 

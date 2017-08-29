@@ -6,7 +6,7 @@ USING:
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise freescale.68000.emulator.exception
-    freescale.68000.emulator.alu models models.memory ascii ;
+    freescale.68000.emulator.alu models ascii ;
 
 
 IN: freescale.68000.emulator
@@ -22,7 +22,7 @@ CONSTANT: CPU-UNKNOWN 32
 
 ! Generic functions read and write memory
 GENERIC: read-bytes ( n address cpu -- seq )
-GENERIC: write-bytes ( n seq address cpu -- )
+GENERIC: write-bytes ( seq address cpu -- )
 
 ! memory is a memory model
 ! alu is Arithmatic Logic Unit
@@ -232,33 +232,33 @@ TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
     [ 31 16 bit-range ] keep
     15 0 bit-range ;
 
-: cpu-write-byte ( d address cpu -- ? )
+: cpu-write-byte ( d address cpu --  )
     [ 1byte-array ] 2dip
-    memory-write ;
+    write-bytes ;
 
 ! write word to memory
-: cpu-write-word ( d address cpu -- ? )
+: cpu-write-word ( d address cpu --  )
     [ word-bytes 2byte-array ] 2dip
-    memory-write ;
+    write-bytes ;
 
 
 ! write long to memory
-: cpu-write-long ( dddd address cpu -- ? )
+: cpu-write-long ( dddd address cpu --  )
     [ long-bytes 4byte-array ] 2dip
-    memory-write ;
+    write-bytes ;
 
 
 : bytes>number ( seq -- number )
     0 [ [ 8 shift ] dip bitor ] reduce ;
 
 : cpu-read-byte ( address cpu -- d )
-    [ 1 ] 2dip memory-read bytes>number ;
+    [ 1 ] 2dip read-bytes bytes>number ;
 
 : cpu-read-word ( address cpu -- d )
-    [ 2 ] 2dip memory-read bytes>number ;
+    [ 2 ] 2dip read-bytes bytes>number ;
 
 : cpu-read-long ( address cpu -- d )
-    [ 4 ] 2dip memory-read bytes>number ;
+    [ 4 ] 2dip read-bytes bytes>number ;
 
 : cpu-pc-read ( cpu -- d )
     [ PC> ] keep cpu-read-word ;
@@ -576,7 +576,7 @@ TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
   [ cashe>> second ] keep
   [ PC+ ] keep
   [ cashe>> third words-long ] keep
-  [ cpu-write-byte drop ] keep
+  [ cpu-write-byte ] keep
   PC+ ;
 
 : cpu-move-wb-mode-seven ( data reg cpu -- )

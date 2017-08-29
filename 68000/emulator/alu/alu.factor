@@ -27,9 +27,7 @@ CONSTANT: IP     0b11100000000
 TUPLE: alu < model ;
 
 
-! make a alu
-: <alu> ( -- alu )
-    0 alu new-model ;
+
 
 
 M: alu model-activated
@@ -333,3 +331,10 @@ M: alu model-activated
   [ ?alu-z ] keep
   [ alu-v-clr ] keep
   alu-c-clr ;
+
+
+! make a alu
+: <alu> ( -- alu )
+  0 alu new-model
+  [ 7 swap alu-imask-write ] keep
+  [ alu-s-set ] keep ;

@@ -196,6 +196,11 @@ TUPLE: mc68k < cpu disasm asm ;
   execute-cycle ;
 
 
+: new-mc68k ( 68k -- )
+  new-cpu
+  <disassembler> >>disasm ;
+
+  
 : <mc68k> ( -- 68k )
   mc68k new-cpu
   <disassembler> >>disasm ;

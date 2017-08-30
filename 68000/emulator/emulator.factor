@@ -30,7 +30,7 @@ GENERIC: write-bytes ( seq address cpu -- )
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
 TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
-    reset exception doublefault stop trace halt sync ;
+    reset exception doublefault stop trace halt sync mnemo ;
 
 
 

@@ -196,6 +196,22 @@ TUPLE: mc68k < cpu disasm asm ;
   execute-cycle ;
 
 
+! disassemble from address
+: mnemonic-dump ( address cpu -- str )
+  [ rom-nbytes ] 2keep [ dump-rom 14 0x20 pad-tail ] 2keep
+  [ string-opcode ] keep [ append ] dip
+  drop ;
+
+! generate list of mnemonics
+: list-mnemonic-dump ( l address cpu -- str )
+    [ f <array> ] 2dip rot
+    [
+      drop
+      [ rom-nbytes ] 2keep
+      [ dup [ + ] dip ] dip
+      swap
+    ] map [ drop ] 2dip
+    [ over mnemonic-dump ] map [ drop ] dip ;
 
 
 : <mc68k> ( -- 68k )

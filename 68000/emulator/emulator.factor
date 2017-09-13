@@ -20,6 +20,28 @@ CONSTANT: CPU-ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
+! Table of number of bytes for each opcode
+CONSTANT: nbytes-seq {
+        1 2 3 1 1 2 1 1 1 1 1 1 1 1 1 1
+        3 2 3 1 1 2 1 1 1 1 1 1 1 1 1 1
+        3 2 1 1 2 2 1 1 1 1 1 1 1 1 1 1
+        3 2 1 1 2 2 1 1 1 1 1 1 1 1 1 1
+        2 2 2 3 2 2 1 1 1 1 1 1 1 1 1 1
+        2 2 2 3 2 2 1 1 1 1 1 1 1 1 1 1
+        2 2 2 3 3 3 1 1 1 1 1 1 1 1 1 1
+        2 2 2 1 2 3 2 2 2 2 2 2 2 2 2 2
+        2 2 2 1 1 3 2 2 2 2 2 2 2 2 2 2
+        3 2 2 1 2 2 1 1 1 1 1 1 1 1 1 1
+        2 2 2 1 1 1 2 2 2 2 2 2 2 2 2 2
+        2 2 2 1 3 3 3 3 3 3 3 3 3 3 3 3
+        2 2 2 1 1 2 1 1 1 1 1 1 1 1 1 1
+        2 2 2 1 1 3 1 1 2 2 2 2 2 2 2 2
+        1 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1
+        1 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1
+    }
+
+
+
 ! Generic functions read and write memory
 GENERIC: read-bytes ( n address cpu -- seq )
 GENERIC: write-bytes ( seq address cpu -- )
@@ -943,6 +965,10 @@ TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
 ! here we process exception
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
+
+! get the number of bytes for instrction in the array
+: number-bytes ( array -- n )
+  first extract-opcode nbytes-seq nth ;
 
 ! : cpu-address-exception ( cpu -- )
 !  [ exception>> ] keep swap

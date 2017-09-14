@@ -32,12 +32,20 @@ TUPLE: mc68k < cpu disasm asm ;
   ] if ;
 
 
-! need turn a byte array into word array
+
+
+
+! need turn two bytes into word
 : >word< ( a b -- ab )
-        [ 8 bits 8 shift ] dip 8 bits bitor ;
+  [ 8 bits 8 shift ] dip 8 bits bitor ;
+
+! turn a bytr array into word array
+: word-array ( barray -- warray )
+  2 group [ first2 >word< ] map ;
+
 
 : >long< ( a b c d -- abcd )
-        [ >word< 16 bits 16 shift ] 2dip >word< 16 bits bitor ;
+    [ >word< 16 bits 16 shift ] 2dip >word< 16 bits bitor ;
 
 
 ! memory display words
@@ -198,7 +206,8 @@ TUPLE: mc68k < cpu disasm asm ;
 
 ! disassemble from address
 : mnemonic-dump ( address cpu -- str )
-  [ [ 6 ] 2dip read-bytes number-bytes ] 2keep [ mdw 14 0x20 pad-tail ] 2keep
+  [ [ 6 ] 2dip read-bytes word-array number-bytes ] 2keep
+  [ mdw 14 0x20 pad-tail ] 2keep
   [ mnemo>> disassemble-array ] keep [ append ] dip
   drop ;
 

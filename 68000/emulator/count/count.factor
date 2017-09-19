@@ -12,139 +12,144 @@ USING:
     freescale.68000.emulator.alu models ascii ;
 
 
-IN: freescale.68000.count
+IN: freescale.68000.emulator.count
 
-TUPLE: count bcount cycle ;
+TUPLE: count bytes cycles ;
 
 
-: (bytes-0)
+: (bytes-0) ( opcode -- n )
   ;
 
-: (bytes-1)
+: (bytes-1) ( opcode -- n )
   ;
 
-: (bytes-2)
+: (bytes-2) ( opcode -- n )
   ;
 
-: (bytes-3)
+: (bytes-3) ( opcode -- n )
   ;
 
-: (bytes-4)
+: (bytes-4) ( opcode -- n )
   ;
 
-: (bytes-5)
+: (bytes-5) ( opcode -- n )
   ;
 
-: (bytes-6)
+: (bytes-6) ( opcode -- n )
   ;
 
-: (bytes-7)
+: (bytes-7) ( opcode -- n )
   ;
 
-: (bytes-8)
+: (bytes-8) ( opcode -- n )
   ;
 
-: (bytes-9)
+: (bytes-9) ( opcode -- n )
   ;
 
-: (bytes-A)
+: (bytes-A) ( opcode -- n )
   ;
 
-: (bytes-B)
+: (bytes-B) ( opcode -- n )
   ;
 
-: (bytes-C)
+: (bytes-C) ( opcode -- n )
   ;
 
-: (bytes-D)
+: (bytes-D) ( opcode -- n )
   ;
 
-: (bytes-E)
+: (bytes-E) ( opcode -- n)
   ;
 
-: (bytes-F)
+: (bytes-F) ( -- )
   ;
 
 ! generate the opcode array here
-: count-bytes ( count -- )
-  bcount>> dup
+: count-bytes-build ( count -- )
+  bytes>> dup
   [
     [ drop ] dip
     [
       >hex >upper
       "(bytes-" swap append ")" append
-      "freescale.68000.count" lookup-word 1quotation
+      "freescale.68000.emulator.count" lookup-word 1quotation
     ] keep
     [ swap ] dip swap [ set-nth ] keep
   ] each-index drop ;
 
-
-: (cycles-0)
+! find number of bytes in opcode
+: count-bytes ( opcode count -- n )
+      [ 6 swap cpu-pc-read-array ] keep [ cashe<< ] keep [ cashe>> first ] keep
+      [ extract-opcode ] dip [ opcodes>> nth ] keep swap call( cpu -- )
   ;
 
-: (cycles-1)
+: (cycles-0) ( -- )
   ;
 
-: (cycles-2)
+: (cycles-1) ( -- )
   ;
 
-: (cycles-3)
+: (cycles-2) ( -- )
   ;
 
-: (cycles-4)
+: (cycles-3) ( -- )
   ;
 
-: (cycles-5)
+: (cycles-4) ( -- )
   ;
 
-: (cycles-6)
+: (cycles-5) ( -- )
   ;
 
-: (cycles-7)
+: (cycles-6) ( -- )
   ;
 
-: (cycles-8)
+: (cycles-7) ( -- )
   ;
 
-: (cycles-9)
+: (cycles-8) ( -- )
   ;
 
-: (cycles-A)
+: (cycles-9) ( -- )
   ;
 
-: (cycles-B)
+: (cycles-A) ( -- )
   ;
 
-: (cycles-C)
+: (cycles-B) ( -- )
   ;
 
-: (cycles-D)
+: (cycles-C) ( -- )
   ;
 
-: (cycles-E)
+: (cycles-D) ( -- )
   ;
 
-: (cycles-F)
+: (cycles-E) ( -- )
+  ;
+
+: (cycles-F) ( -- )
   ;
 
 ! generate the opcode array here
-: count-cycles ( count -- )
+: count-cycles-build ( count -- )
   cycles>> dup
   [
     [ drop ] dip
     [
       >hex >upper
       "(cycles-" swap append ")" append
-        "freescale.68000.count" lookup-word 1quotation
+        "freescale.68000.emulator.count" lookup-word 1quotation
     ] keep
     [ swap ] dip swap [ set-nth ] keep
   ] each-index drop ;
 
 : count-build ( count -- )
-  16 0 <array> >>bcount
-  16 0 <array> >>cycle
-  [ count-bytes ] keep
-  count-cycles ;
+  16 0 <array> >>bytes
+  16 0 <array> >>cycles
+  [ count-bytes-build ] keep
+  count-cycles-build ;
 
 : <count-opcode> ( --  count )
-  count new ;
+  count new [ count-build ] keep ;

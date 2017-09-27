@@ -59,10 +59,15 @@ TUPLE: count bytes cycles ;
 : (bytes-D) ( opcode -- n )
   ;
 
-: (bytes-E) ( opcode -- n)
+: (bytes-E) ( opcode -- n )
   ;
 
-: (bytes-F) ( -- )
+: (bytes-F) ( opcode -- n )
+  ;
+
+! now we return the number of bytes
+: count-number-bytes ( array count -- n )
+  [ dup first extract-opcode ] dip
   ;
 
 ! generate the opcode array here
@@ -84,52 +89,52 @@ TUPLE: count bytes cycles ;
       [ extract-opcode ] dip [ opcodes>> nth ] keep swap call( cpu -- )
   ;
 
-: (cycles-0) ( -- )
+: (cycles-0) ( count -- n )
   ;
 
-: (cycles-1) ( -- )
+: (cycles-1) ( count -- n )
   ;
 
-: (cycles-2) ( -- )
+: (cycles-2) ( count -- n )
   ;
 
-: (cycles-3) ( -- )
+: (cycles-3) ( count -- n )
   ;
 
-: (cycles-4) ( -- )
+: (cycles-4) ( count -- n )
   ;
 
-: (cycles-5) ( -- )
+: (cycles-5) ( count -- n )
   ;
 
-: (cycles-6) ( -- )
+: (cycles-6) ( count -- n )
   ;
 
-: (cycles-7) ( -- )
+: (cycles-7) ( count -- n )
   ;
 
-: (cycles-8) ( -- )
+: (cycles-8) ( count -- n )
   ;
 
-: (cycles-9) ( -- )
+: (cycles-9) ( count -- n )
   ;
 
-: (cycles-A) ( -- )
+: (cycles-A) ( count -- n )
   ;
 
-: (cycles-B) ( -- )
+: (cycles-B) ( count -- n )
   ;
 
-: (cycles-C) ( -- )
+: (cycles-C) ( count -- n )
   ;
 
-: (cycles-D) ( -- )
+: (cycles-D) ( count -- n )
   ;
 
-: (cycles-E) ( -- )
+: (cycles-E) ( count -- n )
   ;
 
-: (cycles-F) ( -- )
+: (cycles-F) ( count -- n )
   ;
 
 ! generate the opcode array here

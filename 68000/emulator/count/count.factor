@@ -14,55 +14,74 @@ USING:
 
 IN: freescale.68000.emulator.count
 
-TUPLE: count bytes cycles ;
+TUPLE: bc-count bytes cycles ;
 
-
+! Bit Manipulation
 : (bytes-0) ( opcode -- n )
-  ;
+  11 0 bit-range
+  {
+    { 0 [ 2 ] }
+    [ drop ]
+  } case ;
 
 : (bytes-1) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-2) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-3) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-4) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-5) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-6) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-7) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-8) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-9) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-A) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-B) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-C) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-D) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-E) ( opcode -- n )
+  drop 2
   ;
 
 : (bytes-F) ( opcode -- n )
+  drop 2
   ;
 
 ! now we return the number of bytes

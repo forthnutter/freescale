@@ -51,7 +51,7 @@ GENERIC: write-bytes ( seq address cpu -- )
 ! ar is a set of address registers
 ! dr is a set of data registes
 ! reset is model to run all things that need to reset
-TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
+TUPLE: cpu alu ar dr pc rx bcount cashe opcodes state
     reset exception doublefault stop trace halt sync mnemo ;
 
 
@@ -1043,19 +1043,4 @@ TUPLE: cpu alu ar dr pc rx cycles cashe opcodes state
   f <model> >>sync ;
 
 : <cpu> ( -- cpu )
-  f cpu new-model
-  <alu> >>alu
-  8 f <array> >>dr
-  9 f <array> >>ar
-  [ alu>> 7 swap alu-imask-write ] keep
-  [ alu>> alu-s-set ] keep
-  [ f swap cpu-power ] keep
-  16 [ not-implemented ] <array> >>opcodes
-  [ opcode-build ] keep
-  f <model> >>reset
-  EXCEPTION-RESET <exception> >>exception
-  f >>doublefault
-  f >>stop
-  f >>trace
-  f <model> >>halt
-  f <model> >>sync ;
+  cpu new-cpu ;

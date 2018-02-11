@@ -966,9 +966,13 @@ TUPLE: cpu alu ar dr pc rx bcount cashe opcodes state
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
 
+! from the instruct get the nuber of bytes
+: get-nbytes ( exe -- n )
+  extract-opcode nbytes-seq nth ;
+
 ! get the number of bytes for instrction in the array
 : number-bytes ( array -- n )
-  first extract-opcode nbytes-seq nth ;
+  first get-nbytes ;
 
 ! : cpu-address-exception ( cpu -- )
 !  [ exception>> ] keep swap

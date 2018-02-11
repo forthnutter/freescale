@@ -213,13 +213,11 @@ TUPLE: mc68k < cpu disasm asm ;
 
 ! generate list of mnemonics
 : list-mnemonic-dump ( l address cpu -- str )
-    [ f <array> ] 2dip rot
-    [
-      drop
-      [ number-bytes ] 2keep
-      [ dup [ + ] dip ] dip
-      swap
-    ] map [ drop ] 2dip
+    [ 0 swap 2 <range> >array ] 2dip ! create an array size of l + 2
+    [ [ + ] curry map dup ] dip  ! now add address to all array elements
+    [ [ cpu-read-word ] curry map ] keep ! read word elemets from memory
+    [ [ get-nbytes ] map swap ] dip
+    [ mnemonic-dump ] curry map
     [ over mnemonic-dump ] map [ drop ] dip ;
 
 

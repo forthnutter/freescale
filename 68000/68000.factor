@@ -13,7 +13,7 @@ USING:
 
 IN: freescale.68000
 
-TUPLE: mc68k < cpu disasm asm ;
+TUPLE: M68000 < cpu mnemo asm ;
 
 
 : mc68k-disasm ( mc68k -- disasm )
@@ -50,7 +50,7 @@ TUPLE: mc68k < cpu disasm asm ;
 
 ! memory display words
 : mdw ( n address mc68k -- str/f )
-  [ >even ] 2dip    ! make sure we have even number of bytes
+  [ 1 shift ] 2dip    ! make sure we have even number of bytes
   [ read-bytes ] 2keep drop  [ dup f = ] dip swap
   [
     [ drop ] dip
@@ -217,10 +217,14 @@ TUPLE: mc68k < cpu disasm asm ;
     [ [ + ] curry map dup ] dip  ! now add address to all array elements
     [ [ cpu-read-word ] curry map ] keep ! read word elemets from memory
     [ [ get-nbytes ] map swap ] dip
-    [ mnemonic-dump ] curry map
+    [ break mnemonic-dump ] curry map
     [ over mnemonic-dump ] map [ drop ] dip ;
 
 
-: <mc68k> ( -- 68k )
-  mc68k new-cpu
+: new-68000 ( M68000 -- 'M68000 )
+  new-cpu
+  <disassembler> >>mnemo ;
+
+: <M68000> ( -- M68000 )
+  M68000 new-cpu
   <disassembler> >>disasm ;

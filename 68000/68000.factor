@@ -17,18 +17,24 @@ TUPLE: M68000 < cpu mnemo asm ;
 
 
 : mc68k-disasm ( mc68k -- disasm )
-  disasm>> ;
+  mnemo>> ;
 
 
 ! memory display or dump bytes
 : mdb ( n address mc68k -- str/f )
-  [ memory-read ] 2keep drop [ dup f = ] dip swap
+  [ dup f = ] dip swap
   [
-    [ drop ] dip
+    drop drop drop f
   ]
   [
-    >hex-pad8 swap
-    [ >hex-pad2 ] { } map-as concat append
+    [ memory-read ] 2keep drop [ dup f = ] dip swap
+    [
+      [ drop ] dip
+    ]
+    [
+      >hex-pad8 swap
+      [ >hex-pad2 ] { } map-as concat append
+    ] if
   ] if ;
 
 
@@ -50,28 +56,36 @@ TUPLE: M68000 < cpu mnemo asm ;
 
 ! memory display words
 : mdw ( n address mc68k -- str/f )
-  [ 1 shift ] 2dip    ! make sure we have even number of bytes
-  [ read-bytes ] 2keep drop  [ dup f = ] dip swap
+  [ dup f = ] dip swap
+  [ drop drop drop f ]
   [
-    [ drop ] dip
-  ]
-  [
-    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
-    2 group [ first2 >word< ] map
-    [ >hex 4 CHAR: 0 pad-head >upper " " append "$" prepend ] { } map-as concat append
+    [ 1 shift ] 2dip    ! make sure we have even number of bytes
+    [ read-bytes ] 2keep drop  [ dup f = ] dip swap
+    [
+      [ drop ] dip
+    ]
+    [
+      >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
+      2 group [ first2 >word< ] map
+      [ >hex 4 CHAR: 0 pad-head >upper " " append "$" prepend ] { } map-as concat append
+    ] if
   ] if ;
 
 ! memory display long
 : mdl ( n address mc68k -- str/f )
-  [ >even 0b11 unmask ] 2dip
-  [ memory-read ] 2keep drop [ dup f = ] dip swap
+  [ dup f = ] dip swap
+  [ drop drop drop f ]
   [
-    [ drop ] dip
-  ]
-  [
-    >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
-    4 group [ first4 >long< ] map
-    [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    [ >even 0b11 unmask ] 2dip
+    [ memory-read ] 2keep drop [ dup f = ] dip swap
+    [
+      [ drop ] dip
+    ]
+    [
+      >hex 8 CHAR: 0 pad-head >upper ": " append "$" prepend swap
+      4 group [ first4 >long< ] map
+      [ >hex 8 CHAR: 0 pad-head >upper " " append ] { } map-as concat append
+    ] if
   ] if ;
 
 
@@ -227,4 +241,4 @@ TUPLE: M68000 < cpu mnemo asm ;
 
 : <M68000> ( -- M68000 )
   M68000 new-cpu
-  <disassembler> >>disasm ;
+  <disassembler> >>mnemo ;

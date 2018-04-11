@@ -8,12 +8,13 @@ USING:
    tools.continuations
    freescale.binfile arrays prettyprint
    math.ranges models.memory quotations words
-   freescale.68000.emulator freescale.68000.disassembler ;
+   freescale.68000.emulator freescale.68000.disassembler
+   freescale.68000.count ;
 
 
 IN: freescale.68000
 
-TUPLE: M68000 < cpu mnemo asm ;
+TUPLE: M68000 < cpu mnemo dcount asm ;
 
 
 : mc68k-disasm ( mc68k -- disasm )
@@ -237,7 +238,8 @@ TUPLE: M68000 < cpu mnemo asm ;
 
 : new-68000 ( M68000 -- 'M68000 )
   new-cpu
-  <disassembler> >>mnemo ;
+  <disassembler> >>mnemo
+  <count-opcode> >>dcount ;
 
 : <M68000> ( -- M68000 )
   M68000 new-cpu

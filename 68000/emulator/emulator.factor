@@ -46,14 +46,24 @@ CONSTANT: nbytes-seq {
 GENERIC: read-bytes ( n address cpu -- seq )
 GENERIC: write-bytes ( seq address cpu -- )
 
-! memory is a memory model
+! cpu name of class
 ! alu is Arithmatic Logic Unit
 ! ar is a set of address registers
 ! dr is a set of data registes
+! pc is the program counter
+! rx
+! cashe instrcution cashe
+! opcode array of opcodes call
+! state of cpu
 ! reset is model to run all things that need to reset
-TUPLE: cpu alu ar dr pc rx bcount cashe opcodes state
+! exception
+! doublefault
+! stop
+! trace
+! halt
+! sync
+TUPLE: cpu alu ar dr pc rx cashe opcodes state
     reset exception doublefault stop trace halt sync ;
-! mnemo ;
 
 
 

@@ -176,4 +176,4 @@ TUPLE: bc-count bytes cycles ;
   count-cycles-build ;
 
 : <count-opcode> ( --  count )
-  count new [ count-build ] keep ;
+  bc-count new [ count-build ] keep ;

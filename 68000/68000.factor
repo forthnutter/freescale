@@ -231,7 +231,7 @@ TUPLE: M68000 < cpu mnemo dcount asm ;
     [ 0 swap 2 <range> >array ] 2dip ! create an array size of l + 2
     [ [ + ] curry map dup ] dip  ! now add address to all array elements
     [ [ cpu-read-word ] curry map ] keep ! read word elemets from memory
-    [ [ get-nbytes ] map swap ] dip
+    [ [ break count-number-bytes ] map swap ] dip
     [ break mnemonic-dump ] curry map
     [ over mnemonic-dump ] map [ drop ] dip ;
 

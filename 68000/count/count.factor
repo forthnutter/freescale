@@ -14,79 +14,85 @@ USING:
 
 IN: freescale.68000.count
 
-TUPLE: bc-count bytes cycles ;
+TUPLE: bc-count bytes cycles array ;
 
 ! Bit Manipulation
-: (bytes-0) ( opcode -- n )
-  11 0 bit-range
-  {
-    { 0 [ 2 ] }
-    [ drop ]
-  } case ;
+: (bytes-0) ( bc-count -- n )
+  break
+  [ array>> first ] keep
+  [ 11 0 bit-range ] dip
+  [
+    {
+      { 0 [ 2 ] }
+      [ drop ]
+    } case
+  ] dip drop ;
 
-: (bytes-1) ( opcode -- n )
+: (bytes-1) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-2) ( opcode -- n )
+: (bytes-2) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-3) ( opcode -- n )
+: (bytes-3) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-4) ( opcode -- n )
+: (bytes-4) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-5) ( opcode -- n )
+: (bytes-5) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-6) ( opcode -- n )
+: (bytes-6) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-7) ( opcode -- n )
+: (bytes-7) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-8) ( opcode -- n )
+: (bytes-8) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-9) ( opcode -- n )
+: (bytes-9) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-A) ( opcode -- n )
+: (bytes-A) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-B) ( opcode -- n )
+: (bytes-B) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-C) ( opcode -- n )
+: (bytes-C) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-D) ( opcode -- n )
+: (bytes-D) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-E) ( opcode -- n )
+: (bytes-E) ( bc-count -- n )
   drop 2
   ;
 
-: (bytes-F) ( opcode -- n )
+: (bytes-F) ( bc-count -- n )
   drop 2
   ;
 
 ! now we return the number of bytes
 : count-number-bytes ( array count -- n )
-  [ dup first extract-opcode ] dip
+  [ swap >>array array>> ] keep
+  [ first extract-opcode ] dip
+  [ bytes>> nth ] keep swap call( opcode -- n )
   ;
 
 ! generate the opcode array here

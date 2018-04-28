@@ -14,7 +14,7 @@ USING:
 
 IN: freescale.68000
 
-TUPLE: M68000 < cpu mnemo dcount asm ;
+TUPLE: M68000 < cpu mnemo dcount asm next ;
 
 
 : mc68k-disasm ( mc68k -- disasm )
@@ -221,16 +221,15 @@ TUPLE: M68000 < cpu mnemo dcount asm ;
 
 ! disassemble from address
 : mnemonic-dump ( address cpu -- str )
-  [ [ 6 ] 2dip read-bytes word-array number-bytes ] 2keep
+  [ [ 6 ] 2dip read-bytes word-array count-number-bytes ] 2keep
   [ mdw 14 0x20 pad-tail ] 2keep
   [ mnemo>> disassemble-array ] keep [ append ] dip
   drop ;
 
 ! generate list of mnemonics
 : list-mnemonic-dump ( l address cpu -- str )
-    [ cpu-read-word 1array ] 2keep [ swap ] dip
-    [ dcount>> count-number-bytes ] keep
-    [ swap ] dip mnemonic-dump ;
+  [ next<< ] 2keep
+  [ mnemonic-dump ] keep ;
 
 
 : new-68000 ( M68000 -- 'M68000 )

@@ -222,19 +222,24 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 ! disassemble from address
 : mnemonic-dump ( address cpu -- str )
   [
-    [ [ 6 ] 2dip read-bytes word-array ] keep dcount>> count-number-bytes dup
+    [ [ 6 ] 2dip read-bytes word-array ] keep
+    dcount>> count-number-bytes dup
   ] 2keep
   [ [ next>> swap drop + ] keep next<< ] 2keep
   [ -1 shift ] 2dip
   [ mdw 14 0x20 pad-tail ] 2keep
-  [ [ 6 ] 2dip read-bytes word-array ] keep 
+  [ [ 6 ] 2dip read-bytes word-array ] keep
   [ mnemo>> disassemble-array ] keep [ append ] dip
   drop ;
 
 ! generate list of mnemonics
 : list-mnemonic-dump ( l address cpu -- str )
-  [ next<< ] 2keep
-  [ mnemonic-dump ] keep ;
+  [ swap ] dip swap f <array>
+  [
+    drop
+    [ next<< ] 2keep
+    [ mnemonic-dump ] keep drop
+  ] map ;
 
 
 : new-68000 ( M68000 -- 'M68000 )

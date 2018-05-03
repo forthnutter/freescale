@@ -92,7 +92,7 @@ TUPLE: bc-count bytes cycles array ;
 : count-number-bytes ( array count -- n )
   [ swap >>array array>> ] keep
   [ first extract-opcode ] dip
-  [ bytes>> nth ] keep swap call( opcode -- n )
+  [ bytes>> nth ] keep swap call( bc-count -- n )
   ;
 
 ! generate the opcode array here

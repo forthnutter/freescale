@@ -245,7 +245,9 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 : new-68000 ( M68000 -- 'M68000 )
   new-cpu
   <disassembler> >>mnemo
-  <count-opcode> >>dcount ;
+  <count-opcode> >>dcount
+  0 >>next ;
+
 
 : <M68000> ( -- M68000 )
   M68000 new-cpu

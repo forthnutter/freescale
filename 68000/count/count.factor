@@ -18,13 +18,12 @@ TUPLE: bc-count bytes cycles array ;
 
 ! Bit Manipulation
 : (bytes-0) ( bc-count -- n )
-  break
   [ array>> first ] keep
   [ 11 0 bit-range ] dip
   [
     {
       { 0 [ 2 ] }
-      [ drop ]
+      [ drop 2 ]
     } case
   ] dip drop ;
 

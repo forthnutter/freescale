@@ -68,7 +68,7 @@ TUPLE: disassembler opcodes ;
     [ drop drop "BAD SIZE"]
   } case ;
 
-: op-zero-mode-seven ( size reg array -- $ )
+: op-zero-mode-seven ( s r m -- $ )
   swap
   {
     { 4 [ op-zero-status ] }
@@ -84,20 +84,27 @@ TUPLE: disassembler opcodes ;
 : op-zero-mode ( array -- n )
   first 5 3 bit-range 3 bits ;
 
-: op-zero-ea ( size reg mode array -- $ )
+: op-zero-reg$ ( array -- $ )
+  op-zero-reg
+  {
+    { 2 [ "A" ] }
+    [ drop "?"]
+  } case ;
+
+: op-zero-ea ( array -- $ )
+  [ op-zero-mode ] keep
   swap
   {
-    { 0 [ drop [ drop ] dip  dregister$ ] }
-    { 2 [ drop drop drop "2" ] }
-    { 7 [ op-zero-mode-seven ] }
-    [ drop drop drop drop "BAD MODE" ]
+    { 0 [ "D" ] }
+    { 2 [ "A" ] }
+    [ drop "BAD MODE" ]
   } case ;
 
 : ori-byte ( array -- $ )
   [ "ORI.B #$" ] dip
   [ second 8 bits >hex append "," append ] keep
   [ op-zero-size ] keep
-  [ op-zero-reg ] keep ! resister first
+  [ op-zero-reg$ ] keep
   [ op-zero-mode ] keep ! get mode
   [ op-zero-ea append ] keep drop ;
 
@@ -105,7 +112,7 @@ TUPLE: disassembler opcodes ;
   [ "ORI.W #$" ] dip
   [ second >hex append "," append ] keep
   [ op-zero-size ] keep
-  [ op-zero-reg ] keep
+  [ op-zero-reg$ ] keep
   [ op-zero-mode ] keep
   [ op-zero-ea append ] keep drop ;
 
@@ -151,7 +158,6 @@ TUPLE: disassembler opcodes ;
 
 
 : (opcode$-1) ( array -- $ )
-  break
   [ "MOVE.B " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep

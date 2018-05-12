@@ -19,17 +19,26 @@ TUPLE: bc-count bytes cycles array ;
 ! Bit Manipulation
 : (bytes-0) ( bc-count -- n )
   [ array>> first ] keep
-  [ 11 0 bit-range ] dip
+  [ 7 0 bit-range ] dip
   [
     {
-      { 0 [ 2 ] }
-      [ drop 2 ]
+      { 0x34 [ 4 ] }
+      { 0x35 [ 8 ] }
+      [ drop 4 ]
     } case
   ] dip drop ;
 
 : (bytes-1) ( bc-count -- n )
-  drop 2
-  ;
+  [ array>> first ] keep
+  [ 11 0 bit-range ] dip
+  [
+    {
+      { 0x34 [ 4 ] }
+      { 1 [ 4 ] }
+      { 2 [ 8 ] }
+      [ drop 2 ]
+    } case
+  ] dip drop ;
 
 : (bytes-2) ( bc-count -- n )
   drop 2

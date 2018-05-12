@@ -234,12 +234,12 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 
 ! generate list of mnemonics
 : list-mnemonic-dump ( l address cpu -- str )
+  [ next<< ] 2keep ! save address into next for latter
   [ swap ] dip swap f <array>
   [
     drop
-    [ next<< ] 2keep
     [ mnemonic-dump ] keep [ next>> swap ] keep swap
-  ] map ;
+  ] map [ drop drop ] dip ;
 
 
 : new-68000 ( M68000 -- 'M68000 )

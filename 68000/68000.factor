@@ -238,7 +238,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
   [
     drop
     [ next<< ] 2keep
-    [ mnemonic-dump ] keep drop
+    [ mnemonic-dump ] keep [ next>> swap ] keep swap
   ] map ;
 
 

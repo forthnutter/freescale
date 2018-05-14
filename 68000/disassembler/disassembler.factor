@@ -85,9 +85,32 @@ TUPLE: disassembler opcodes ;
   first 5 3 bit-range 3 bits ;
 
 : op-zero-reg$ ( array -- $ )
-  op-zero-reg
+  first 5 0 bit-range 6 bits
   {
-    { 2 [ "A" ] }
+    { 0 [ "D0" ] }
+    { 1 [ "D1" ] }
+    { 2 [ "D2" ] }
+    { 3 [ "D3" ] }
+    { 4 [ "D4" ] }
+    { 5 [ "D5" ] }
+    { 6 [ "D6" ] }
+    { 7 [ "D7" ] }
+    { 16 [ "(A0)" ] }
+    { 17 [ "(A1)" ] }
+    { 18 [ "(A2)" ] }
+    { 19 [ "(A3)" ] }
+    { 20 [ "(A4)" ] }
+    { 21 [ "(A5)" ] }
+    { 22 [ "(A6)" ] }
+    { 23 [ "(A7)" ] }
+    { 24 [ "(A0)+" ] }
+    { 25 [ "(A1)+" ] }
+    { 26 [ "(A2)+" ] }
+    { 27 [ "(A3)+" ] }
+    { 28 [ "(A4)+" ] }
+    { 29 [ "(A5)+" ] }
+    { 30 [ "(A6)+" ] }
+    { 31 [ "(A7)+" ] }
     [ drop "?"]
   } case ;
 
@@ -95,17 +118,14 @@ TUPLE: disassembler opcodes ;
   [ op-zero-mode ] keep
   swap
   {
-    { 0 [ "D" ] }
-    { 2 [ "A" ] }
+    { 0 [ op-zero-reg dregister$ ] }
+    { 2 [ op-zero-reg aregister$ ] }
     [ drop "BAD MODE" ]
   } case ;
 
 : ori-byte ( array -- $ )
   [ "ORI.B #$" ] dip
   [ second 8 bits >hex append "," append ] keep
-  [ op-zero-size ] keep
-  [ op-zero-reg$ ] keep
-  [ op-zero-mode ] keep ! get mode
   [ op-zero-ea append ] keep drop ;
 
 : ori-word ( array -- $ )

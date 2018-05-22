@@ -55,31 +55,37 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
+
+
 : >long< ( wh wl -- l )
     [ 16 bits 16 shift ] dip 16 bits bitor ;
 
-
-
-: op-zero-status ( size array -- $ )
-  swap
-  {
-    { 0 [ drop "CCR" ] }
-    { 1 [ drop "SR" ] }
-    [ drop drop "BAD SIZE"]
-  } case ;
-
-: op-zero-mode-seven ( s r m -- $ )
-  swap
-  {
-    { 4 [ op-zero-status ] }
-    [ drop drop drop "BAD REG"]
-  } case ;
 
 : op-zero-size ( array -- n )
   first 7 6 bit-range 2 bits ;
 
 : op-zero-reg ( array -- n )
   first 2 0 bit-range 3 bits ;
+
+: op-zero-status ( array -- $ )
+  op-zero-size
+  {
+    { 0 [ "CCR" ] }
+    { 1 [ "SR" ] }
+    [ drop "BAD SIZE" ]
+  } case ;
+
+: op-zero-mode-seven ( array -- $ )
+  [ op-zero-reg ] keep swap
+  {
+    { 0 [ drop "ABS.W" ] }
+    { 1 [ drop "ABS.L" ] }
+    { 4 [ op-zero-status ] }
+    [ drop drop "BAD REG"]
+  } case ;
+
+
+
 
 : op-zero-mode ( array -- n )
   first 5 3 bit-range 3 bits ;
@@ -120,7 +126,8 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ op-zero-reg dregister$ ] }
     { 2 [ op-zero-reg aregister$ ] }
-    [ drop "BAD MODE" ]
+    { 7 [ op-zero-mode-seven ] }
+    [ drop drop "BAD MODE" ]
   } case ;
 
 : ori-byte ( array -- $ )
@@ -131,23 +138,16 @@ TUPLE: disassembler opcodes ;
 : ori-word ( array -- $ )
   [ "ORI.W #$" ] dip
   [ second >hex append "," append ] keep
-  [ op-zero-size ] keep
-  [ op-zero-reg$ ] keep
-  [ op-zero-mode ] keep
   [ op-zero-ea append ] keep drop ;
 
 : andi-long ( array -- $ )
   [ "ANDI.L #$" ] dip
   [ second ] keep [ third ] keep [ >long<  >hex append "," append ] dip
-  [ op-zero-size ] keep
-  [ op-zero-reg ] keep
-  [ op-zero-mode ] keep
   op-zero-ea append ;
 
 
 
 : (opcode$-0) ( array -- $ )
-  break
   [ first 11 6 bit-range 6 bits ] keep swap
   {
     { 0 [ ori-byte ] }  ! ORI

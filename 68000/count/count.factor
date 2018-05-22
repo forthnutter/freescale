@@ -36,13 +36,26 @@ TUPLE: bc-count bytes cycles array ;
       { 0x34 [ 4 ] }
       { 1 [ 4 ] }
       { 2 [ 8 ] }
+      { 0x039 [ 6 ] }
+      { 0x3c0 [ 6 ] }
+      { 0xe79 [ 6 ] }
       [ drop 2 ]
     } case
   ] dip drop ;
 
 : (bytes-2) ( bc-count -- n )
-  drop 2
-  ;
+  [ array>> first ] keep
+  [ 11 0 bit-range ] dip
+  [
+    {
+      { 0x34 [ 4 ] }
+      { 1 [ 4 ] }
+      { 2 [ 8 ] }
+      { 0x3c0 [ 6 ] }
+      { 0xe79 [ 6 ] }
+      [ drop 2 ]
+    } case
+  ] dip drop ;
 
 : (bytes-3) ( bc-count -- n )
   drop 2

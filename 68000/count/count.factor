@@ -16,14 +16,16 @@ IN: freescale.68000.count
 
 TUPLE: bc-count bytes cycles array ;
 
+
+
 ! Bit Manipulation
 : (bytes-0) ( bc-count -- n )
   [ array>> first ] keep
-  [ 7 0 bit-range ] dip
+  [ 11 0 bit-range ] dip
   [
     {
-      { 0x34 [ 4 ] }
-      { 0x35 [ 8 ] }
+      { 0x038 [ 8 ] }
+      { 0x039 [ 8 ] }
       [ drop 4 ]
     } case
   ] dip drop ;
@@ -33,9 +35,9 @@ TUPLE: bc-count bytes cycles array ;
   [ 11 0 bit-range ] dip
   [
     {
-      { 0x34 [ 4 ] }
-      { 1 [ 4 ] }
-      { 2 [ 8 ] }
+      { 0x001 [ 4 ] }
+      { 0x002 [ 8 ] }
+      { 0x034 [ 4 ] }
       { 0x039 [ 6 ] }
       { 0x3c0 [ 6 ] }
       { 0xe79 [ 6 ] }

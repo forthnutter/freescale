@@ -153,7 +153,9 @@ TUPLE: disassembler opcodes ;
     { 0 [ ori-byte ] }  ! ORI
     { 1 [ ori-word ] }  ! ORI
     { 2 [ drop "ANDI.B" ] } ! ANDI
+    { 0x06 [ drop "BCLR" ] }
     { 10 [ andi-long ] }
+
     [ drop opcode$-error ]
   } case ;
 

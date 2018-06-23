@@ -209,11 +209,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
     1quotation [ dup ] dip call( cpu -- str )
   ] map [ drop ] dip ;
 
-: string-PC ( cpu -- $ )
-  "PC: " swap [ 6 swap [ PC> ] keep mdw ] keep
-  [ append ] dip
-  [ " " append ] dip [ 6 swap cpu-pc-read-array ] keep
-  [ mnemo>> disassemble-array ] keep drop append ;
+
 
 : single-step ( cpu -- )
   execute-cycle ;
@@ -241,6 +237,10 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
     [ mnemonic-dump ] keep [ next>> swap ] keep swap
   ] map [ drop drop ] dip ;
 
+  : string-PC ( cpu -- $ )
+    break
+    "PC: " swap [ PC> ] keep
+    mnemonic-dump append ;
 
 : new-68000 ( M68000 -- 'M68000 )
   new-cpu

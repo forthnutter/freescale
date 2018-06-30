@@ -209,7 +209,10 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
     1quotation [ dup ] dip call( cpu -- str )
   ] map [ drop ] dip ;
 
-
+! lets build string for Status register
+: string-status ( mc68k -- s )
+  drop "nothing yet"
+  ;
 
 : single-step ( cpu -- )
   execute-cycle ;

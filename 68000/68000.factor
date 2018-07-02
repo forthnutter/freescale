@@ -211,7 +211,8 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 
 ! lets build string for Status register
 : string-status ( mc68k -- s )
-  drop "nothing yet"
+  break
+  "SR: " swap drop
   ;
 
 : single-step ( cpu -- )
@@ -241,7 +242,6 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
   ] map [ drop drop ] dip ;
 
   : string-PC ( cpu -- $ )
-    break
     "PC: " swap [ PC> ] keep
     mnemonic-dump append ;
 

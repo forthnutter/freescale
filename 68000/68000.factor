@@ -8,7 +8,9 @@ USING:
    tools.continuations
    freescale.binfile arrays prettyprint
    math.ranges models.memory quotations words
-   freescale.68000.emulator freescale.68000.disassembler
+   freescale.68000.emulator
+   freescale.68000.emulator.alu
+   freescale.68000.disassembler
    freescale.68000.count ;
 
 
@@ -24,14 +26,10 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 ! memory display or dump bytes
 : mdb ( n address mc68k -- str/f )
   [ dup f = ] dip swap
-  [
-    drop drop drop f
-  ]
+  [ drop drop drop f ]
   [
     [ memory-read ] 2keep drop [ dup f = ] dip swap
-    [
-      [ drop ] dip
-    ]
+    [ [ drop ] dip ]
     [
       >hex-pad8 swap
       [ >hex-pad2 ] { } map-as concat append
@@ -212,7 +210,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 ! lets build string for Status register
 : string-status ( mc68k -- s )
   break
-  "SR: " swap drop
+  "SR: " swap alu>> alu-sr> >hex-pad2 append
   ;
 
 : single-step ( cpu -- )

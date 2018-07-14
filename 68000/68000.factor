@@ -207,10 +207,22 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
     1quotation [ dup ] dip call( cpu -- str )
   ] map [ drop ] dip ;
 
+
+: string-status-t ( mc68k -- s )
+  alu>> alu-t?
+  [ "T" ] [ "-" ] if ;
+
+: string-status-s ( mc68k -- s )
+  alu>> alu-mode?
+  [ "S" ] [ "-" ] if ;
+
 ! lets build string for Status register
 : string-status ( mc68k -- s )
   break
-  "SR: " swap alu>> alu-sr> >hex-pad2 append
+  "SR: " swap
+  [ alu>> alu-sr> >hex-pad2 append " " append ] keep
+  [ string-status-t append ] keep
+  string-status-s append
   ;
 
 : single-step ( cpu -- )

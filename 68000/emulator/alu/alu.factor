@@ -192,6 +192,9 @@ M: alu model-activated
 : alu-ip2? ( alu -- ? )
     alu-ip0-read 0 = not ;
 
+: alu-ip ( alu -- n )
+  value>> I2-BIT I0-BIT bit-range ;
+
 ! interrupt mask
 : alu-imask-write ( b alu -- )
     [ 3 bits ] dip

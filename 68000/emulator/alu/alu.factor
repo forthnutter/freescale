@@ -192,6 +192,7 @@ M: alu model-activated
 : alu-ip2? ( alu -- ? )
     alu-ip0-read 0 = not ;
 
+! read that interrupt mask
 : alu-ip ( alu -- n )
   value>> I2-BIT I0-BIT bit-range ;
 
@@ -202,11 +203,7 @@ M: alu model-activated
     [ value>> ] keep [ bitand ] dip
     [ 8 shift ] 2dip [ bitor ] dip
     set-model ;
-
-
-! read interrupt mask
-: alu-imask-read ( alu -- d )
-    ;
+    
 
 ! set the supervise mode
 : alu-s-set ( alu -- )

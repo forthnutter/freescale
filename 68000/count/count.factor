@@ -72,8 +72,9 @@ TUPLE: bc-count bytes cycles array ;
   ;
 
 : (bytes-6) ( bc-count -- n )
-  drop 2
-  ;
+  array>> first
+  7 0 bit-range
+  0 = [ 4 ] [ 2 ] if ;
 
 : (bytes-7) ( bc-count -- n )
   drop 2

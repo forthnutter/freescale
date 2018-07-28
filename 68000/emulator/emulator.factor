@@ -624,6 +624,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 : cpu-move-wb-ea ( data reg mode cpu -- )
+  [ [ 2drop ] dip alu>> alu-byte-z ] 4keep
+  [ [ 2drop ] dip alu>> alu-byte-n ] 4keep
+  [ alu>> alu-v-clr ] keep
+  [ alu>> alu-c-clr ] keep
   swap
   {
     { 0 [ cpu-write-dregister ] }
@@ -636,12 +640,9 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! Move Byte
 : (opcode-1) ( cpu -- )
     break
-  dup
-  [ cashe>> first move-source-reg ]
-  [ cashe>> first move-source-mode ] bi
+  [ [ cashe>> first move-source-reg ] [ cashe>> first move-source-mode ] bi ] keep
   [ cpu-move-rb-ea ] keep
-  [ cashe>> first move-dest-reg ] keep
-  [ cashe>> first move-dest-mode ] keep
+  [ [ cashe>> first move-dest-reg ] [ cashe>> first move-dest-mode ] bi ] keep
   [ cpu-move-wb-ea ] keep drop ;
 
 : cpu-read-along ( cpu -- l )

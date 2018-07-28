@@ -203,7 +203,7 @@ M: alu model-activated
     [ value>> ] keep [ bitand ] dip
     [ 8 shift ] 2dip [ bitor ] dip
     set-model ;
-    
+
 
 ! set the supervise mode
 : alu-s-set ( alu -- )
@@ -241,6 +241,16 @@ M: alu model-activated
 ! write Status Register
 : >alu-sr ( d cpu -- )
     [ 16 bits ] dip set-model ;
+
+! test the byte for zero and set flag
+: alu-byte-z ( b alu -- )
+  [ 0 = ] dip swap
+  [ alu-z-set ] [ alu-z-clr ] if ;
+
+: alu-byte-n ( b alu -- )
+  [ 7 bit? ] dip swap
+  [ alu-n-set ] [ alu-n-clr ] if ;
+
 
 : alu-lsl-byte ( count d alu -- r )
   [ [ dup 0 = not ] 2dip rot ]

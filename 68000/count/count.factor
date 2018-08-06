@@ -53,6 +53,7 @@ TUPLE: bc-count bytes cycles array ;
       { 0x34 [ 4 ] }
       { 1 [ 4 ] }
       { 2 [ 8 ] }
+      { 0x070 [ 4 ] }
       { 0x3c0 [ 6 ] }
       { 0xe79 [ 6 ] }
       [ drop 2 ]

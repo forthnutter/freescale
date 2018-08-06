@@ -247,8 +247,17 @@ M: alu model-activated
   [ 0 = ] dip swap
   [ alu-z-set ] [ alu-z-clr ] if ;
 
+! test the long data for zero
+: alu-long-z ( data alu -- )
+  [ 0 = ] dip swap
+  [ alu-z-set ] [ alu-z-clr ] if ;
+
 : alu-byte-n ( b alu -- )
   [ 7 bit? ] dip swap
+  [ alu-n-set ] [ alu-n-clr ] if ;
+
+: alu-long-n ( data alu -- )
+  [ 31 bit? ] dip swap
   [ alu-n-set ] [ alu-n-clr ] if ;
 
 

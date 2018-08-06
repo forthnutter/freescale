@@ -169,11 +169,28 @@ TUPLE: disassembler opcodes ;
     [ drop drop "bad" ]
   } case ;
 
+
+
+: move-mode-six$ ( reg array -- $ )
+  [ second 7 0 bit-range 8 >signed number>string "(" append ] keep
+  [ aregister$ ] 2dip [ prepend "," append ] dip
+  [ second 15 bit? ] keep swap
+  [
+    [ second 14 12 bit-range aregister$ append ] keep
+  ]
+  [
+    [ second 14 12 bit-range dregister$ append ] keep
+  ] if
+  second 15 bit?
+  [ ".L)" append ]
+  [ ".W)" append ] if ;
+
 : move-ea ( reg mode array -- $ )
   swap ! get mode
   {
     { 0 [ drop dregister$ ] }
     { 1 [ drop aregister$ ] }
+    { 6 [ move-mode-six$ ] }
     { 7 [ move-mode-seven$ ] }
     [ drop drop drop "bad" ]
   } case ;
@@ -204,12 +221,29 @@ TUPLE: disassembler opcodes ;
   break
   opcode$-error ;
 
+: jumps ( array -- $ )
+  [ first 5 0 bit-range ] keep swap
+  {
+    { 0x10 [ drop "JMP (A0)" ] }
+  } case ;
+
+: clr-byte ( array -- $ )
+  [ first 5 0 bit-range ] keep swap
+  {
+    { 0 [ drop "CLR.B D0"] }
+    { 1 [ drop "CLR.B D1"] }
+    { 2 [ drop "CLR.B D2"] }
+    { 3 [ drop "CLR.B D3"] }
+    [ drop drop "BAD OPCODE"]
+  } case ;
 
 : (opcode$-4) ( array -- $ )
   break
-  [ first ] keep swap
+  [ first 15 6 bit-range ] keep swap
   {
-    { 0x4E70 [ drop "RESET" ] }
+    { 0x108 [ clr-byte ] }
+    { 0x139 [ drop "RESET" ] }
+    { 0x13B [ jumps ] }
     [ drop drop "BAD OPCODE 4" ]
   } case ;
 
@@ -255,7 +289,6 @@ TUPLE: disassembler opcodes ;
 
 
 : (opcode$-6) ( array -- $ )
-  break
   [ first 7 0 bit-range 8 bits ] keep
   [ first 11 8 bit-range 4 bits ] keep
   [ op-branch ] keep drop ;
@@ -320,7 +353,6 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 : (opcode$-E) ( array -- $ )
-  break
   [ first 7 6 bit-range 2 bits ] keep swap ! get size to find the mode
   {
     {

@@ -352,6 +352,33 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 
+: cpu-read-aregister ( d cpu -- n )
+  swap
+  {
+    { 0 [ A0> ] }
+    { 1 [ A1> ] }
+    { 2 [ A2> ] }
+    { 3 [ A3> ] }
+    { 4 [ A4> ] }
+    { 5 [ A5> ] }
+    { 6 [ A6> ] }
+    { 7 [ A7> ] }
+    [ drop drop f ]
+  } case ;
+
+: cpu-write-aregister ( d reg cpu -- )
+  swap
+  {
+    { 0 [ >A0 ] }
+    { 1 [ >A1 ] }
+    { 2 [ >A2 ] }
+    { 3 [ >A3 ] }
+    { 4 [ >A4 ] }
+    { 5 [ >A5 ] }
+    { 6 [ >A6 ] }
+    { 7 [ >A7 ] }
+    [ drop drop drop ]
+  } case ;
 
 
 ! get absolute word address read byte
@@ -377,6 +404,14 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 7 [ >A7 ] }
     [ drop drop drop ]
   } case ;
+
+
+
+: source-areg ( instruct -- regnum )
+    2 0 bit-range 3 bits ;
+
+: source-emode ( instruct -- mode )
+    5 3 bit-range 3 bits ;
 
 : cpu-rb-along ( cpu -- b )
   [ PC+ ] keep
@@ -576,7 +611,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
-  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
@@ -593,7 +627,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 1 [ cpu-rb-along ] }
     [ drop drop f ]
   } case ;
-
 
 : cpu-move-rb-ea ( reg mode cpu -- d )
   swap
@@ -639,42 +672,87 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
-    break
+  break
   [ [ cashe>> first move-source-reg ] [ cashe>> first move-source-mode ] bi ] keep
   [ cpu-move-rb-ea ] keep
   [ [ cashe>> first move-dest-reg ] [ cashe>> first move-dest-mode ] bi ] keep
-  [ cpu-move-wb-ea ] keep drop ;
+  cpu-move-wb-ea ;
 
-: cpu-read-along ( cpu -- l )
+
+: cpu-read-imm ( cpu -- l )
   [ PC+ ] keep
   [ cashe>> second ] keep
   [ PC+ ] keep
-  [ cashe>> third words-long ] keep
-  [ cpu-read-long ] keep
-  PC+ ;
+  [ cashe>> third words-long ] keep PC+ ;
+
+: cpu-read-along ( cpu -- l )
+  [ cpu-read-imm ] keep
+  cpu-read-long ;
 
 : cpu-move-rl-mode-seven ( reg cpu -- d )
   swap
   {
     { 0 [ drop f ] }
     { 1 [ cpu-read-along ] }
+    { 4 [ cpu-read-imm ] }
     [ drop drop f ]
   } case ;
+
+! get the 8 bit signed displacement
+: move-displacement ( data -- d )
+  7 0 bit-range 8 >signed ;
+
+! get the word or long signed index value
+: move-index ( cpu -- d )
+  [
+    [ cashe>> second ] keep swap
+    [ 15 bit? ] keep swap ! test for address or data registers
+    [
+      ! true its address
+      14 12 bit-range swap
+      cpu-read-aregister
+    ]
+    [
+      14 12 bit-range swap
+      cpu-read-dregister
+    ] if
+  ] keep
+  cashe>> second
+  [ 11 bit? ] dip swap
+  [ 32 >signed ]
+  [ 16 >signed ] if ;
+
+
+: move-disp-index ( reg cpu -- d )
+  [ PC+ ] keep
+  [ cpu-read-aregister ] keep
+  [ cashe>> second move-displacement + ] keep
+  [ move-index + ] keep [ PC+ ] keep cpu-read-long ;
 
 
 : cpu-move-rl-ea ( reg mode cpu -- d )
   swap
   {
     { 0 [ cpu-read-dregister ] }
+    { 6 [ move-disp-index ] }
     { 7 [ cpu-move-rl-mode-seven ] }
     [ drop drop drop f ]
   } case ;
 
+: cpu-move-status ( data cpu -- )
+  [ alu>> alu-long-z ] 2keep
+  [ alu>> alu-long-n ] 2keep
+  [ drop ] dip  ! don't data
+  [ alu>> alu-v-clr ] keep
+  alu>> alu-c-clr ;
+
+: cpu-move-stat ( data reg cpu -- data reg cpu )
+  [ [ drop ] dip cpu-move-status ] 3keep ;
 
 : cpu-move-wl-ea ( data reg mode cpu -- )
   swap
   {
-    { 0 [ cpu-write-dregister ] }
+    { 0 [ cpu-move-stat cpu-write-dregister ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ drop drop drop ] } ! cpu-wl-mode-seven ] }
     [ drop drop drop drop ]
@@ -683,7 +761,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! Move Long MOVE MOVEA
 : (opcode-2) ( cpu -- )
-    break
     [ cashe>> first move-source-reg ] keep
     [ cashe>> first move-source-mode ] keep
     [ cpu-move-rl-ea ] keep
@@ -697,11 +774,36 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
+
+: get-jmp-address ( mode reg cpu -- address )
+  [ swap ] dip swap ! mode on top
+  {
+    { 2 [ cpu-read-aregister ] }
+  } case ;
+
+
+: clr-byte-ea ( mode reg cpu -- )
+  [ swap ] dip swap ! mode on top
+  {
+    { 0 [ [ 0 ] 2dip cpu-write-dregister ] }
+  } case ;
+
 ! Miscellaneous
-! CHK CLR
+! CHK
+! CLR
+: cpu-clr-byte ( cpu -- )
+  [ cashe>> first source-emode ] keep
+  [ cashe>> first source-areg ] keep
+  [ clr-byte-ea ] keep PC+ ;
+
 ! EXT EXTB
 ! ILLEGAL
 ! JMP JSR
+: cpu-jmp ( cpu -- )
+  [ cashe>> first source-emode ] keep
+  [ cashe>> first source-areg ] keep
+  [ get-jmp-address ] keep
+  >PC ;
 ! LEA LINK
 ! MOVEM
 ! NBCD NEG NEGX NOP NOT
@@ -712,9 +814,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! UNLK
 : (opcode-4) ( cpu -- )
   break
-  [ cashe>> first ] keep swap
+  [ cashe>> first 15 6 bit-range ] keep swap
   {
-    { 0x4E70 [ cpu-reset-models PC+ ] }
+    { 0x108 [ cpu-clr-byte ] }
+    { 0x139 [ cpu-reset-models PC+ ] }
+    { 0x13B [ cpu-jmp ] }
+
     [ drop drop ]
   } case ;
 
@@ -755,7 +860,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! Bcc BSR BRA
 : (opcode-6) ( cpu -- )
-  break
   [ cashe>> first branch-condition ] keep swap
   {
     { 0 [ drop ] }  ! BRA
@@ -826,7 +930,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   cashe>> first 8 bit? ;
 
 : cpu-shift-register ( cpu -- reg )
-  cashe>> first 2 0 bit-range 3 bits ;
+  cashe>> first 2 0 bit-range ;
+
+: cpu-shift-type ( cpu -- type )
+  cashe>> first 4 3 bit-range ;
 
 : cpu-ls-byte ( cpu -- )
   [ PC+ ] keep
@@ -856,13 +963,16 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   ] if ;
 
 : cpu-shift-byte ( cpu -- )
-  [ cashe>> first 4 3 bit-range 2 bits ] keep swap ! what function
+  [ cpu-shift-type ] keep swap ! what function
   {
     { 0 [ drop ] }  ! Arithmatic shift
     { 1 [ cpu-ls-byte ] }  ! Logical shift
     { 2 [ drop ] }  ! Rotate with extend
     [ drop  drop ]  ! Rotate
   } case ;
+
+: cpu-ls-long ( cpu -- )
+  drop ;
 
 
 : cpu-as-long ( cpu -- )
@@ -885,10 +995,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   cpu-write-dregister ;
 
 : cpu-shift-long ( cpu -- )
-  [ cashe>> first 4 3 bit-range 2 bits ] keep swap
+  [ cpu-shift-type ] keep swap
   {
     { 0 [ cpu-as-long ] }  ! Arithmatic Shift
-    { 1 [ drop ] }  ! Logical Shift
+    { 1 [ cpu-ls-long ] }  ! Logical Shift
     { 2 [ drop ] }  ! Rotate with extend
     [ drop drop ]   ! Rotate
   } case ;
@@ -898,7 +1008,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! LSL LSR
 ! ROL ROR ROXL ROXR
 : (opcode-E) ( cpu -- )
-  break
   [ cpu-size ] keep swap
   {
     { 0 [ cpu-shift-byte ] }  ! byte

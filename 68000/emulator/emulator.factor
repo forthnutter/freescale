@@ -669,6 +669,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop drop drop ]
   } case ;
 
+: source-data ( cpu -- data )
+  [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
+  
+  ;
 
 ! Move Byte
 : (opcode-1) ( cpu -- )

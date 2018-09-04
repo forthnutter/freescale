@@ -302,9 +302,14 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ [ PC> + ] curry map ] keep
     [ cpu-read-word ] curry map ;
 
+: source-reg ( instruct -- regnum )
+  2 0 bit-range 3 bits ;
+
+: source-mode ( instruct -- mode )
+  5 3 bit-range 3 bits ;
 
 : extract-opcode ( instruct -- opcode )
-    15 12 bit-range 4 bits ;
+  15 12 bit-range 4 bits ;
 
 : move-dest-reg ( instruct -- regnum )
     11 9 bit-range 3 bits ;
@@ -671,7 +676,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : source-data ( cpu -- data )
   [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
-  
+
   ;
 
 ! Move Byte

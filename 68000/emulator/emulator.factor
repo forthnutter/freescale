@@ -682,6 +682,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! Move Byte
 : (opcode-1) ( cpu -- )
   break
+  [ source-data ]
   [ [ cashe>> first move-source-reg ] [ cashe>> first move-source-mode ] bi ] keep
   [ cpu-move-rb-ea ] keep
   [ [ cashe>> first move-dest-reg ] [ cashe>> first move-dest-mode ] bi ] keep

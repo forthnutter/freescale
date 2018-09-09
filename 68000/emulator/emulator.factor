@@ -308,6 +308,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : source-mode ( instruct -- mode )
   5 3 bit-range 3 bits ;
 
+: dest-mode ( instruct -- mode )
+    8 6 bit-range 3 bits ;
+
+: dest-reg ( instruct -- reg )
+  11 9 bit-range 3 bits ;
+
 : extract-opcode ( instruct -- opcode )
   15 12 bit-range 4 bits ;
 
@@ -674,20 +680,51 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop drop drop ]
   } case ;
 
+
+: absolute-word ( cpu -- w )
+  [ cashe>> second ] keep
+  cpu-read-long ;
+
+: absolute-long ( cpu -- l )
+  [ cashe>> second ] keep
+  [ cashe>> third words-long ] keep
+  cpu-read-long ;
+
+
+: mode-seven ( reg cpu -- data )
+  swap
+  {
+    { 0 [ absolute-word ] }
+    { 1 [ absolute-long ] }
+    [ drop ]
+  } case ;
+
 : source-data ( cpu -- data )
   [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    [ drop drop ]
+  } case ;
 
-  ;
+
+
+: destination-data ( cpu -- data )
+  [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    { 7 [ mode-seven ] }
+    [ drop drop ]
+  } case ;
+
+
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
   break
-  [ source-data ]
-  [ [ cashe>> first move-source-reg ] [ cashe>> first move-source-mode ] bi ] keep
-  [ cpu-move-rb-ea ] keep
-  [ [ cashe>> first move-dest-reg ] [ cashe>> first move-dest-mode ] bi ] keep
-  cpu-move-wb-ea ;
-
+  [ source-data ] keep
+  [ destination-data ] keep 3drop ;
 
 : cpu-read-imm ( cpu -- l )
   [ PC+ ] keep

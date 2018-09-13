@@ -685,11 +685,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cashe>> second ] keep
   cpu-read-long ;
 
+! grabs the second and third word fro cashe to make a long address
 : absolute-long ( cpu -- l )
-  [ cashe>> second ] keep
-  [ cashe>> third words-long ] keep
-  cpu-read-long ;
-
+  [ [ PC+ ] keep cashe>> second ] keep
+  [ PC+ ] keep cashe>> third words-long ;
 
 : mode-seven ( reg cpu -- data )
   swap
@@ -724,7 +723,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : (opcode-1) ( cpu -- )
   break
   [ source-data ] keep
-  [ destination-data ] keep 3drop ;
+  [ destination-data ] keep cpu-write-byte ;
 
 : cpu-read-imm ( cpu -- l )
   [ PC+ ] keep

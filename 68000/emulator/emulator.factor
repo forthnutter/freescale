@@ -703,6 +703,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
     { 0 [ cpu-read-dregister ] }
+
     [ drop drop ]
   } case ;
 
@@ -717,13 +718,20 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
-
+: write-destination-byte ( data cpu -- )
+  [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
+  swap
+  {
+    { 0 [ cpu-write-dregister ] }
+    { 7 [ [ mode-seven ] keep cpu-write-byte ] }
+    [ drop drop drop ]
+  } case ;
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
   break
   [ source-data ] keep
-  [ destination-data ] keep cpu-write-byte ;
+  [ write-destination-byte ] keep  PC+ ;
 
 : cpu-read-imm ( cpu -- l )
   [ PC+ ] keep

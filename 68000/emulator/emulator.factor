@@ -703,6 +703,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
     { 0 [ cpu-read-dregister ] }
+    { 7 [ [ mode-seven ] keep cpu-read-long ] }
 
     [ drop drop ]
   } case ;
@@ -724,7 +725,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   {
     { 0 [ cpu-write-dregister ] }
     { 7 [ [ mode-seven ] keep cpu-write-byte ] }
-    [ drop drop drop ]
+    [ drop drop drop drop ]
   } case ;
 
 ! Move Byte

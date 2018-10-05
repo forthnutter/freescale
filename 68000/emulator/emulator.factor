@@ -20,25 +20,6 @@ CONSTANT: CPU-ADDRESS-ERROR 12
 CONSTANT: ILLEGAL-INSTRUCTION 16
 CONSTANT: CPU-UNKNOWN 32
 
-! Table of number of bytes for each opcode
-CONSTANT: nbytes-seq {
-        1 2 3 1 1 2 1 1 1 1 1 1 1 1 1 1
-        3 2 3 1 1 2 1 1 1 1 1 1 1 1 1 1
-        3 2 1 1 2 2 1 1 1 1 1 1 1 1 1 1
-        3 2 1 1 2 2 1 1 1 1 1 1 1 1 1 1
-        2 2 2 3 2 2 1 1 1 1 1 1 1 1 1 1
-        2 2 2 3 2 2 1 1 1 1 1 1 1 1 1 1
-        2 2 2 3 3 3 1 1 1 1 1 1 1 1 1 1
-        2 2 2 1 2 3 2 2 2 2 2 2 2 2 2 2
-        2 2 2 1 1 3 2 2 2 2 2 2 2 2 2 2
-        3 2 2 1 2 2 1 1 1 1 1 1 1 1 1 1
-        2 2 2 1 1 1 2 2 2 2 2 2 2 2 2 2
-        2 2 2 1 3 3 3 3 3 3 3 3 3 3 3 3
-        2 2 2 1 1 2 1 1 1 1 1 1 1 1 1 1
-        2 2 2 1 1 3 1 1 2 2 2 2 2 2 2 2
-        1 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1
-        1 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1
-    }
 
 
 
@@ -708,7 +689,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
-
+! set the condition code for move.b
+: move-byte-condition ( data cpu -- )
+  [ [ 7 bit? ] dip alu>> ?alu-n ] 2keep
+  [ alu>> alu-v-clr ] keep
+  [ alu>> alu-c-clr ] keep
+  [ 8 bits 0 = ] dip alu>> ?alu-z ;
 
 : destination-data ( cpu -- data )
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
@@ -723,8 +709,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
   swap
   {
-    { 0 [ cpu-write-dregister ] }
-    { 7 [ [ mode-seven ] keep cpu-write-byte ] }
+    { 0 [ [ [ drop ] dip move-byte-condition ] 3keep cpu-write-dregister ] }
+    { 7 [ [ [ drop ] dip move-byte-condition ] 3keep [ mode-seven ] keep cpu-write-byte ] }
     [ drop drop drop drop ]
   } case ;
 
@@ -1143,13 +1129,9 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-exception-execute ( cpu -- )
     dup exception>> drop drop ;
 
-! from the instruct get the nuber of bytes
-: get-nbytes ( exe -- n )
-  extract-opcode nbytes-seq nth ;
 
-! get the number of bytes for instrction in the array
-: number-bytes ( array -- n )
-  first get-nbytes ;
+
+
 
 ! : cpu-address-exception ( cpu -- )
 !  [ exception>> ] keep swap

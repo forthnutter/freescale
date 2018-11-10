@@ -405,6 +405,34 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : source-emode ( instruct -- mode )
     5 3 bit-range 3 bits ;
 
+
+: absolute-word ( cpu -- w )
+  [ cashe>> second ] keep
+  cpu-read-long ;
+
+! grabs the second and third word fro cashe to make a long address
+: absolute-long ( cpu -- l )
+  [ [ PC+ ] keep cashe>> second ] keep
+  [ PC+ ] keep cashe>> third words-long ;
+
+: mode-seven ( reg cpu -- data )
+  swap
+  {
+    { 0 [ absolute-word ] }
+    { 1 [ absolute-long ] }
+    [ drop ]
+  } case ;
+
+
+: source-data ( cpu -- data )
+  [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
+  swap
+  {
+    { 0 [ cpu-read-dregister ] }
+    { 7 [ [ mode-seven ] keep cpu-read-long ] }
+    [ drop drop ]
+  } case ;
+
 : cpu-rb-along ( cpu -- b )
   [ PC+ ] keep
   [ cashe>> second ] keep
@@ -502,6 +530,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 : cpu-ori-word-data ( cpu -- )
+  [ source-data ] keep
   [ PC+ ] keep
   [ cashe>> second 16 bits ] keep
   [ cashe>> first code0-ea-reg ] keep
@@ -663,32 +692,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 
-: absolute-word ( cpu -- w )
-  [ cashe>> second ] keep
-  cpu-read-long ;
 
-! grabs the second and third word fro cashe to make a long address
-: absolute-long ( cpu -- l )
-  [ [ PC+ ] keep cashe>> second ] keep
-  [ PC+ ] keep cashe>> third words-long ;
-
-: mode-seven ( reg cpu -- data )
-  swap
-  {
-    { 0 [ absolute-word ] }
-    { 1 [ absolute-long ] }
-    [ drop ]
-  } case ;
-
-: source-data ( cpu -- data )
-  [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
-  swap
-  {
-    { 0 [ cpu-read-dregister ] }
-    { 7 [ [ mode-seven ] keep cpu-read-long ] }
-
-    [ drop drop ]
-  } case ;
 
 ! set the condition code for move.b
 : move-byte-condition ( data cpu -- )

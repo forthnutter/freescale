@@ -6,7 +6,7 @@ USING:
     math.parser math.ranges unicode.case namespaces parser lexer
     tools.continuations peg fry assocs combinators sequences.deep make
     words quotations math.bitwise freescale.68000.emulator.exception
-    freescale.68000.emulator.alu models ascii ;
+    freescale.68000.emulator.alu models ascii prettyprint ;
 
 
 IN: freescale.68000.emulator
@@ -433,6 +433,32 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
+! get effective addres register value
+: effective-reg ( instruct -- regvlaue )
+  2 0 bit-range 3 bits ;
+
+! get effective address mode value
+: effective-mode ( instruct -- modeval )
+  5 3 bit-range 3 bits ;
+
+! let do effective mode seven
+: effective-mode-seven ( reg cpu -- data )
+  swap
+  {
+    { 4 [ SR> ] }
+    [ drop ]
+} case ;
+
+
+! get effective address value mainly for opcode 0
+: effective-address ( cpu -- data )
+  [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
+  swap
+  {
+    { 7 [ [ effective-mode-seven ] keep ] }
+    [ drop drop ]
+  } case ;
+
 : cpu-rb-along ( cpu -- b )
   [ PC+ ] keep
   [ cashe>> second ] keep
@@ -529,18 +555,32 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 
-: cpu-ori-word-data ( cpu -- )
-  [ source-data ] keep
+
+
+
+! set the condition code for move.b
+: move-byte-condition ( data cpu -- )
+  [ [ 7 bit? ] dip alu>> ?alu-n ] 2keep
+  [ alu>> alu-v-clr ] keep
+  [ alu>> alu-c-clr ] keep
+  [ 8 bits 0 = ] dip alu>> ?alu-z ;
+
+
+!
+: write-destination-byte ( data cpu -- )
+  [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
+  swap
+  {
+    { 0 [ [ [ drop ] dip move-byte-condition ] 3keep cpu-write-dregister ] }
+    { 7 [ [ [ drop ] dip move-byte-condition ] 3keep [ mode-seven ] keep cpu-write-byte ] }
+    [ drop drop drop drop ]
+  } case ;
+
+
+: ori-source ( cpu -- data )
   [ PC+ ] keep
-  [ cashe>> second 16 bits ] keep
-  [ cashe>> first code0-ea-reg ] keep
-  [ cashe>> first code0-ea-mode ] keep
-  [ cpu-0-rw-ea ] keep
-  [ alu>> alu-or-word ] keep
-  [ cashe>> first code0-ea-reg ] keep
-  [ cashe>> first code0-ea-mode ] keep
-  [ cpu-0-ww-ea ] keep
-  PC+ ;
+  [ cashe>> second 16 bits ] keep;
+
 
 ! get the size from instruction
 : cpu-size ( cpu -- size )
@@ -551,7 +591,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cpu-size ] keep swap ! size
   {
     { 0 [ cpu-ori-byte-data ] }     ! Byte
-    { 1 [ cpu-ori-word-data ] }     ! word
+    { 1 [ ori-word-data ] }     ! word
     { 2 [ drop ] }     ! long
     [ drop drop ]
   } case ;
@@ -694,12 +734,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 
-! set the condition code for move.b
-: move-byte-condition ( data cpu -- )
-  [ [ 7 bit? ] dip alu>> ?alu-n ] 2keep
-  [ alu>> alu-v-clr ] keep
-  [ alu>> alu-c-clr ] keep
-  [ 8 bits 0 = ] dip alu>> ?alu-z ;
 
 : destination-data ( cpu -- data )
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
@@ -710,14 +744,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
-: write-destination-byte ( data cpu -- )
-  [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
-  swap
-  {
-    { 0 [ [ [ drop ] dip move-byte-condition ] 3keep cpu-write-dregister ] }
-    { 7 [ [ [ drop ] dip move-byte-condition ] 3keep [ mode-seven ] keep cpu-write-byte ] }
-    [ drop drop drop drop ]
-  } case ;
+
 
 ! Move Byte
 : (opcode-1) ( cpu -- )

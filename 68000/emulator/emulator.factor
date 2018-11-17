@@ -502,17 +502,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : code0-ea-reg ( d -- reg )
   2 0 bit-range 3 bits ;
 
-: cpu-ori-byte-data ( cpu -- )
-  [ PC+ ] keep
-  [ cashe>> second 8 bits ] keep
-  [ cashe>> first code0-ea-reg ] keep
-  [ cashe>> first code0-ea-mode ] keep
-  [ cpu-0-rb-ea ] keep
-  [ bitor ] dip
-  [ cashe>> first code0-ea-reg ] keep
-  [ cashe>> first code0-ea-mode ] keep
-  [ cpu-0-wb-ea ] keep
-  PC+ ;
+
 
 ! read byte
 : cpu-0-rw-mode-seven ( reg cpu -- d )
@@ -579,19 +569,30 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : ori-source ( cpu -- data )
   [ PC+ ] keep
-  [ cashe>> second 16 bits ] keep;
+  [ cashe>> second 16 bits ] keep ;
 
 
 ! get the size from instruction
 : cpu-size ( cpu -- size )
   cashe>> first 7 6 bit-range 2 bits ;
 
+: cpu-ori-source-byte ( cpu -- data )
+  [ ori-source]
+    [ cashe>> second 8 bits ] keep
+    [ cashe>> first code0-ea-reg ] keep
+    [ cashe>> first code0-ea-mode ] keep
+    [ cpu-0-rb-ea ] keep
+    [ bitor ] dip
+    [ cashe>> first code0-ea-reg ] keep
+    [ cashe>> first code0-ea-mode ] keep
+    [ cpu-0-wb-ea ] keep
+    PC+ ;
 
 : cpu-ori ( cpu -- )
   [ cpu-size ] keep swap ! size
   {
-    { 0 [ cpu-ori-byte-data ] }     ! Byte
-    { 1 [ ori-word-data ] }     ! word
+    { 0 [ ori-source ] }     ! Byte
+    { 1 [ cpu-ori-word-data ] }     ! word
     { 2 [ drop ] }     ! long
     [ drop drop ]
   } case ;

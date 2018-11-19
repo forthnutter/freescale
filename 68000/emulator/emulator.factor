@@ -577,7 +577,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   cashe>> first 7 6 bit-range 2 bits ;
 
 : cpu-ori-source-byte ( cpu -- data )
-  [ ori-source]
+  [ ori-source ]
     [ cashe>> second 8 bits ] keep
     [ cashe>> first code0-ea-reg ] keep
     [ cashe>> first code0-ea-mode ] keep
@@ -592,7 +592,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cpu-size ] keep swap ! size
   {
     { 0 [ ori-source ] }     ! Byte
-    { 1 [ cpu-ori-word-data ] }     ! word
+    { 1 [ ori-source ] }     ! word
     { 2 [ drop ] }     ! long
     [ drop drop ]
   } case ;

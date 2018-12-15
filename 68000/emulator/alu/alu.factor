@@ -351,7 +351,16 @@ M: alu model-activated
   [ alu-v-clr ] keep
   alu-c-clr ;
 
+: alu-or-byte ( a b alu -- r )
+  [ bitor ] dip
+  [ dup 7 bit? ] dip
+  [ ?alu-n ] keep
+  [ dup 8 bits 0 = ] dip
+  [ ?alu-z ] keep
+  [ alu-v-clr ] keep
+  alu-c-clr ;
 
+  
 ! make a alu
 : <alu> ( -- alu )
   0 alu new-model

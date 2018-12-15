@@ -543,6 +543,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop drop drop ]
   } case ;
 
+  ! get the size from instruction
+: cpu-size ( cpu -- size )
+  cashe>> first 7 6 bit-range 2 bits ;
+
 
 : destination-data ( cpu -- data )
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
@@ -552,10 +556,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 7 [ mode-seven ] }
     [ drop drop drop ]
   } case ;
-
-
-
-
 
 ! set the condition code for move.b
 : move-byte-condition ( data cpu -- )
@@ -575,38 +575,50 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop drop drop ]
   } case ;
 
+: ori-ea-reg ( cpu -- data )
+  cashe>> first 2 0 bit-range 3 bits ;
+
+: ori-ea-mode ( cpu -- data )
+  cashe>> first 5 3 bit-range 3 bits ;
+
+: ori-ea ( cpu -- data )
+    [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
+    swap
+    {
+      { 0 [ cpu-read-dregister ] }
+      { 7 [ mode-seven ] }
+      [ drop drop drop ]
+    } case ;
+
 
 : ori-source ( cpu -- data )
   [ PC+ ] keep cashe>> second ;
 
 
-! get the size from instruction
-: cpu-size ( cpu -- size )
+  ! get the size from instruction
+: ori-source-size ( cpu -- size )
   cashe>> first 7 6 bit-range 2 bits ;
 
-: cpu-ori-source-byte ( cpu -- data )
-  [ ori-source ]
-    [ cashe>> second 8 bits ] keep
-    [ cashe>> first code0-ea-reg ] keep
-    [ cashe>> first code0-ea-mode ] keep
-    [ cpu-0-rb-ea ] keep
-    [ bitor ] dip
-    [ cashe>> first code0-ea-reg ] keep
-    [ cashe>> first code0-ea-mode ] keep
-    [ cpu-0-wb-ea ] keep
-    PC+ ;
+
+: ori-source-byte ( cpu -- data )
+  ori-source 8 bits ;
+
 
 : ori-source-word ( cpu -- data )
   ori-source 16 bits ;
 
+: ori-dest-byte ( s cpu -- data )
+  [ ori-ea ] keep
+  alu>> alu-or-byte ;
+
 : ori-dest-word ( s cpu -- data )
-  [ destination-data ] keep
+  [ ori-ea ] keep
   alu>> alu-or-word ;
 
 : cpu-ori ( cpu -- )
-  [ cpu-size ] keep swap ! size
+  [ ori-source-size ] keep swap ! size
   {
-    { 0 [ ori-source ] }     ! Byte
+    { 0 [ [ ori-source-byte ] keep [ ori-dest-byte ] keep 2drop ] }     ! Byte
     { 1 [ [ ori-source-word ] keep [ ori-dest-word ] keep 2drop ] }     ! word
     { 2 [ drop ] }     ! long
     [ drop drop ]

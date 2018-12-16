@@ -360,7 +360,18 @@ M: alu model-activated
   [ alu-v-clr ] keep
   alu-c-clr ;
 
-  
+: alu-sr ( alu -- sr )
+  value>> 16 bits ;
+
+: alu-sr-write ( d alu -- )
+  [ value>> 16 mask-bit bitor ] keep set-model ;
+
+: alu-ccr ( alu -- ccr )
+  value>> 8 bits ;
+
+: alu-ccr-write ( d alu -- )
+  [ value>> 8 mask-bit bitor ] keep set-model ;
+
 ! make a alu
 : <alu> ( -- alu )
   0 alu new-model

@@ -225,6 +225,7 @@ TUPLE: disassembler opcodes ;
   [ first 5 0 bit-range ] keep swap
   {
     { 0x10 [ drop "JMP (A0)" ] }
+    [ drop drop "BAD OPCODE JUMP"]
   } case ;
 
 : clr-byte ( array -- $ )

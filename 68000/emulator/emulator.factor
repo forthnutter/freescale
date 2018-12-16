@@ -455,7 +455,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
   swap
   {
-    { 7 [ [ effective-mode-seven ] keep ] }
+    { 7 [ effective-mode-seven ] }
     [ drop drop ]
   } case ;
 
@@ -554,7 +554,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   {
     { 0 [ cpu-read-dregister ] }
     { 7 [ mode-seven ] }
-    [ drop drop drop ]
+    [ drop drop ]
   } case ;
 
 ! set the condition code for move.b
@@ -581,18 +581,49 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : ori-ea-mode ( cpu -- data )
   cashe>> first 5 3 bit-range 3 bits ;
 
+: ori-mode-seven ( reg cpu -- data )
+  swap
+  {
+    { 0 [ absolute-word ] }
+    { 1 [ absolute-long ] }
+    { 4 [ alu>> alu-sr ]  }
+    [ drop ]
+  } case ;
+
+: ori-mode-seven-write ( d reg cpu -- )
+  swap
+  {
+    { 4 [
+          [ alu>> alu-mode? ] keep swap
+          [ alu>> alu-sr-write ]
+          [ exception>> 32 swap set-model drop ] if
+        ]
+    }
+    [ drop drop drop ]
+  } case ;
+
 : ori-ea ( cpu -- data )
     [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
     swap
     {
       { 0 [ cpu-read-dregister ] }
-      { 7 [ mode-seven ] }
-      [ drop drop drop ]
+      { 7 [ ori-mode-seven ] keep }
+      [ drop drop ]
     } case ;
 
+: ori-ea-write ( d cpu -- )
+  [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
+  swap
+  {
+    { 7 [ ori-mode-seven-write ] }
+    [ drop drop drop drop  ]
+  } case ;
 
 : ori-source ( cpu -- data )
-  [ PC+ ] keep cashe>> second ;
+  [ cashe>> second ] keep cashe>> third words-long ;
+
+: ori-source-word ( cpu -- data )
+  cashe>> second ;
 
 
   ! get the size from instruction
@@ -601,11 +632,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 : ori-source-byte ( cpu -- data )
-  ori-source 8 bits ;
+  ori-source-word 8 bits ;
 
-
-: ori-source-word ( cpu -- data )
-  ori-source 16 bits ;
 
 : ori-dest-byte ( s cpu -- data )
   [ ori-ea ] keep
@@ -615,11 +643,19 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ ori-ea ] keep
   alu>> alu-or-word ;
 
+: ori-dest-word-write ( d cpu -- )
+  ori-ea-write ;
+
 : cpu-ori ( cpu -- )
   [ ori-source-size ] keep swap ! size
   {
     { 0 [ [ ori-source-byte ] keep [ ori-dest-byte ] keep 2drop ] }     ! Byte
-    { 1 [ [ ori-source-word ] keep [ ori-dest-word ] keep 2drop ] }     ! word
+    { 1 [
+          [ ori-source-word ] keep [ PC++ ] keep
+          [ ori-dest-word ] keep
+          ori-dest-word-write
+        ]
+    }     ! word
     { 2 [ drop ] }     ! long
     [ drop drop ]
   } case ;
@@ -906,7 +942,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cashe>> first 15 6 bit-range ] keep swap
   {
     { 0x108 [ cpu-clr-byte ] }
-    { 0x139 [ cpu-reset-models PC+ ] }
+    { 0x139 [
+              [ alu>> alu-mode? ] keep swap
+              [ cpu-reset-models PC+ ]
+              [ exception>> 32 swap set-model ] if
+            ]
+    }
     { 0x13B [ cpu-jmp ] }
 
     [ drop drop ]

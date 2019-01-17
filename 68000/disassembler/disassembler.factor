@@ -145,7 +145,10 @@ TUPLE: disassembler opcodes ;
   [ second ] keep [ third ] keep [ >long<  >hex append "," append ] dip
   op-zero-ea append ;
 
-
+: andi-byte ( array -- $ )
+  [ "ANDI.B #$" ] dip
+  [ second ] keep [ >hex append "," append ] dip
+  op-zero-ea append ;
 
 : (opcode$-0) ( array -- $ )
   [ first 11 6 bit-range 6 bits ] keep swap
@@ -154,8 +157,8 @@ TUPLE: disassembler opcodes ;
     { 1 [ ori-word ] }  ! ORI
     { 2 [ drop "ANDI.B" ] } ! ANDI
     { 0x06 [ drop "BCLR" ] }
+    { 0x08 [ andi-byte ] }
     { 10 [ andi-long ] }
-
     [ drop opcode$-error ]
   } case ;
 

@@ -715,10 +715,24 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cpu-0-wl-ea ] keep
   PC+ ;
 
+
+: cpu-andi-byte-data ( cpu -- )
+  [ PC+ ] keep
+  [ cashe>> second 8 bits ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-rl-ea ] keep
+  [ alu>> alu-and-byte ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-wl-ea ] keep
+  PC+ ;
+
+
 : cpu-andi ( cpu -- )
   [ cpu-size ] keep swap
   {
-    { 0 [ drop ] }  ! byte
+    { 0 [ cpu-andi-byte-data ] }  ! byte
     { 1 [ drop ] }  ! word
     { 2 [ cpu-andi-long-data ] }  ! long
     [ drop drop ]
@@ -736,6 +750,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
+  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI

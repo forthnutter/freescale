@@ -329,7 +329,14 @@ M: alu model-activated
     [ alu-v-clr ] keep
   ] while drop swap drop ;
 
-
+: alu-and-byte ( a b alu -- r )
+  [ bitand ] dip
+  [ dup 7 bit? ] dip
+  [ ?alu-n ] keep
+  [ dup 8 bits 0 = ] dip
+  [ ?alu-z ] keep
+  [ alu-v-clr ] keep
+  [ alu-c-clr ] keep drop ;
 
 : alu-and-long ( a b alu -- r )
   [ bitand ] dip

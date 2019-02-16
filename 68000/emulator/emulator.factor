@@ -750,7 +750,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
-  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
@@ -815,7 +814,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! Move Byte
 : (opcode-1) ( cpu -- )
   [ source-data ] keep
-  [ break write-destination-byte ] keep  PC+ ;
+  [ write-destination-byte ] keep  PC+ ;
 
 : cpu-read-imm ( cpu -- l )
   [ PC+ ] keep
@@ -953,7 +952,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : (opcode-4) ( cpu -- )
   [ cashe>> first 15 6 bit-range ] keep swap
   {
-    { 0x108 [ cpu-clr-byte ] }
+    { 0x108 [ break cpu-clr-byte ] }
     { 0x139 [
               [ alu>> alu-mode? ] keep swap
               [ cpu-reset-models PC+ ]

@@ -242,7 +242,6 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 : (opcode$-4) ( array -- $ )
-  break
   [ first 15 6 bit-range ] keep swap
   {
     { 0x108 [ clr-byte ] }

@@ -256,6 +256,12 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 : single-step ( cpu -- )
   execute-cycle ;
 
+: run-steps ( n cpu -- )
+  swap iota
+  [
+    drop
+    [ single-step ] keep
+  ] each drop ;
 
 ! disassemble from address
 : mnemonic-dump ( address cpu -- str )

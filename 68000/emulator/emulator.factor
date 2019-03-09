@@ -952,7 +952,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : (opcode-4) ( cpu -- )
   [ cashe>> first 15 6 bit-range ] keep swap
   {
-    { 0x108 [ break cpu-clr-byte ] }
+    { 0x108 [ cpu-clr-byte ] }
     { 0x139 [
               [ alu>> alu-mode? ] keep swap
               [ cpu-reset-models PC+ ]

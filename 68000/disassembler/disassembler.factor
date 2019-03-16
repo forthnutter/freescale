@@ -302,8 +302,14 @@ TUPLE: disassembler opcodes ;
   opcode$-error ;
 
 
-: (opcode$-8) ( cpu -- $ )
+
+
+: (opcode$-8) ( array -- $ )
   break
+  [ first 8 6 bit-range 3 bits ] keep swap
+  {
+    { 0 [ drop ]}
+}
   opcode$-error ;
 
 

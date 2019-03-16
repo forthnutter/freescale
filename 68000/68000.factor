@@ -257,7 +257,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
   execute-cycle ;
 
 : run-steps ( n cpu -- )
-  swap iota
+  swap <iota>
   [
     drop
     [ single-step ] keep

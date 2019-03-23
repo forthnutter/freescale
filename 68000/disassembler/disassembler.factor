@@ -302,15 +302,21 @@ TUPLE: disassembler opcodes ;
   opcode$-error ;
 
 
+: op-8-or ( array -- $ )
+  [ first ]
 
 
 : (opcode$-8) ( array -- $ )
   break
-  [ first 8 6 bit-range 3 bits ] keep swap
+  [ first 8 4 bit-range 3 bits ] keep swap
   {
-    { 0 [ drop ]}
-}
-  opcode$-error ;
+    { 12 [ drop "DIVU" ] }
+    { 16 [ drop "SBCD" ] }
+    { 20 [ drop "PACK" ] }
+    { 24 [ drop "UNPK" ] }
+    { 28 [ drop "DIVS" ] }
+    [ drop drop "OR" ]
+  } case ;
 
 
 : (opcode$-9) ( cpu -- $ )

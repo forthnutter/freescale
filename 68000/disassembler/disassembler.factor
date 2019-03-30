@@ -60,6 +60,42 @@ TUPLE: disassembler opcodes ;
 : >long< ( wh wl -- l )
     [ 16 bits 16 shift ] dip 16 bits bitor ;
 
+: ea-mode ( array -- n )
+  first 5 3 bit-range 3 bits ;
+
+: ea-reg ( array -- n )
+  first 2 0 bit-range 3 bits ;
+
+: ea-size ( array -- n )
+  first 7 6 bit-range 2 bits ;
+
+: ea-status ( array -- $ )
+  ea-size
+  {
+    { 0 [ "CCR" ] }
+    { 1 [ "SR" ] }
+    [ drop "BAD SIZE" ]
+  } case ;
+
+
+: ea-mode-seven ( array -- $ )
+  [ ea-reg ] keep swap
+  {
+    { 0 [ drop "ABS.W" ] }
+    { 1 [ drop "ABS.L" ] }
+    { 4 [ op-zero-status ] }
+    [ drop drop "BAD REG"]
+  } case ;
+
+
+: effective-address ( array -- $ )
+  [ ea-mode ] keep swap
+  {
+    { 0 [ ea-reg dregister$ ] }
+    { 2 [ ea-reg aregister$ ] }
+    { 7 [ op-zero-mode-seven ] }
+    [ drop drop "BAD MODE" ]
+  } case ;
 
 : op-zero-size ( array -- n )
   first 7 6 bit-range 2 bits ;
@@ -83,6 +119,7 @@ TUPLE: disassembler opcodes ;
     { 4 [ op-zero-status ] }
     [ drop drop "BAD REG"]
   } case ;
+
 
 
 
@@ -121,7 +158,7 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 : op-zero-ea ( array -- $ )
-  [ op-zero-mode ] keep
+  [ ea-mode ] keep
   swap
   {
     { 0 [ op-zero-reg dregister$ ] }
@@ -301,21 +338,32 @@ TUPLE: disassembler opcodes ;
   break
   opcode$-error ;
 
+: op-eight-ea ( array -- $ )
+
 
 : op-8-or ( array -- $ )
-  [ first ]
+  [ first 8 6 bit-range 3 bits ] keep swap
+  {
+    { 0 [ drop "OR.B <ea>,Dn" ] }
+    { 1 [ drop "OR.W <ea>,Dn" ] }
+    { 2 [ drop "OR.L <ea>,Dn" ] }
+    { 4 [ drop "OR.B Dn,<ea>" ] }
+    { 5 [ drop "OR.W Dn,<ea>" ] }
+    { 6 [ drop "OR.L Dn,<ea>" ] }
+    [ drop drop "OR OPMODE Error" ]
+} case ;
 
 
 : (opcode$-8) ( array -- $ )
   break
-  [ first 8 4 bit-range 3 bits ] keep swap
+  [ first 8 4 bit-range 5 bits ] keep swap
   {
     { 12 [ drop "DIVU" ] }
     { 16 [ drop "SBCD" ] }
     { 20 [ drop "PACK" ] }
     { 24 [ drop "UNPK" ] }
     { 28 [ drop "DIVS" ] }
-    [ drop drop "OR" ]
+    [ drop op-8-or ]
   } case ;
 
 

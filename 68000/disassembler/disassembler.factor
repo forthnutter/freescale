@@ -83,7 +83,7 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ drop "ABS.W" ] }
     { 1 [ drop "ABS.L" ] }
-    { 4 [ op-zero-status ] }
+    { 4 [ ea-status ] }
     [ drop drop "BAD REG"]
   } case ;
 
@@ -93,7 +93,7 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ ea-reg dregister$ ] }
     { 2 [ ea-reg aregister$ ] }
-    { 7 [ op-zero-mode-seven ] }
+    { 7 [ ea-mode-seven ] }
     [ drop drop "BAD MODE" ]
   } case ;
 
@@ -338,13 +338,15 @@ TUPLE: disassembler opcodes ;
   break
   opcode$-error ;
 
-: op-eight-ea ( array -- $ )
-
+: op-8-dreg ( array -- $ )
+  first 11 9 bit-range 3 dregister$ ;
 
 : op-8-or ( array -- $ )
   [ first 8 6 bit-range 3 bits ] keep swap
   {
-    { 0 [ drop "OR.B <ea>,Dn" ] }
+    { 0 [
+          [ effective-address ] [ op-8-dreg ] bi
+           "OR.B" prepend append ] }
     { 1 [ drop "OR.W <ea>,Dn" ] }
     { 2 [ drop "OR.L <ea>,Dn" ] }
     { 4 [ drop "OR.B Dn,<ea>" ] }

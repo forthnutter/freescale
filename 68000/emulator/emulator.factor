@@ -1033,11 +1033,16 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! UNPK
 : (opcode-8) ( cpu -- )
   break
+  [ first 8 4 bit-range 5 bits ] keep swap
+  {
+
+  } case
   drop ;
 
 ! SUB SUBA SUBX
 : (opcode-9) ( cpu -- )
   break
+
   drop ;
 
 ! Reserved

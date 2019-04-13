@@ -339,14 +339,14 @@ TUPLE: disassembler opcodes ;
   opcode$-error ;
 
 : op-8-dreg ( array -- $ )
-  first 11 9 bit-range 3 dregister$ ;
+  first 11 9 bit-range 3 bits dregister$ ;
 
 : op-8-or ( array -- $ )
   [ first 8 6 bit-range 3 bits ] keep swap
   {
     { 0 [
           [ effective-address ] [ op-8-dreg ] bi
-           "OR.B" prepend append ] }
+           "OR.B " prepend "," append prepend ] }
     { 1 [ drop "OR.W <ea>,Dn" ] }
     { 2 [ drop "OR.L <ea>,Dn" ] }
     { 4 [ drop "OR.B Dn,<ea>" ] }

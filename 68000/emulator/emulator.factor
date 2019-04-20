@@ -1027,15 +1027,41 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
+: op-8-or-ea ( cpu -- ea )
+  [ source-emode ] keep swap
+  {
+    { 0 [ ea-reg ] }
+    { 2 [ ea-reg ] }
+    { 7 [ ea-mode-seven ] }
+    [ drop drop ]
+  } case ;
+
+: op-8-or-dr ( cpu -- dr )
+  ;
+
+: op-8-or ( cpu -- )
+  [ cashe>> first 8 6 bit-range 3 bits ] keep swap
+  {
+    { 0 [ [ op-8-or-ea ] [ op-8-or-dr ] bi ] }
+    { 1 [ drop ] }
+    { 2 [ drop ] }
+    { 4 [ drop ] }
+    { 5 [ drop ] }
+    { 6 [ drop ] }
+    [ drop drop ]
+  } case ;
+
+
 ! DIV DIVS DIVL DIVU DIVUL
 ! OR
 ! SBCD
 ! UNPK
 : (opcode-8) ( cpu -- )
   break
-  [ first 8 4 bit-range 5 bits ] keep swap
+  [ cashe>> first 8 4 bit-range 5 bits ] keep swap
   {
-
+    { 12 [ drop ] }
+    [ drop op-8-or ]
   } case
   drop ;
 

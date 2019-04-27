@@ -451,12 +451,22 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 ! get effective address value mainly for opcode 0
-: effective-address ( cpu -- data )
+: ea-read ( cpu -- data )
   [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
   swap
   {
+    { 0 [ cpu-read-dregister ] }
     { 7 [ effective-mode-seven ] }
     [ drop drop ]
+  } case ;
+
+! write to the effective address
+: ea-write ( data cpu -- )
+  [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ] keep
+  swap
+  {
+      { 0 [ cpu-write-dregister ] }
+      [ drop drop drop ]
   } case ;
 
 : cpu-rb-along ( cpu -- b )
@@ -1027,22 +1037,25 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
-: op-8-or-ea ( cpu -- ea )
-  [ source-emode ] keep swap
-  {
-    { 0 [ ea-reg ] }
-    { 2 [ ea-reg ] }
-    { 7 [ ea-mode-seven ] }
-    [ drop drop ]
-  } case ;
+
 
 : op-8-or-dr ( cpu -- dr )
-  ;
+  [ cashe>> first 11 9 bit-range 3 bits ] keep
+  cpu-read-dregister ;
+
+: op-8-write ( d cpu -- )
+  [ cashe>> first 11 9 bit-range 3 bits ] keep
+  cpu-write-dregister ;
 
 : op-8-or ( cpu -- )
   [ cashe>> first 8 6 bit-range 3 bits ] keep swap
   {
-    { 0 [ [ op-8-or-ea ] [ op-8-or-dr ] bi ] }
+    { 0 [ [ ea-read ]
+          [ op-8-or-dr ]
+          [ [ alu>> alu-or-byte ] keep ] tri
+          ea-write
+        ]
+    }
     { 1 [ drop ] }
     { 2 [ drop ] }
     { 4 [ drop ] }
@@ -1062,8 +1075,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   {
     { 12 [ drop ] }
     [ drop op-8-or ]
-  } case
-  drop ;
+  } case ;
 
 ! SUB SUBA SUBX
 : (opcode-9) ( cpu -- )

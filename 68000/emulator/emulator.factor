@@ -466,7 +466,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
       { 0 [ cpu-write-dregister ] }
-      [ drop drop drop ]
+      [ drop drop drop drop ]
   } case ;
 
 : cpu-rb-along ( cpu -- b )
@@ -1053,7 +1053,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0 [ [ ea-read ]
           [ op-8-or-dr ]
           [ [ alu>> alu-or-byte ] keep ] tri
-          ea-write
+          [ ea-write ] keep PC+
         ]
     }
     { 1 [ drop ] }

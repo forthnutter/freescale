@@ -357,7 +357,6 @@ TUPLE: disassembler opcodes ;
 
 
 : (opcode$-8) ( array -- $ )
-  break
   [ first 8 4 bit-range 5 bits ] keep swap
   {
     { 12 [ drop "DIVU" ] }

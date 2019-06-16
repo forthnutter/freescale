@@ -288,12 +288,23 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 
-: op$-5-sub ( array -- $ )
+: op$-5-data ( array -- $ )
   ;
+
+: op$-5-sub ( array -- $ )
+  [ first 7 6 bit-range ] keep swap
+  {
+    { 0 [ drop "SUBQ.B" ] }
+    { 1 [ drop "SUBQ.W" ] }
+    { 2 [ drop "SUBQ.L" ] }
+    [ drop drop "BAD OPCODE 5 SIZE" ]
+  } case ;
+
+
 : op$-5-add ( array -- $ )
   [ first 7 6 bit-range ] keep swap
   {
-    { 0 [ drop "ADDQ.B" ] }
+    { 0 [ drop "ADDQ.B #" ] }
     { 1 [ drop "ADDQ.W" ] }
     { 2 [ drop "ADDQ.L" ] }
     [ drop drop "BAD OPCDE 5 SIZE" ]

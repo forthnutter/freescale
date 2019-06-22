@@ -974,13 +974,53 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
+
+
+
+: op-5-data ( cpu -- d )
+  [ cashe>> first 11 9 bit-range ] keep
+  cpu-read-dregister ;
+
+: op-5-sub ( cpu -- )
+  [ cashe>> first 7 6 bit-range ] keep swap
+  {
+    { 0 [ drop ] }
+    { 1 [ drop ] }
+    { 2 [ drop ] }
+    [ drop drop ]
+  } case ;
+
+
+: op-5-add ( cpu -- )
+  [ cashe>> first 7 6 bit-range ] keep swap
+  {
+    { 0 [
+          [ op-5-data 8 bits ] keep
+          [ ea-read ] keep
+          [ alu>> alu-add]
+        ] }
+    { 1 [ drop ] }
+    { 2 [ drop ] }
+    [ drop drop ]
+  } case ;
+
+
+: op-5-00 ( cpu -- )
+  [ cashe>> first 8 bit? ] keep swap
+  [ op-5-sub ] [ op-5-add ] if ;
+
+
 ! ADDQ
 ! DBcc
 ! SUBQ SUBX Scc
 ! TRAPcc
 : (opcode-5) ( cpu -- )
   break
-  drop ;
+  [ cashe>> first 7 6 bit-range ] keep swap
+  {
+    { 3 [ drop ] }
+    [ drop op-5-00 ]
+  } case ;
 
 ! get branch condition
 : branch-condition ( op -- con )

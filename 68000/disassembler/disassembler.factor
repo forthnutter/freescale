@@ -88,7 +88,7 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 
-: effective-address ( array -- $ )
+: ea$ ( array -- $ )
   [ ea-mode ] keep swap
   {
     { 0 [ ea-reg dregister$ ] }
@@ -288,8 +288,10 @@ TUPLE: disassembler opcodes ;
   } case ;
 
 
+
 : op$-5-data ( array -- $ )
-  ;
+  first 11 9 bit-range
+  dregister$ ;
 
 : op$-5-sub ( array -- $ )
   [ first 7 6 bit-range ] keep swap
@@ -304,7 +306,13 @@ TUPLE: disassembler opcodes ;
 : op$-5-add ( array -- $ )
   [ first 7 6 bit-range ] keep swap
   {
-    { 0 [ drop "ADDQ.B #" ] }
+    { 0 [
+          [ ea$ ] keep
+          op$-5-data "," append
+          "ADDQ.B #" prepend
+          prepend
+        ]
+    }
     { 1 [ drop "ADDQ.W" ] }
     { 2 [ drop "ADDQ.L" ] }
     [ drop drop "BAD OPCDE 5 SIZE" ]
@@ -384,7 +392,7 @@ TUPLE: disassembler opcodes ;
   [ first 8 6 bit-range 3 bits ] keep swap
   {
     { 0 [
-          [ effective-address ] [ $op-8-dreg ] bi
+          [ ea$ ] [ $op-8-dreg ] bi
            "OR.B " prepend "," append prepend ] }
     { 1 [ drop "OR.W <ea>,Dn" ] }
     { 2 [ drop "OR.L <ea>,Dn" ] }

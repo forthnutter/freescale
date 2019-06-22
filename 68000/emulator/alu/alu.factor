@@ -379,6 +379,9 @@ M: alu model-activated
 : alu-ccr-write ( d alu -- )
   [ value>> 8 mask-bit bitor ] keep set-model ;
 
+: alu-add-byte ( a b alu -- r )
+;
+
 ! make a alu
 : <alu> ( -- alu )
   0 alu new-model

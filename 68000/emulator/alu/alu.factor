@@ -260,6 +260,9 @@ M: alu model-activated
   [ 31 bit? ] dip swap
   [ alu-n-set ] [ alu-n-clr ] if ;
 
+: alu-byte-c ( b alu -- )
+  [ 8 bit? ] dip swap
+  [ alu-c-set ] [ alu-c-clr ] if ;
 
 : alu-lsl-byte ( count d alu -- r )
   [ [ dup 0 = not ] 2dip rot ]
@@ -380,6 +383,13 @@ M: alu model-activated
   [ value>> 8 mask-bit bitor ] keep set-model ;
 
 : alu-add-byte ( a b alu -- r )
+  break
+  [ + ] dip
+  [ alu-byte-n ] 2keep
+  [ [ 8 bits ] dip alu-byte-z ] 2keep
+  [ alu-byte-c ] 2keep
+  [ [ alu-c? ] [ ?alu-x ] bi ] 2keep
+  
 ;
 
 ! make a alu

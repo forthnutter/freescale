@@ -382,6 +382,11 @@ M: alu model-activated
 : alu-ccr-write ( d alu -- )
   [ value>> 8 mask-bit bitor ] keep set-model ;
 
+!
+: alu-addv-byte ( a b -- ? )
+  [ [ 7 bit ] dip 7 bit ] 2keep ;
+
+
 : alu-add-byte ( a b alu -- r )
   break
   [ + ] dip
@@ -389,7 +394,7 @@ M: alu model-activated
   [ [ 8 bits ] dip alu-byte-z ] 2keep
   [ alu-byte-c ] 2keep
   [ [ alu-c? ] [ ?alu-x ] bi ] 2keep
-  
+
 ;
 
 ! make a alu

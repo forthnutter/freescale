@@ -382,20 +382,25 @@ M: alu model-activated
 : alu-ccr-write ( d alu -- )
   [ value>> 8 mask-bit bitor ] keep set-model ;
 
-!
-: alu-addv-byte ( a b -- ? )
-  [ [ 7 bit ] dip 7 bit ] 2keep ;
+! V =  (\A7 and \B7 and R7) or (A7 and B7 and \R7)
+: alu-addv-byte ( a b r -- ? )
+  [ [ 7 bit? not ] 2dip [ 7 bit? not and ] dip 7 bit? and ] 3keep
+  [ 7 bit? ] 2dip [ 7 bit? and ] dip 7 bit? not and or ;
 
 
 : alu-add-byte ( a b alu -- r )
   break
-  [ + ] dip
+  [ 2dup + ] dip
+  [ drop alu-addv-byte ] 2keep [ [ drop ] dip ?alu-v ] 2keep
   [ alu-byte-n ] 2keep
   [ [ 8 bits ] dip alu-byte-z ] 2keep
   [ alu-byte-c ] 2keep
   [ [ alu-c? ] [ ?alu-x ] bi ] 2keep
 
 ;
+
+! Sub
+! V = (A7 and \B7 and \R7) or (\A7 and B7 and R7)
 
 ! make a alu
 : <alu> ( -- alu )

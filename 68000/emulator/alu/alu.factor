@@ -395,9 +395,7 @@ M: alu model-activated
   [ alu-byte-n ] 2keep
   [ [ 8 bits ] dip alu-byte-z ] 2keep
   [ alu-byte-c ] 2keep
-  [ [ alu-c? ] [ ?alu-x ] bi ] 2keep
-
-;
+  [ alu-c? ] [ ?alu-x ] bi ;
 
 ! Sub
 ! V = (A7 and \B7 and \R7) or (\A7 and B7 and R7)

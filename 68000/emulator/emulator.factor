@@ -997,7 +997,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0 [
           [ op-5-data 8 bits ] keep
           [ ea-read ] keep
-          [ alu>> alu-add-byte ]
+          [ alu>> alu-add-byte ] keep
         ] }
     { 1 [ drop ] }
     { 2 [ drop ] }

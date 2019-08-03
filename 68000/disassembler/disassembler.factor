@@ -298,7 +298,12 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ drop "SUBQ.B" ] }
     { 1 [ drop "SUBQ.W" ] }
-    { 2 [ drop "SUBQ.L" ] }
+    { 2 [
+          [ ea$ ] keep
+          op$-5-data "," append
+          "SUBQ.L #" prepend prepend
+        ]
+    }
     [ drop drop "BAD OPCODE 5 SIZE" ]
   } case ;
 
@@ -349,7 +354,7 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ [ ".W " ] dip second 16 >signed$ append ] }
     { 0xff [ drop ".L" ] }
-    [ drop drop ".B" ]
+    [ drop [ ".B " ] dip second 8 >signed$ append ]
   } case ;
 
 : op-branch ( disp cond array -- $ )
@@ -361,7 +366,7 @@ TUPLE: disassembler opcodes ;
     { 3 [ drop drop "BLS" ] }
     { 4 [ drop drop "BCC" ] }
     { 5 [ drop drop "BCS" ] }
-    { 6 [ drop drop "BNE" ] }
+    { 6 [ [ "BNE" ] 2dip op-branch-displace append ] }
     { 7 [ drop drop "BEQ" ] }
     { 8 [ drop drop "BVC" ] }
     { 9 [ drop drop "BVS" ] }

@@ -446,7 +446,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
     { 4 [ SR> ] }
-    [ drop ]
+    [ drop drop 0 ]
 } case ;
 
 
@@ -986,7 +986,13 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   {
     { 0 [ drop ] }
     { 1 [ drop ] }
-    { 2 [ drop ] }
+    { 2 [
+          [ op-5-data 32 bits ] keep
+          [ ea-read ] keep
+          [ alu>> alu-sub-long ] keep
+          [ PC+ ] keep ea-write
+        ]
+    }
     [ drop drop ]
   } case ;
 
@@ -998,6 +1004,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
           [ op-5-data 8 bits ] keep
           [ ea-read ] keep
           [ alu>> alu-add-byte ] keep
+          [ PC+ ] keep ea-write
         ] }
     { 1 [ drop ] }
     { 2 [ drop ] }

@@ -260,6 +260,10 @@ M: alu model-activated
   [ 31 bit? ] dip swap
   [ alu-n-set ] [ alu-n-clr ] if ;
 
+: alu-long-c ( b alu -- )
+  [ 32 bit? ] dip swap
+  [ alu-c-set ] [ alu-c-clr ] if ;
+
 : alu-byte-c ( b alu -- )
   [ 8 bit? ] dip swap
   [ alu-c-set ] [ alu-c-clr ] if ;
@@ -389,16 +393,28 @@ M: alu model-activated
 
 
 : alu-add-byte ( a b alu -- r )
-  break
   [ 2dup + ] dip
   [ drop alu-addv-byte ] 2keep [ [ drop ] dip ?alu-v ] 2keep
   [ alu-byte-n ] 2keep
-  [ [ 8 bits ] dip alu-byte-z ] 2keep
   [ alu-byte-c ] 2keep
+  [ [ 8 bits ] dip alu-byte-z ] 2keep
   [ alu-c? ] [ ?alu-x ] bi ;
 
 ! Sub
 ! V = (A7 and \B7 and \R7) or (\A7 and B7 and R7)
+: alu-subv-long ( a b r -- ? )
+  [ [ 31 bit? ] 2dip [ 31 bit? not and ] dip 31 bit? not and ] 3keep
+  [ 31 bit? not ] 2dip [ 31 bit? and ] dip 31 bit? and or ;
+
+
+: alu-sub-long ( a b alu -- r )
+  [ 2dup - ] dip
+  [ drop alu-subv-long ] 2keep [ [ drop ] dip ?alu-v ] 2keep
+  [ alu-long-n ] 2keep
+  [ alu-long-c ] 2keep
+  [ [ 32 bits ] dip alu-byte-z ] 2keep
+  [ alu-c? ] [ ?alu-x ] bi ;
+
 
 ! make a alu
 : <alu> ( -- alu )

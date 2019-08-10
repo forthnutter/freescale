@@ -350,11 +350,12 @@ TUPLE: disassembler opcodes ;
   [ drop [ "+" ] dip number>string append ] if ;
 
 : op-branch-displace ( disp array -- $ )
+  break
   swap
   {
     { 0 [ [ ".W " ] dip second 16 >signed$ append ] }
     { 0xff [ drop ".L" ] }
-    [ drop [ ".B " ] dip second 8 >signed$ append ]
+    [ drop [ ".B " ] dip first 8 >signed$ append ]
   } case ;
 
 : op-branch ( disp cond array -- $ )

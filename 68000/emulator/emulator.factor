@@ -1050,7 +1050,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : cpu-byte-displacement ( cpu -- )
   [ PC+ ] keep
-   ;
+  [ cashe>> first 8 >signed ] keep
+  [ PC> + ] keep >PC ;
 
 
 : cpu-bmi ( cpu -- )

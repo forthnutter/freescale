@@ -1038,15 +1038,9 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : cpu-word-displacement ( cpu -- )
   [ PC+ ] keep
-  [ alu>> alu-n? ] keep swap
-  [
-    [ PC+ ] keep
-    [ cashe>> second 16 >signed ] keep
-    [ PC> + ] keep >PC
-  ]
-  [
-    PC+
-  ] if ;
+  [ cashe>> second 16 >signed ] keep
+  [ PC+ ] keep
+  [ PC> + ] keep >PC ;
 
 : cpu-byte-displacement ( cpu -- )
   [ PC+ ] keep
@@ -1057,7 +1051,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-bmi ( cpu -- )
   [ cashe>> first branch-displacement ] keep swap
   {
-    { 0 [ cpu-word-displacement ] }  ! 16 bit displacement
+    { 0
+      [
+        [ alu>> alu-n? ] keep swap not
+        [ PC+ ] [ break cpu-word-displacement ] if
+      ]
+    }  ! 16 bit displacement
     [ drop drop ]   ! default is 8 bit displacement
   } case ;
 
@@ -1065,7 +1064,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   [ cashe>> first branch-displacement ] keep swap
   {
-    { 0 [ cpu-word-displacement ] }  ! 16 bit displacement
+    { 0
+      [
+        [ alu>> alu-z? ] keep swap
+        [ PC+ ] [ cpu-word-displacement ] if
+      ]
+    }  ! 16 bit displacement
     [
       drop
       [ alu>> alu-z? ] keep swap

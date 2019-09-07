@@ -188,6 +188,7 @@ TUPLE: disassembler opcodes ;
   op-zero-ea append ;
 
 : (opcode$-0) ( array -- $ )
+  break
   [ first 11 6 bit-range 6 bits ] keep swap
   {
     { 0 [ ori-byte ] }  ! ORI
@@ -196,6 +197,7 @@ TUPLE: disassembler opcodes ;
     { 0x06 [ drop "BCLR" ] }
     { 0x08 [ andi-byte ] }
     { 10 [ andi-long ] }
+    { 40 [ drop "40"]}
     [ drop opcode$-error ]
   } case ;
 
@@ -337,7 +339,6 @@ TUPLE: disassembler opcodes ;
 ! Scc
 
 : (opcode$-5) ( array -- $ )
-  break
   [ first 7 6 bit-range ] keep swap
   {
     { 3 [ drop "OPCODE-5" ] }

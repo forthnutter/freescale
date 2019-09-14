@@ -197,7 +197,7 @@ TUPLE: disassembler opcodes ;
     { 0x06 [ drop "BCLR" ] }
     { 0x08 [ andi-byte ] }
     { 10 [ andi-long ] }
-    { 40 [ drop "40"]}
+    { 40 [ drop "BTST"] }
     [ drop opcode$-error ]
   } case ;
 

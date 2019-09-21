@@ -187,8 +187,14 @@ TUPLE: disassembler opcodes ;
   [ second ] keep [ >hex append "," append ] dip
   op-zero-ea append ;
 
+: eori-byte ( array -- $ )
+  [ "EORI.B #$" ] dip
+  [ second ] keep [ >hex append "," append ] dip
+  op-zero-ea append ;
+
+
+
 : (opcode$-0) ( array -- $ )
-  break
   [ first 11 6 bit-range 6 bits ] keep swap
   {
     { 0 [ ori-byte ] }  ! ORI
@@ -197,7 +203,7 @@ TUPLE: disassembler opcodes ;
     { 0x06 [ drop "BCLR" ] }
     { 0x08 [ andi-byte ] }
     { 10 [ andi-long ] }
-    { 40 [ drop "BTST"] }
+    { 40 [ eori-byte ] }  ! EORI
     [ drop opcode$-error ]
   } case ;
 

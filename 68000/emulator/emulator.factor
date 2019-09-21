@@ -760,10 +760,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
+  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
     { 2 [ cpu-andi ] } ! ANDI
+
     [ drop drop ]
   } case ;
 

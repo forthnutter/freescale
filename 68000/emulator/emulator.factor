@@ -748,6 +748,25 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
   } case ;
 
+: cpu-eori-byte-data ( cpu -- )
+  [ PC+ ] keep
+  [ cashe>> second 8 bits ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-rl-ea ] keep
+  [ alu>> alu-or-byte ] keep
+  [ cashe>> first code0-ea-reg ] keep
+  [ cashe>> first code0-ea-mode ] keep
+  [ cpu-0-wl-ea ] keep
+  PC+ ;
+
+: cpu-eori ( cpu -- )
+  [ cpu-size ] keep swap
+  {
+    { 0 [ cpu-eori-byte-data ] }
+    [ drop drop ]
+  } case ;
+
 
 ! the opcodes are divide into 16
 ! opcode 0 Bit Manipulation MOVEP Immediate
@@ -765,6 +784,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   {
     { 0 [ cpu-ori ] }  ! ORI
     { 2 [ cpu-andi ] } ! ANDI
+    { 10 [ cpu-eori ] } ! EORI
 
     [ drop drop ]
   } case ;

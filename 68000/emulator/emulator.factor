@@ -1070,7 +1070,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 : cpu-bmi ( cpu -- )
-  break
   [ cashe>> first branch-displacement ] keep swap
   {
     { 0
@@ -1083,7 +1082,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 : op-6-bne ( cpu -- )
-  break
   [ cashe>> first branch-displacement ] keep swap
   {
     { 0
@@ -1099,11 +1097,19 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     ]   ! default is 8 bit displacement
   } case ;
 
+: op-6-bra ( cpu -- )
+  break
+  [ cashe>> first branch-displacement ] keep swap
+  {
+    { 0 [ cpu-word-displacement ] }
+    [ drop cpu-byte-displacement ]
+  } case ;
+
 ! Bcc BSR BRA
 : (opcode-6) ( cpu -- )
   [ cashe>> first branch-condition ] keep swap
   {
-    { 0 [ drop ] }  ! BRA
+    { 0 [ op-6-bra ] }  ! BRA
     { 1 [ drop ] }  ! BSR
     { 2 [ drop ] }  ! BHI
     { 3 [ drop ] }  ! BLS

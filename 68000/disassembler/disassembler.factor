@@ -368,7 +368,7 @@ TUPLE: disassembler opcodes ;
 : op-branch ( disp cond array -- $ )
   swap
   {
-    { 0 [ drop drop "0" ] }
+    { 0 [ [ "BRA" ] 2dip op-branch-displace append ] }
     { 1 [ drop drop "1" ] }
     { 2 [ drop drop "BHI" ] }
     { 3 [ drop drop "BLS" ] }

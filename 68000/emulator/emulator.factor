@@ -779,7 +779,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! RTM
 ! SUBI
 : (opcode-0) ( cpu -- )
-  break
   [ cashe>> first 11 8 bit-range 4 bits ] keep swap
   {
     { 0 [ cpu-ori ] }  ! ORI
@@ -1000,8 +999,9 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 
 : op-5-data ( cpu -- d )
-  [ cashe>> first 11 9 bit-range ] keep
-  cpu-read-dregister ;
+  cashe>> first 11 9 bit-range
+  dup 0 =
+  [ drop 8 ] [ ] if ;
 
 : op-5-sub ( cpu -- )
   [ cashe>> first 7 6 bit-range ] keep swap
@@ -1009,7 +1009,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0 [ drop ] }
     { 1 [ drop ] }
     { 2 [
-          [ op-5-data 32 bits ] keep
+          [ op-5-data ] keep
           [ ea-read ] keep
           [ alu>> alu-sub-long ] keep
           [ PC+ ] keep ea-write
@@ -1098,7 +1098,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 : op-6-bra ( cpu -- )
-  break
   [ cashe>> first branch-displacement ] keep swap
   {
     { 0 [ cpu-word-displacement ] }
@@ -1166,7 +1165,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! SBCD
 ! UNPK
 : (opcode-8) ( cpu -- )
-  break
   [ cashe>> first 8 4 bit-range 5 bits ] keep swap
   {
     { 12 [ drop ] }

@@ -298,8 +298,8 @@ TUPLE: disassembler opcodes ;
 
 
 : op$-5-data ( array -- $ )
-  first 11 9 bit-range
-  dregister$ ;
+  first 11 9 bit-range dup 0 =
+  [ drop 8 number>string ] [ number>string ] if ;
 
 : op$-5-sub ( array -- $ )
   [ first 7 6 bit-range ] keep swap
@@ -357,7 +357,6 @@ TUPLE: disassembler opcodes ;
   [ drop [ "+" ] dip number>string append ] if ;
 
 : op-branch-displace ( disp array -- $ )
-  break
   swap
   {
     { 0 [ [ ".W " ] dip second 16 >signed$ append ] }

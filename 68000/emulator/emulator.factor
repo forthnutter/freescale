@@ -113,7 +113,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! get A7
 : A7> ( cpu -- d )
   [ alu>> alu-mode? ] keep swap
-  [ SSP> ] [ USP> ] if ;
+  [ SSP> abs ] [ USP> abs ] if ;
 
 
 ! increment A7
@@ -130,91 +130,91 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   ar>> 6 swap set-nth ;
 
 : A6> ( cpu -- d )
-  ar>> 6 swap nth ;
+  ar>> 6 swap nth abs ;
 
 : >A5 ( d cpu -- )
   ar>> 5 swap set-nth ;
 
 : A5> ( cpu -- d )
-  ar>> 5 swap nth ;
+  ar>> 5 swap nth abs ;
 
 : >A4 ( d cpu -- )
   ar>> 4 swap set-nth ;
 
 : A4> ( cpu -- d )
-  ar>> 4 swap nth ;
+  ar>> 4 swap nth abs ;
 
 : >A3 ( d cpu -- )
   ar>> 3 swap set-nth ;
 
 : A3> ( cpu -- d )
-  ar>> 3 swap nth ;
+  ar>> 3 swap nth abs ;
 
 : >A2 ( d cpu -- )
   ar>> 2 swap set-nth ;
 
 : A2> ( cpu -- d )
-  ar>> 2 swap nth ;
+  ar>> 2 swap nth abs ;
 
 : >A1 ( d cpu -- )
   ar>> 1 swap set-nth ;
 
 : A1> ( cpu -- d )
-  ar>> 1 swap nth ;
+  ar>> 1 swap nth abs ;
 
 : >A0 ( d cpu -- )
   ar>> 0 swap set-nth ;
 
 : A0> ( cpu -- d )
-  ar>> 0 swap nth ;
+  ar>> 0 swap nth abs ;
 
 : >D7 ( d cpu -- )
   dr>> 6 swap set-nth ;
 
 : D7> ( cpu -- d )
-  dr>> 6 swap nth ;
+  dr>> 6 swap nth abs ;
 
 : >D6 ( d cpu -- )
   dr>> 6 swap set-nth ;
 
 : D6> ( cpu -- d )
-  dr>> 6 swap nth ;
+  dr>> 6 swap nth abs ;
 
 : >D5 ( d cpu -- )
   dr>> 5 swap set-nth ;
 
 : D5> ( cpu -- d )
-  dr>> 5 swap nth ;
+  dr>> 5 swap nth abs ;
 
 : >D4 ( d cpu -- )
   dr>> 4 swap set-nth ;
 
 : D4> ( cpu -- d )
-  dr>> 4 swap nth ;
+  dr>> 4 swap nth abs ;
 
 : >D3 ( d cpu -- )
   dr>> 3 swap set-nth ;
 
 : D3> ( cpu -- d )
-  dr>> 3 swap nth ;
+  dr>> 3 swap nth abs ;
 
 : >D2 ( d cpu -- )
   dr>> 2 swap set-nth ;
 
 : D2> ( cpu -- d )
-  dr>> 2 swap nth ;
+  dr>> 2 swap nth abs ;
 
 : >D1 ( d cpu -- )
   dr>> 1 swap set-nth ;
 
 : D1> ( cpu -- d )
-  dr>> 1 swap nth ;
+  dr>> 1 swap nth abs ;
 
 : >D0 ( d cpu -- )
   dr>> 0 swap set-nth ;
 
 : D0> ( cpu -- d )
-  dr>> 0 swap nth ;
+  dr>> 0 swap nth abs ;
 
 : SR> ( cpu -- d )
     alu>> alu-sr> ;

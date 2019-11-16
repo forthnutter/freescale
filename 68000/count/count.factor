@@ -57,6 +57,7 @@ TUPLE: bc-count bytes cycles array ;
       { 0x07C [ 6 ] }
       { 0x23C [ 6 ] }
       { 0x3c0 [ 6 ] }
+      { 0xA7C [ 6 ] }
       { 0xe79 [ 6 ] }
 
       [ drop 2 ]

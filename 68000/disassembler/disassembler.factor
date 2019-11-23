@@ -392,14 +392,17 @@ TUPLE: disassembler opcodes ;
   [ first 11 8 bit-range 4 bits ] keep
   [ op-branch ] keep drop ;
 
+: op-moveq$ ( d r -- $ )
+  "MOVEQ #"
+  [ >hex-pad2 "," append ] 2dip
+  [ dregister$ append ] dip prepend ;
+
 ! moveq #< data>,Dn
 : (opcode$-7) ( array -- $ )
-  break
   [ first 7 0 bit-range 8 bits ] keep
   [ first 11 9 bit-range 3 bits ] keep
   [ first 8 bit? ] keep swap
-  [ opcode$-error ] [ op-moveq ] if
-  opcode$-error ;
+  [ drop drop opcode$-error ] [ drop op-moveq$ ] if ;
 
 : $op-8-dreg ( array -- $ )
   first 11 9 bit-range 3 bits dregister$ ;

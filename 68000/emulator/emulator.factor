@@ -1127,10 +1127,17 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop ]
 } case ;
 
+: op-moveq ( cpu -- )
+  [ cashe>> first 7 0 bit-range 8 >signed ] keep
+  [ cashe>> first 11 9 bit-range 3 bits ] keep
+  [ cpu-write-dregister ] 2keep
+  [ [ cpu-read-dregister ] keep swap 0 = ] keep ;
+
 ! MOVEQ
 : (opcode-7) ( cpu -- )
   break
-  drop ;
+  [ cashe>> first 8 bit? ] keep swap
+  [ drop ] [ op-moveq ] if ;
 
 
 

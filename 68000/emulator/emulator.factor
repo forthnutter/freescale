@@ -844,6 +844,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
+  break
   [ source-data ] keep
   [ write-destination-byte ] keep  PC+ ;
 
@@ -1131,7 +1132,15 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cashe>> first 7 0 bit-range 8 >signed ] keep
   [ cashe>> first 11 9 bit-range 3 bits ] keep
   [ cpu-write-dregister ] 2keep
-  [ [ cpu-read-dregister ] keep swap 0 = ] keep ;
+  [
+    [ cpu-read-dregister ] keep swap 0 =
+    swap alu>> ?alu-z
+  ] 2keep
+  [
+    [ cpu-read-dregister ] keep swap 31 bit?
+    swap alu>> ?alu-n
+  ] keep
+  [ alu>> alu-v-clr ] [ alu>> alu-c-clr ] [ PC+ ] tri ;
 
 ! MOVEQ
 : (opcode-7) ( cpu -- )

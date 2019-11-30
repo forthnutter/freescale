@@ -238,6 +238,7 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [ drop dregister$ ] }
     { 1 [ drop aregister$ ] }
+    { 3 [ drop aregister$ "(" prepend ")+" append ] }
     { 6 [ move-mode-six$ ] }
     { 7 [ move-mode-seven$ ] }
     [ drop drop drop "bad" ]

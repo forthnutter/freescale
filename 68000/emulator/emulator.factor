@@ -222,6 +222,38 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : >SR ( d cpu -- )
     alu>> >alu-sr ;
 
+: Ax+ ( a cpu -- )
+  swap
+  {
+      { 0 [ A0+ ] }
+      { 1 [ A1+ ] }
+      { 2 [ A2+ ] }
+      { 3 [ A3+ ] }
+      { 4 [ A4+ ] }
+      { 5 [ A5+ ] }
+      { 6 [ A6+ ] }
+      { 7 [ A7+ ] }
+      [ drop drop f ]
+  } case ;
+
+: Ax> ( a cpu -- a )
+  swap
+  {
+    { 0 [ A0> ] }
+    { 1 [ A1> ] }
+    { 2 [ A2> ] }
+    { 3 [ A3> ] }
+    { 4 [ A4> ] }
+    { 5 [ A5> ] }
+    { 6 [ A6> ] }
+    { 7 [ A7> ] }
+    [ drop drop f ]
+  } case ;
+
+
+: (Ax)+ ( a cpu -- d )
+  [ Ax> ] 2keep [ Ax+ ] keep
+  cpu-read-long ;
 
 ! split a word value to bytes
 : word-bytes ( w -- a b )
@@ -429,6 +461,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
     { 0 [ cpu-read-dregister ] }
+    { 3 [
+          [ cpu-read-aregister ] keep
+          [ cpu-read-byte ] keep
+
+        ]
+    }
     { 7 [ [ mode-seven ] keep cpu-read-long ] }
     [ drop drop ]
   } case ;

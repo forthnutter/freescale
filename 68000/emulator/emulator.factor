@@ -132,11 +132,17 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : A6> ( cpu -- d )
   ar>> 6 swap nth abs ;
 
+: A6+ ( cpu -- )
+  [ A6> ] keep [ 1 + ] dip >A6 ;
+
 : >A5 ( d cpu -- )
   ar>> 5 swap set-nth ;
 
 : A5> ( cpu -- d )
   ar>> 5 swap nth abs ;
+
+: A5+ ( cpu -- )
+  [ A5> ] keep [ 1 + ] dip >A5 ;
 
 : >A4 ( d cpu -- )
   ar>> 4 swap set-nth ;
@@ -144,11 +150,18 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : A4> ( cpu -- d )
   ar>> 4 swap nth abs ;
 
+: A4+ ( cpu -- )
+  [ A4> ] keep [ 1 + ] dip >A4 ;
+
+
 : >A3 ( d cpu -- )
   ar>> 3 swap set-nth ;
 
 : A3> ( cpu -- d )
   ar>> 3 swap nth abs ;
+
+: A3+ ( cpu -- )
+  [ A3> ] keep [ 1 + ] dip >A3 ;
 
 : >A2 ( d cpu -- )
   ar>> 2 swap set-nth ;
@@ -156,17 +169,27 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : A2> ( cpu -- d )
   ar>> 2 swap nth abs ;
 
+: A2+ ( cpu -- )
+  [ A2> ] keep [ 1 + ] dip >A2 ;
+
+
 : >A1 ( d cpu -- )
   ar>> 1 swap set-nth ;
 
 : A1> ( cpu -- d )
   ar>> 1 swap nth abs ;
 
+: A1+ ( cpu -- )
+  [ A1> ] keep [ 1 + ] dip >A1 ;
+
 : >A0 ( d cpu -- )
   ar>> 0 swap set-nth ;
 
 : A0> ( cpu -- d )
   ar>> 0 swap nth abs ;
+
+: A0+ ( cpu -- )
+ [ A0> ] keep [ 1 + ] dip >A0 ;
 
 : >D7 ( d cpu -- )
   dr>> 6 swap set-nth ;
@@ -233,7 +256,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
       { 5 [ A5+ ] }
       { 6 [ A6+ ] }
       { 7 [ A7+ ] }
-      [ drop drop f ]
+      [ drop drop ]
   } case ;
 
 : Ax> ( a cpu -- a )
@@ -251,9 +274,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 
-: (Ax)+ ( a cpu -- d )
-  [ Ax> ] 2keep [ Ax+ ] keep
-  cpu-read-long ;
+
 
 ! split a word value to bytes
 : word-bytes ( w -- a b )
@@ -346,6 +367,9 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : move-mode ( instruct -- mode )
   8 3 bit-range 6 bits ;
 
+: (Ax)+ ( a cpu -- d )
+  [ Ax> ] 2keep [ Ax+ ] keep
+  cpu-read-long ;
 
 : cpu-read-dregister ( d cpu -- n )
   swap
@@ -461,12 +485,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   swap
   {
     { 0 [ cpu-read-dregister ] }
-    { 3 [
-          [ cpu-read-aregister ] keep
-          [ cpu-read-byte ] keep
-
-        ]
-    }
+    { 3 [ (Ax)+ 8 bits ] }
     { 7 [ [ mode-seven ] keep cpu-read-long ] }
     [ drop drop ]
   } case ;

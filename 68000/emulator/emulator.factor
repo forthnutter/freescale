@@ -371,7 +371,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ Ax> ] 2keep [ Ax+ ] keep
   cpu-read-long ;
 
-: cpu-read-dregister ( d cpu -- n )
+: Dx> ( d cpu -- n )
   swap
   {
     { 0 [ D0> ] }
@@ -484,7 +484,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first source-reg ] [ cashe>> first source-mode ] bi ] keep
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 3 [ (Ax)+ 8 bits ] }
     { 7 [ [ mode-seven ] keep cpu-read-long ] }
     [ drop drop ]
@@ -512,7 +512,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 7 [ effective-mode-seven ] }
     [ drop drop ]
   } case ;
@@ -548,7 +548,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-rb-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister 8 bits ] }
+    { 0 [ Dx> 8 bits ] }
     { 7 [ cpu-0-rb-seven ] }
     [ drop drop ]
   } case ;
@@ -585,7 +585,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-rw-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 7 [ cpu-0-rw-mode-seven ] }
     [ drop drop ]
   } case ;
@@ -619,7 +619,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 7 [ mode-seven ] }
     [ drop drop ]
   } case ;
@@ -673,7 +673,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
     swap
     {
-      { 0 [ cpu-read-dregister ] }
+      { 0 [ Dx> ] }
       { 7 [ ori-mode-seven ] keep }
       [ drop drop ]
     } case ;
@@ -751,7 +751,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-rl-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 7 [ cpu-0-rw-mode-seven ] }
     [ drop drop ]
   } case ;
@@ -858,7 +858,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-move-rb-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister 8 bits ] }
+    { 0 [ Dx> ] }
     { 7 [ cpu-move-rb-mode-seven ] }
     [ drop drop ]
   } case ;
@@ -940,7 +940,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     ]
     [
       14 12 bit-range swap
-      cpu-read-dregister
+      Dx>
     ] if
   ] keep
   cashe>> second
@@ -959,7 +959,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-move-rl-ea ( reg mode cpu -- d )
   swap
   {
-    { 0 [ cpu-read-dregister ] }
+    { 0 [ Dx> ] }
     { 6 [ move-disp-index ] }
     { 7 [ cpu-move-rl-mode-seven ] }
     [ drop drop drop f ]
@@ -1190,11 +1190,11 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cashe>> first 11 9 bit-range 3 bits ] keep
   [ cpu-write-dregister ] 2keep
   [
-    [ cpu-read-dregister ] keep swap 0 =
+    [ Dx> ] keep swap 0 =
     swap alu>> ?alu-z
   ] 2keep
   [
-    [ cpu-read-dregister ] keep swap 31 bit?
+    [ Dx> ] keep swap 31 bit?
     swap alu>> ?alu-n
   ] keep
   [ alu>> alu-v-clr ] [ alu>> alu-c-clr ] [ PC+ ] tri ;
@@ -1209,7 +1209,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : op-8-or-dr ( cpu -- dr )
   [ cashe>> first 11 9 bit-range 3 bits ] keep
-  cpu-read-dregister ;
+  Dx> ;
 
 : op-8-write ( d cpu -- )
   [ cashe>> first 11 9 bit-range 3 bits ] keep
@@ -1291,7 +1291,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cpu-shift-ir ] keep swap
   [
     [ cpu-shift-rcount ] keep
-    [ cpu-read-dregister ] keep
+    [ Dx> ] keep
     [ cpu-shift-register ] keep
     [
       [ alu>> ] keep
@@ -1331,7 +1331,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cpu-shift-ir ] keep swap
   [
     [ cpu-shift-rcount ] keep
-    [ cpu-read-dregister ] keep
+    [ Dx> ] keep
   ]
   [
     [ cpu-shift-rcount ] keep

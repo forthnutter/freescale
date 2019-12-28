@@ -392,12 +392,28 @@ M: alu model-activated
   [ 7 bit? ] 2dip [ 7 bit? and ] dip 7 bit? not and or ;
 
 
+
+
 : alu-add-byte ( a b alu -- r )
   [ 2dup + ] dip
   [ drop alu-addv-byte ] 2keep [ [ drop ] dip ?alu-v ] 2keep
   [ alu-byte-n ] 2keep
   [ alu-byte-c ] 2keep
   [ [ 8 bits ] dip alu-byte-z ] 2keep
+  [ alu-c? ] [ ?alu-x ] bi ;
+
+! V =  (\A31 and \B31 and R31) or (A31 and B31 and \R31)
+: alu-addv-long ( a b r -- ? )
+  [ [ 31 bit? not ] 2dip [ 31 bit? not and ] dip 31 bit? and ] 3keep
+  [ 31 bit? ] 2dip [ 31 bit? and ] dip 31 bit? not and or ;
+
+
+: alu-add-long ( a b alu -- r )
+  [ 2dup + ] dip
+  [ drop alu-addv-long ] 2keep [ [ drop ] dip ?alu-v ] 2keep
+  [ alu-long-n ] 2keep
+  [ alu-long-c ] 2keep
+  [ [ 32 bits ] dip alu-long-z ] 2keep
   [ alu-c? ] [ ?alu-x ] bi ;
 
 ! Sub

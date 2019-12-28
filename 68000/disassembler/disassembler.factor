@@ -40,7 +40,18 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
-
+: $Dx ( d -- $ )
+  {
+    { 0 [ "D0" ] }
+    { 1 [ "D1" ] }
+    { 2 [ "D2" ] }
+    { 3 [ "D3" ] }
+    { 4 [ "D4" ] }
+    { 5 [ "D5" ] }
+    { 6 [ "D6" ] }
+    { 7 [ "D7" ] }
+    [ drop f ]
+  } case ;
 
 : aregister$ ( d -- $ )
   {
@@ -318,6 +329,7 @@ TUPLE: disassembler opcodes ;
 
 
 : op$-5-add ( array -- $ )
+  break
   [ first 7 6 bit-range ] keep swap
   {
     { 0 [
@@ -328,7 +340,13 @@ TUPLE: disassembler opcodes ;
         ]
     }
     { 1 [ drop "ADDQ.W" ] }
-    { 2 [ drop "ADDQ.L" ] }
+    { 2 [
+          [ ea$ ] keep
+          op$-5-data "," append
+          "ADDQ.L #" prepend
+          prepend
+        ]
+    }
     [ drop drop "BAD OPCDE 5 SIZE" ]
   } case ;
 
@@ -445,9 +463,21 @@ TUPLE: disassembler opcodes ;
   opcode$-error ;
 
 
-: (opcode$-B) ( cpu -- $ )
+: $op-B-address ( array -- $ )
+  drop "?" ;
+
+: $op-B-data ( array -- $ )
+  drop "??" ;
+
+! CMPM
+! CMP
+! CMPA
+! EOR
+: (opcode$-B) ( array -- $ )
   break
-  opcode$-error ;
+  [ first 8 bit? ] keep swap
+  [ $op-B-address ] [ $op-B-data ] if
+  ;
 
 
 : (opcode$-C) ( cpu -- $ )

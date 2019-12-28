@@ -1087,7 +1087,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
           [ PC+ ] keep ea-write
         ] }
     { 1 [ drop ] }
-    { 2 [ drop ] }
+    { 2 [
+          [ op-5-data ] keep
+          [ ea-read ] keep
+          [ alu>> alu-add-long ] keep
+          [ PC+ ] keep ea-write
+        ] }
     [ drop drop ]
   } case ;
 
@@ -1102,6 +1107,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! SUBQ SUBX Scc
 ! TRAPcc
 : (opcode-5) ( cpu -- )
+  break
   [ cashe>> first 7 6 bit-range ] keep swap
   {
     { 3 [ drop ] }
@@ -1133,7 +1139,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0
       [
         [ alu>> alu-n? ] keep swap not
-        [ [ PC+ ] keep PC+  ] [ break cpu-word-displacement ] if
+        [ [ PC+ ] keep PC+  ] [ cpu-word-displacement ] if
       ]
     }  ! 16 bit displacement
     [ drop drop ]   ! default is 8 bit displacement
@@ -1201,7 +1207,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! MOVEQ
 : (opcode-7) ( cpu -- )
-  break
   [ cashe>> first 8 bit? ] keep swap
   [ drop ] [ op-moveq ] if ;
 

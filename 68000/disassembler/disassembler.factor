@@ -329,7 +329,6 @@ TUPLE: disassembler opcodes ;
 
 
 : op$-5-add ( array -- $ )
-  break
   [ first 7 6 bit-range ] keep swap
   {
     { 0 [

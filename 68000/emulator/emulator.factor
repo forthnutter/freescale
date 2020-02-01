@@ -901,7 +901,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! Move Byte
 : (opcode-1) ( cpu -- )
-  break
   [ source-data ] keep
   [ write-destination-byte ] keep  PC+ ;
 

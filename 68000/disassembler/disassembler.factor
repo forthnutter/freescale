@@ -466,7 +466,7 @@ TUPLE: disassembler opcodes ;
   drop "?" ;
 
 : $op-B-data ( array -- $ )
-  drop "??" ;
+  first 11 9 bit-range 3 bits dregister$ ;
 
 ! CMPM
 ! CMP
@@ -474,8 +474,15 @@ TUPLE: disassembler opcodes ;
 ! EOR
 : (opcode$-B) ( array -- $ )
   break
-  [ first 8 bit? ] keep swap
-  [ $op-B-address ] [ $op-B-data ] if
+  [ first 8 6 bit-range ] keep swap ! opmode
+  {
+    { 0 [ drop "CMP.B "  ] }
+    { 1 [ drop "CMP.W " ] }
+    { 2 [ drop "CMP.L " ] }
+    { 3 [ drop "CMPA.W " ] }
+    { 8 [ drop "CMPA.L " ] }
+    [ drop drop "OP B" ]
+  } case
   ;
 
 

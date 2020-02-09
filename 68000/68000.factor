@@ -7,7 +7,7 @@ USING:
    sequences unicode unicode.case grouping
    tools.continuations
    freescale.binfile arrays prettyprint
-   math.ranges models.memory quotations words
+   math.ranges quotations words
    freescale.68000.emulator
    freescale.68000.emulator.alu
    freescale.68000.disassembler
@@ -28,7 +28,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
   [ dup f = ] dip swap
   [ drop drop drop f ]
   [
-    [ memory-read ] 2keep drop [ dup f = ] dip swap
+    [ read-bytes ] 2keep drop [ dup f = ] dip swap
     [ [ drop ] dip ]
     [
       >hex-pad8 swap
@@ -76,7 +76,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
   [ drop drop drop f ]
   [
     [ >even 0b11 unmask ] 2dip
-    [ memory-read ] 2keep drop [ dup f = ] dip swap
+    [ read-bytes ] 2keep drop [ dup f = ] dip swap
     [
       [ drop ] dip
     ]

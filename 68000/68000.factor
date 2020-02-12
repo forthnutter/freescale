@@ -26,7 +26,7 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 ! memory display or dump bytes
 : mdb ( n address mc68k -- str/f )
   [ dup f = ] dip swap
-  [ drop drop drop f ]
+  [ drop drop drop "???" ]
   [
     [ read-bytes ] 2keep drop [ dup f = ] dip swap
     [ [ drop ] dip ]

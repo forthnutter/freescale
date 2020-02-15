@@ -25,14 +25,15 @@ TUPLE: M68000 < cpu mnemo dcount asm next ;
 
 ! memory display or dump bytes
 : mdb ( n address mc68k -- str/f )
+  break
   [ dup f = ] dip swap
   [ drop drop drop "???" ]
   [
     [ read-bytes ] 2keep drop [ dup f = ] dip swap
     [ [ drop ] dip ]
     [
-      >hex-pad8 swap
-      [ >hex-pad2 ] { } map-as concat append
+      >hex-pad8 ": " append swap
+      [ >hex-pad2 " " append ] { } map-as concat append
     ] if
   ] if ;
 

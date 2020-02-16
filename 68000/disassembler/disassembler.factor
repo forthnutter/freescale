@@ -66,7 +66,18 @@ TUPLE: disassembler opcodes ;
     [ drop f ]
   } case ;
 
-
+: $Ax ( d -- $ )
+  {
+    { 0 [ "A0" ] }
+    { 1 [ "A1" ] }
+    { 2 [ "A2" ] }
+    { 3 [ "A3" ] }
+    { 4 [ "A4" ] }
+    { 5 [ "A5" ] }
+    { 6 [ "A6" ] }
+    { 7 [ "A7" ] }
+    [ drop f ]
+  } case ;
 
 : >long< ( wh wl -- l )
     [ 16 bits 16 shift ] dip 16 bits bitor ;
@@ -463,10 +474,10 @@ TUPLE: disassembler opcodes ;
 
 
 : $op-B-address ( array -- $ )
-  drop "?" ;
+  first 11 9 bit-range 3 bits $Ax ;
 
 : $op-B-data ( array -- $ )
-  first 11 9 bit-range 3 bits dregister$ ;
+  first 11 9 bit-range 3 bits $Dx ;
 
 ! CMPM
 ! CMP
@@ -476,7 +487,7 @@ TUPLE: disassembler opcodes ;
   break
   [ first 8 6 bit-range ] keep swap ! opmode
   {
-    { 0 [ drop "CMP.B "  ] }
+    { 0 [ [ "CMP.B " ] dip [ $op-B-data append ] keep drop ] }
     { 1 [ drop "CMP.W " ] }
     { 2 [ drop "CMP.L " ] }
     { 3 [ drop "CMPA.W " ] }

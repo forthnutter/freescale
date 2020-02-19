@@ -479,6 +479,8 @@ TUPLE: disassembler opcodes ;
 : $op-B-data ( array -- $ )
   first 11 9 bit-range 3 bits $Dx ;
 
+: $op-B-ea ( array -- $ )
+  ;
 ! CMPM
 ! CMP
 ! CMPA
@@ -487,7 +489,13 @@ TUPLE: disassembler opcodes ;
   break
   [ first 8 6 bit-range ] keep swap ! opmode
   {
-    { 0 [ [ "CMP.B " ] dip [ $op-B-data append ] keep drop ] }
+    { 0 [
+          [ "CMP.B " ] dip
+          [ $op-B-data append ] keep
+          [ ea$ append ] keep
+          drop
+        ]
+    }
     { 1 [ drop "CMP.W " ] }
     { 2 [ drop "CMP.L " ] }
     { 3 [ drop "CMPA.W " ] }

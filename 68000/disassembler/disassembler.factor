@@ -99,13 +99,32 @@ TUPLE: disassembler opcodes ;
     [ drop "BAD SIZE" ]
   } case ;
 
+: ea-mode-seven-data ( array -- $ )
+  [ ea-size ] keep swap
+  {
+    { 0 [ second 8 bits >hex-pad2 ] }
+    { 1 [ second >hex-pad4 ] }
+    { 2 [
+          [ second ] keep
+          third words-long
+          >hex-pad8
+        ]
+    }
+    [ drop drop "BAD SIZE" ]
+  } case ;
+
 
 : ea-mode-seven ( array -- $ )
   [ ea-reg ] keep swap
   {
     { 0 [ drop "ABS.W" ] }
     { 1 [ drop "ABS.L" ] }
-    { 4 [ ea-status ] }
+    { 2 [ ea-status ] }
+    { 4 [
+          [ "#" ] dip
+          ea-mode-seven-data append
+        ]
+    }
     [ drop drop "BAD REG"]
   } case ;
 

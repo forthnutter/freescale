@@ -103,7 +103,8 @@ TUPLE: bc-count bytes cycles array ;
   array>> first
   7 0 bit-range
   {
-    [ drop 4 ]
+    { 0x3C [ 4 ] }
+    [ drop 2 ]
   } case ;
 
 : (bytes-C) ( bc-count -- n )

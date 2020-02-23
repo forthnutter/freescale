@@ -510,8 +510,8 @@ TUPLE: disassembler opcodes ;
   {
     { 0 [
           [ "CMP.B " ] dip
+          [ ea$ append "," append ] keep
           [ $op-B-data append ] keep
-          [ ea$ append ] keep
           drop
         ]
     }

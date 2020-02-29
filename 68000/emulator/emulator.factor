@@ -1258,11 +1258,25 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
+! get effective address value mainly for opcode 0
+: ea-B-read ( cpu -- data )
+  [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
+    swap
+    {
+      { 0 [ Dx> ] }
+      { 7 [ effective-mode-seven ] }
+      [ drop drop ]
+    } case ;
 ! CMP CMPA CMPM
 ! EOR
 : (opcode-B) ( cpu -- )
   break
-  drop ;
+  [ cashe>> first 8 6 bit-range ] keep swap ! opmode
+  {
+    { 0 [ ea-read drop ] }
+    [ drop drop ]
+
+  } case ;
 
 ! AND ABCD EXG MUL MULS MULU
 : (opcode-C) ( cpu -- )

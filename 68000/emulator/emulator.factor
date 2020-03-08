@@ -1258,7 +1258,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
-
+: orb-read-ea-seven-four ( cpu -- data )
+  ;
 
 : opb-read-ea-seven ( reg cpu -- data )
   swap

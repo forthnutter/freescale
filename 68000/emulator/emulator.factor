@@ -1258,11 +1258,25 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   drop ;
 
-: orb-read-ea-seven-four ( cpu -- data )
+
+: opmode-size ( cpu -- size )
+  cashe>> first 8 6 bit-range ;
+
+: op-b-reg ( cpu -- dx )
+  cashe>> first 11 9 bit-range ;
+
+: ea-mode-0 ( cpu -- mode )
+   cashe>> first 5 3 bit-range ;
+
+: ea-reg-0 ( cpu -- reg )
+  cashe>> first 2 0 bit-range ;
+
+: opb-read-ea-seven-four ( cpu -- data )
+
   ;
 
-: opb-read-ea-seven ( reg cpu -- data )
-  swap
+: opb-read-ea-seven ( cpu -- data )
+  [ ea-reg-0 ] keep swap
   {
     { 4 [ SR> ] }
     [ drop drop 0 ]
@@ -1271,19 +1285,18 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! get effective address value mainly for opcode 0
 : opB-read-ea ( cpu -- data )
-  [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ]  keep
-    swap
-    {
-      { 0 [ Dx> ] }
-      { 7 [ opb-read-ea-seven ] }
-      [ drop drop ]
-    } case ;
+  [ ea-mode-0 ]  keep swap
+  {
+    { 0 [ [ ea-reg-0 ] keep Dx> ] }
+    { 7 [ opb-read-ea-seven ] }
+    [ drop ]
+  } case ;
 
 ! CMP CMPA CMPM
 ! EOR
 : (opcode-B) ( cpu -- )
   break
-  [ cashe>> first 8 6 bit-range ] keep swap ! opmode
+  [ opmode-size ] keep swap ! opmode
   {
     { 0 [ opB-read-ea drop ] }
     [ drop drop ]

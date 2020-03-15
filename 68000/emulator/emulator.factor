@@ -1272,13 +1272,16 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   cashe>> first 2 0 bit-range ;
 
 : opb-read-ea-seven-four ( cpu -- data )
-
-  ;
+  [ opmode-size ] keep swap
+  {
+    { 0 [ cashe>> second 8 bits ] } ! return byte
+    [ drop drop 0 ]
+  } case ;
 
 : opb-read-ea-seven ( cpu -- data )
   [ ea-reg-0 ] keep swap
   {
-    { 4 [ SR> ] }
+    { 4 [ opb-read-ea-seven-four ] }
     [ drop drop 0 ]
   } case ;
 
@@ -1298,7 +1301,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   [ opmode-size ] keep swap ! opmode
   {
-    { 0 [ opB-read-ea drop ] }
+    { 0
+      [
+        [ opB-read-ea ] keep ! source
+        [ Dx> ]  drop
+      ]
+    }
     [ drop drop ]
 
   } case ;

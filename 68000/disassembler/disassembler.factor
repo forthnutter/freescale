@@ -505,7 +505,6 @@ TUPLE: disassembler opcodes ;
 ! CMPA
 ! EOR
 : (opcode$-B) ( array -- $ )
-  break
   [ first 8 6 bit-range ] keep swap ! opmode
   {
     { 0 [

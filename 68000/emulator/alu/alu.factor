@@ -244,7 +244,7 @@ M: alu model-activated
 
 ! test the byte for zero and set flag
 : alu-byte-z ( b alu -- )
-  [ 0 = ] dip swap
+  [ 8 bits 0 = ] dip swap
   [ alu-z-set ] [ alu-z-clr ] if ;
 
 ! test the long data for zero
@@ -416,6 +416,20 @@ M: alu model-activated
   [ [ 32 bits ] dip alu-long-z ] 2keep
   [ alu-c? ] [ ?alu-x ] bi ;
 
+! sub byte
+! V = (A7 and \B7 and \R7) or (\A7 and B7 and R7)
+: alu-subv-byte ( a b r -- ? )
+  [ [ 7 bit? ] 2dip [ 7 bit? not and ] dip 7 bit? not and ] 3keep
+  [ 7 bit? not ] 2dip [ 7 bit? and ] dip 7 bit? and or ;
+
+: alu-sub-byte ( a b alu -- r )
+  [ 2dup - ] dip
+  [ drop alu-subv-byte ] 2keep [ [ drop ] dip ?alu-v ] 2keep
+  [ alu-byte-n ] 2keep
+  [ alu-byte-c ] 2keep
+  [ [ 32 bits ] dip alu-byte-z ] 2keep
+  [ alu-c? ] [ ?alu-x ] bi ;
+
 ! Sub
 ! V = (A7 and \B7 and \R7) or (\A7 and B7 and R7)
 : alu-subv-long ( a b r -- ? )
@@ -428,7 +442,7 @@ M: alu model-activated
   [ drop alu-subv-long ] 2keep [ [ drop ] dip ?alu-v ] 2keep
   [ alu-long-n ] 2keep
   [ alu-long-c ] 2keep
-  [ [ 32 bits ] dip alu-byte-z ] 2keep
+  [ [ 32 bits ] dip alu-long-z ] 2keep
   [ alu-c? ] [ ?alu-x ] bi ;
 
 

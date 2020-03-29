@@ -1304,7 +1304,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0
       [
         [ opB-read-ea ] keep ! source
-        [ Dx> ]  drop
+        [ Dx> ]  keep ! destination
+        [ alu>> ] keep 
       ]
     }
     [ drop drop ]

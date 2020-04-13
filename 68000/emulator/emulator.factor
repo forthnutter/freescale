@@ -76,6 +76,10 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : PC++ ( cpu -- )
   [ PC+ ] keep PC+ ;
 
+! decrement PC-2
+: PC- ( cpu -- )
+  [ PC> 2 - ] keep >PC ;
+
 ! write to user sp
 : >USP ( d cpu -- )
    ar>> 7 swap set-nth ;
@@ -109,11 +113,19 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
         drop CPU-ADDRESS-ERROR >>state drop
     ] [ swap >A7 ] if ;
 
+! save stack pointer
+: >SP ( d cpu -- )
+  [ alu>> alu-mode? ] keep swap
+  [ >SSP ] [ >USP ] if ;
 
 ! get A7
-: A7> ( cpu -- d )
+: SP> ( cpu -- d )
   [ alu>> alu-mode? ] keep swap
   [ SSP> abs ] [ USP> abs ] if ;
+
+
+: A7> ( cpu -- d )
+  SP> ;
 
 
 ! increment A7
@@ -122,7 +134,15 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 ! decrement A7
 : A7- ( cpu -- )
-  [ A7> 1 - ] keep >A7 ;
+  [ A7> 4 - ] keep >A7 ;
+
+! decremt SP 4 bytes
+: SP- ( cpu -- )
+  [ SP> 4 - ] keep >SP ;
+
+! increment SP 4 bytes
+: SP+ ( cpu -- )
+  [ SP> 4 + ] keep >SP ;
 
 
 
@@ -335,6 +355,25 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ 0 swap 2 <range> >array ] dip
     [ [ PC> + ] curry map ] keep
     [ cpu-read-word ] curry map ;
+
+
+
+! Stack routines
+! push value onto stack
+: (->SP) ( value cpu -- )
+  break
+  [ SP- ] keep    ! decrement stack pointer
+  [ SP> ] keep cpu-write-long ;
+
+! pop value off stack
+: (SP>+) ( cpu -- d )
+  [ SP> ] keep
+  [ cpu-read-long ] keep
+  SP+ ;
+
+
+
+
 
 : source-reg ( instruct -- regnum )
   2 0 bit-range 3 bits ;
@@ -1029,6 +1068,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ cashe>> first source-areg ] keep
   [ get-jmp-address ] keep
   >PC ;
+
 ! LEA LINK
 ! MOVEM
 ! NBCD NEG NEGX NOP NOT
@@ -1125,6 +1165,14 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ PC+ ] keep
   [ PC> + ] keep >PC ;
 
+: op-6-bsr-word-displacement ( cpu -- )
+  [ PC+ ] keep
+  [ cashe>> second 16 >signed ] keep
+  [ PC+ ] keep
+  [ PC> ] keep [ (->SP) ] keep
+  [ PC> + ] keep >PC ;
+
+
 : cpu-byte-displacement ( cpu -- )
   [ PC+ ] keep
   [ cashe>> first 8 >signed ] keep
@@ -1166,12 +1214,21 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop cpu-byte-displacement ]
   } case ;
 
+: op-6-bsr ( cpu -- )
+  [ cashe>> first branch-displacement ] keep swap
+  {
+    { 0
+      [ op-6-bsr-word-displacement ]
+    }
+    [ drop cpu-byte-displacement ]
+  } case ;
+
 ! Bcc BSR BRA
 : (opcode-6) ( cpu -- )
   [ cashe>> first branch-condition ] keep swap
   {
     { 0 [ op-6-bra ] }  ! BRA
-    { 1 [ drop ] }  ! BSR
+    { 1 [ op-6-bsr ] }  ! BSR
     { 2 [ drop ] }  ! BHI
     { 3 [ drop ] }  ! BLS
     { 4 [ drop ] }  ! BCC
@@ -1298,14 +1355,14 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! CMP CMPA CMPM
 ! EOR
 : (opcode-B) ( cpu -- )
-  break
   [ opmode-size ] keep swap ! opmode
   {
     { 0
       [
         [ opB-read-ea ] keep ! source
         [ [ op-b-reg ] keep Dx> ]  keep ! destination
-        [ alu>> alu-sub-byte drop ] keep drop
+        [ alu>> alu-sub-byte drop ] keep
+        [ PC+ ] keep PC+
       ]
     }
     [ drop drop ]

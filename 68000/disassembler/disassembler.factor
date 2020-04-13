@@ -315,6 +315,7 @@ TUPLE: disassembler opcodes ;
   [ first 5 0 bit-range ] keep swap
   {
     { 0x10 [ drop "JMP (A0)" ] }
+    { 0x15 [ drop "JMP (A5)" ] }
     [ drop drop "BAD OPCODE JUMP"]
   } case ;
 
@@ -416,7 +417,7 @@ TUPLE: disassembler opcodes ;
   swap
   {
     { 0 [ [ "BRA" ] 2dip op-branch-displace append ] }
-    { 1 [ drop drop "1" ] }
+    { 1 [ [ "BSR" ] 2dip op-branch-displace append ] }
     { 2 [ drop drop "BHI" ] }
     { 3 [ drop drop "BLS" ] }
     { 4 [ drop drop "BCC" ] }

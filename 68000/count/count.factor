@@ -54,6 +54,7 @@ TUPLE: bc-count bytes cycles array ;
       { 0x34 [ 4 ] }
       { 1 [ 4 ] }
       { 2 [ 8 ] }
+      { 0x03C [ 6 ] }
       { 0x070 [ 4 ] }
       { 0x07C [ 6 ] }
       { 0x23C [ 6 ] }
@@ -99,7 +100,6 @@ TUPLE: bc-count bytes cycles array ;
   ;
 
 : (bytes-B) ( bc-count -- n )
-  break
   array>> first
   7 0 bit-range
   {

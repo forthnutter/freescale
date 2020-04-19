@@ -753,6 +753,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   ori-ea-write ;
 
 : cpu-ori ( cpu -- )
+  break
   [ ori-source-size ] keep swap ! size
   {
     { 0 [ [ ori-source-byte ] keep [ ori-dest-byte ] keep 2drop ] }     ! Byte

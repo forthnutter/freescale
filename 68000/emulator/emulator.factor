@@ -708,7 +708,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop drop ]
   } case ;
 
-: ori-ea ( cpu -- data )
+: ori-ea-read ( cpu -- data )
     [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
     swap
     {
@@ -740,7 +740,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : ori-source-byte ( cpu -- data )
   ori-source-word 8 bits ;
 
-
 : ori-dest-byte ( s cpu -- data )
   [ ori-ea ] keep
   alu>> alu-or-byte ;
@@ -756,7 +755,12 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   break
   [ ori-source-size ] keep swap ! size
   {
-    { 0 [ [ ori-source-byte ] keep [ ori-dest-byte ] keep 2drop ] }     ! Byte
+    { 0 [
+          [ ori-source-byte ] keep [ PC+ ] keep
+          [ ori-ea-read ] keep
+          [ alu>> alu-or-byte ] keep 
+        ]
+    }     ! Byte
     { 1 [
           [ ori-source-word ] keep [ PC++ ] keep
           [ ori-dest-word ] keep

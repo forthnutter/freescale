@@ -741,11 +741,11 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   ori-source-word 8 bits ;
 
 : ori-dest-byte ( s cpu -- data )
-  [ ori-ea ] keep
+  [ ori-ea-read ] keep
   alu>> alu-or-byte ;
 
 : ori-dest-word ( s cpu -- data )
-  [ ori-ea ] keep
+  [ ori-ea-read ] keep
   alu>> alu-or-word ;
 
 : ori-dest-word-write ( d cpu -- )
@@ -758,7 +758,8 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     { 0 [
           [ ori-source-byte ] keep [ PC+ ] keep
           [ ori-ea-read ] keep
-          [ alu>> alu-or-byte ] keep 
+          [ alu>> alu-or-byte ] keep
+          ori-ea-write
         ]
     }     ! Byte
     { 1 [

@@ -424,7 +424,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ drop drop f ]
   } case ;
 
-: cpu-write-dregister ( d reg cpu -- )
+: >Dx ( d reg cpu -- )
   swap
   {
     { 0 [ >D0 ] }
@@ -561,7 +561,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first effective-reg ] [ cashe>> first effective-mode ] bi ] keep
   swap
   {
-      { 0 [ cpu-write-dregister ] }
+      { 0 [ >Dx ] }
       [ drop drop drop drop ]
   } case ;
 
@@ -595,7 +595,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-wb-ea ( data reg mode cpu -- )
   swap
   {
-    { 0 [ cpu-write-dregister ] }
+    { 0 [ >Dx ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ drop drop drop ] } ! cpu-wb-mode-seven ] }
     [ drop drop drop drop ]
@@ -643,7 +643,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-ww-ea ( data reg mode cpu -- )
   swap
   {
-    { 0 [ cpu-write-dregister ] }
+    { 0 [ >Dx ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ cpu-0-ww-mode-seven ] }
     [ drop drop drop drop ]
@@ -676,7 +676,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ cashe>> first dest-reg ] [ cashe>> first dest-mode ] bi ] keep
   swap
   {
-    { 0 [ [ [ drop ] dip move-byte-condition ] 3keep cpu-write-dregister ] }
+    { 0 [ [ [ drop ] dip move-byte-condition ] 3keep >Dx ] }
     { 7 [ [ [ drop ] dip move-byte-condition ] 3keep [ mode-seven ] keep cpu-write-byte ] }
     [ drop drop drop drop ]
   } case ;
@@ -721,6 +721,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
   swap
   {
+    { 0 [ >Dx ] }
     { 7 [ ori-mode-seven-write ] }
     [ drop drop drop drop  ]
   } case ;
@@ -804,7 +805,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-0-wl-ea ( data reg mode cpu -- )
   swap
   {
-    { 0 [ cpu-write-dregister ] }
+    { 0 [ >Dx ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ cpu-0-ww-mode-seven ] }
     [ drop drop drop drop ]
@@ -935,7 +936,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   [ alu>> alu-c-clr ] keep
   swap
   {
-    { 0 [ cpu-write-dregister ] }
+    { 0 [ >Dx ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ cpu-move-wb-mode-seven ] }
     [ drop drop drop drop ]
@@ -1022,7 +1023,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : cpu-move-wl-ea ( data reg mode cpu -- )
   swap
   {
-    { 0 [ cpu-move-stat cpu-write-dregister ] }
+    { 0 [ cpu-move-stat >Dx ] }
     { 1 [ cpu-write-mode-one ] }
     { 7 [ drop drop drop ] } ! cpu-wl-mode-seven ] }
     [ drop drop drop drop ]
@@ -1055,7 +1056,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : clr-byte-ea ( mode reg cpu -- )
   [ swap ] dip swap ! mode on top
   {
-    { 0 [ [ 0 ] 2dip cpu-write-dregister ] }
+    { 0 [ [ 0 ] 2dip >Dx ] }
   } case ;
 
 ! Miscellaneous
@@ -1255,7 +1256,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 : op-moveq ( cpu -- )
   [ cashe>> first 7 0 bit-range 8 >signed ] keep
   [ cashe>> first 11 9 bit-range 3 bits ] keep
-  [ cpu-write-dregister ] 2keep
+  [ >Dx ] 2keep
   [
     [ Dx> ] keep swap 0 =
     swap alu>> ?alu-z
@@ -1279,7 +1280,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 
 : op-8-write ( d cpu -- )
   [ cashe>> first 11 9 bit-range 3 bits ] keep
-  cpu-write-dregister ;
+  >Dx ;
 
 : op-8-or ( cpu -- )
   [ cashe>> first 8 6 bit-range 3 bits ] keep swap
@@ -1413,7 +1414,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
       [ alu>> alu-lsl-byte ] [ alu>> alu-lsr-byte ] if
     ] keep
     [ cpu-shift-register ] keep
-    cpu-write-dregister
+    >Dx
   ]
   [
     [ cpu-shift-rcount ] keep
@@ -1424,7 +1425,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
       [ alu-lsl-byte ] [ alu-lsr-byte ] if
     ] keep
     [ cpu-shift-register ] keep
-    cpu-write-dregister
+    >Dx
   ] if ;
 
 : cpu-shift-byte ( cpu -- )
@@ -1457,7 +1458,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ alu-asl-long ] [ alu-asr-long ] if
   ] keep
   [ cpu-shift-register ] keep
-  cpu-write-dregister ;
+  >Dx ;
 
 : cpu-shift-long ( cpu -- )
   [ cpu-shift-type ] keep swap

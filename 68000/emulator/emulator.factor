@@ -712,7 +712,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ [ ori-ea-reg ] [ ori-ea-mode ] bi ] keep
     swap
     {
-      { 0 [ Dx> ] }
+      { 0 [ [ Dx> ] keep PC+ ] }
       { 7 [ ori-mode-seven ] keep }
       [ drop drop ]
     } case ;

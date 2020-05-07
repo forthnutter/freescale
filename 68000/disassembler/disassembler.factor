@@ -274,12 +274,24 @@ TUPLE: disassembler opcodes ;
   [ ".L)" append ]
   [ ".W)" append ] if ;
 
+: >signed$ ( x n -- $ )
+  [ bits ] keep 2dup 1 - bit?
+  [ 2^ - number>string ]
+  [ drop [ "+" ] dip number>string append ] if ;
+
+
+: move-mode-five$ ( reg array -- $ )
+  [ "(" ] 2dip
+  second 16 >signed$ swap [ append "," append ] dip
+  aregister$ append ")" append ;
+
 : move-ea ( reg mode array -- $ )
   swap ! get mode
   {
     { 0 [ drop dregister$ ] }
     { 1 [ drop aregister$ ] }
     { 3 [ drop aregister$ "(" prepend ")+" append ] }
+    { 5 [ move-mode-five$ ] }
     { 6 [ move-mode-six$ ] }
     { 7 [ move-mode-seven$ ] }
     [ drop drop drop "bad" ]
@@ -287,6 +299,7 @@ TUPLE: disassembler opcodes ;
 
 
 : (opcode$-1) ( array -- $ )
+  break
   [ "MOVE.B " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep
@@ -400,10 +413,7 @@ TUPLE: disassembler opcodes ;
     [ drop op$-5-00 ]
   } case ;
 
-: >signed$ ( x n -- $ )
-  [ bits ] keep 2dup 1 - bit?
-  [ 2^ - number>string ]
-  [ drop [ "+" ] dip number>string append ] if ;
+
 
 : op-branch-displace ( disp array -- $ )
   swap

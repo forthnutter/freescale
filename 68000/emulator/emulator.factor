@@ -361,7 +361,6 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
 ! Stack routines
 ! push value onto stack
 : (->SP) ( value cpu -- )
-  break
   [ SP- ] keep    ! decrement stack pointer
   [ SP> ] keep cpu-write-long ;
 

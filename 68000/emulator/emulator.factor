@@ -1221,6 +1221,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
   } case ;
 
 : op-6-bsr ( cpu -- )
+  break
   [ cashe>> first branch-displacement ] keep swap
   {
     { 0

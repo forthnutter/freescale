@@ -299,7 +299,6 @@ TUPLE: disassembler opcodes ;
 
 
 : (opcode$-1) ( array -- $ )
-  break
   [ "MOVE.B " ] dip
   [ first move-source-reg ] keep
   [ first move-source-mode ] keep

@@ -1520,7 +1520,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     cpu-reset-models
     CPU-RUNNING >>state drop ;
 
-: reset ( cpu -- )
+: cpu-reset ( cpu -- )
     CPU-RESET >>state drop ;
 
 ! execute one instruction
@@ -1587,7 +1587,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
     [ 0 swap >USP ] keep
     [ dr>> [ drop 0 ] map ] keep swap >>dr
     [ ar>> [ drop 0 ] map ] keep swap >>ar
-    swap [ reset ] [ drop ] if ;
+    swap [ cpu-reset ] [ drop ] if ;
 
 : cpu-halted ( cpu -- ? )
   doublefault>> ;

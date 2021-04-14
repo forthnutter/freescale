@@ -1576,7 +1576,7 @@ TUPLE: cpu alu ar dr pc rx cashe opcodes state
         {
             { CPU-RESET [ dup reset-exception ] }   ! do reset cycle
             { CPU-ADDRESS-ERROR [ dup execute-pc-opcode ] }
-            { CPU-UNKNOWN [ dup reset ] }
+            { CPU-UNKNOWN [ dup cpu-reset ] }
             { CPU-RUNNING [ dup execute-pc-opcode ] }
             [ drop CPU-UNKNOWN >>state ]
         } case
